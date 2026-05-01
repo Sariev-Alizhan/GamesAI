@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Boilergen — YAML → Code Generator</title>
+<title>Boilergen — Grand Games · Internal Code Generator</title>
+<meta name="description" content="Internal code generator for Grand Games. Turns YAML entity descriptions into boilerplate code across stack layers (C++, Node, Flutter).">
+<meta name="theme-color" content="#0a0c10">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='6' cy='16' r='3' fill='%23f7c948'/><path d='M9 16 L24 8' stroke='%238d96a3' stroke-width='1.5' stroke-linecap='round'/><path d='M9 16 L24 16' stroke='%238d96a3' stroke-width='1.5' stroke-linecap='round'/><path d='M9 16 L24 24' stroke='%238d96a3' stroke-width='1.5' stroke-linecap='round'/><circle cx='25' cy='8' r='2.5' fill='%23b08bff'/><circle cx='25' cy='16' r='2.5' fill='%2358a6ff'/><circle cx='25' cy='24' r='2.5' fill='%233fb950'/></svg>">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
@@ -102,23 +104,26 @@ header {
 .org-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 8px;
+  font-size: 11.5px;
   font-family: var(--mono);
   color: var(--text-muted);
-  padding: 4px 9px;
-  background: linear-gradient(135deg, rgba(247, 201, 72, 0.08), rgba(176, 139, 255, 0.06));
-  border: 1px solid var(--border);
+  padding: 4px 11px 4px 5px;
+  background: linear-gradient(135deg, rgba(247, 201, 72, 0.08), rgba(247, 201, 72, 0.02));
+  border: 1px solid rgba(247, 201, 72, 0.2);
   border-radius: var(--radius);
   letter-spacing: 0.2px;
+  transition: var(--transition);
 }
-.org-dot {
-  width: 6px;
-  height: 6px;
-  background: var(--accent);
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(247, 201, 72, 0.4);
+.org-badge:hover { background: linear-gradient(135deg, rgba(247, 201, 72, 0.12), rgba(247, 201, 72, 0.04)); }
+.org-badge img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(247, 201, 72, 0.25));
 }
+.org-badge .org-text { color: var(--text); font-weight: 500; }
+.org-badge .org-tag { color: var(--text-dim); font-size: 10px; }
 
 .session-stats {
   display: inline-flex;
@@ -518,7 +523,9 @@ main {
     <div class="brand-text">Boiler<span class="gen">gen</span></div>
   </div>
   <span class="org-badge" title="Internal tool — Grand Games">
-    <span class="org-dot"></span>Internal · Grand Games
+    <img src="/grandgames-logo.png" alt="Grand Games" />
+    <span class="org-text">Grand Games</span>
+    <span class="org-tag">· Internal</span>
   </span>
   <span class="dot-sep">·</span>
   <span class="subtitle">YAML → multi-stack code</span>
