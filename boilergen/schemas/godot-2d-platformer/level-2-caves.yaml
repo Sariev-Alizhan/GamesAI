@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: level_2_caves
+type: level
+name: The Caves
+data:
+  worldId: world_caves
+  objective: Defeat the slime king and find the exit.
+  enemyPool:
+    - slime
+    - giant_slime
+  itemPool:
+    - health_potion
+    - copper_coin
+  parScore: 1200
+  musicTrack: res://audio/caves_theme.ogg
+  nextLevel: ""

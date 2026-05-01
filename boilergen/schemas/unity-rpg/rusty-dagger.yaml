@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: rusty_dagger
+type: item
+name: Rusty Dagger
+data:
+  description: A worn-out blade dropped by goblins. Better than no weapon.
+  category: equipment
+  effectAmount: 5
+  stackSize: 1
+  value: 10
+  iconPath: Assets/Icons/Items/rusty_dagger.png

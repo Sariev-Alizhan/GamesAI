@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: mana_potion
+type: item
+name: Mana Potion
+data:
+  description: Restores 30 MP on use.
+  category: consumable
+  effectAmount: 30
+  stackSize: 10
+  value: 80
+  iconPath: Assets/Icons/Items/mana_potion.png

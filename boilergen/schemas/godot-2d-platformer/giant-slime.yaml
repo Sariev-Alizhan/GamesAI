@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: giant_slime
+type: enemy
+name: Giant Slime
+data:
+  description: Bigger, slower, hits harder. Boss-tier slime variant.
+  health: 120
+  damage: 18
+  speed: 25
+  behaviourType: chase
+  dropTable:
+    - copper_coin
+    - health_potion

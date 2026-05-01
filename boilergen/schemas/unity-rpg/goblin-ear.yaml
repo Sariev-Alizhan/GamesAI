@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: goblin_ear
+type: item
+name: Goblin Ear
+data:
+  description: Bounty hunters pay for these. Stack five for the goblin slayer reward.
+  category: quest
+  effectAmount: 0
+  stackSize: 99
+  value: 15
+  iconPath: Assets/Icons/Items/goblin_ear.png

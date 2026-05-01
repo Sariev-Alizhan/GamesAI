@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: silver_ring
+type: item
+name: Silver Ring
+data:
+  description: A delicate silver band. Sells for a modest sum or wears for +1 charisma.
+  category: equipment
+  effectAmount: 1
+  stackSize: 1
+  value: 75
+  iconPath: Assets/Icons/Items/silver_ring.png

@@ -32,6 +32,22 @@ describe('loadEntitiesFromDirectory', () => {
     expect(entities[0]?.id).toBe('real');
   });
 
+  it('skips config files and template/internal files', async () => {
+    // Config files — would fail "missing id" validation if loaded
+    await write('validator.config.yaml', 'namespaceByDirectory: true\nignoreOrphans: true');
+    await write('build.config.yml', 'someOption: true');
+    // Template / internal convention
+    await write('_template.yaml', 'id: tpl\ntype: x\nname: T\ndata: {}');
+    // README in YAML form (rare but possible)
+    await write('README.yaml', 'description: docs');
+    // Real entity
+    await write('real.yaml', 'id: real\ntype: x\nname: R\ndata: {}');
+    const { entities, issues } = await loadEntitiesFromDirectory(dir);
+    expect(entities).toHaveLength(1);
+    expect(entities[0]?.id).toBe('real');
+    expect(issues).toEqual([]);
+  });
+
   it('reports broken YAML as invalid-schema issue but continues', async () => {
     await write('broken.yaml', 'id: x\ntype: y\n  invalid: : :');
     await write('good.yaml', 'id: good\ntype: x\nname: G\ndata: {}');

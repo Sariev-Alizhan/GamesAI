@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: small_health_potion
+type: item
+name: Small Health Potion
+data:
+  description: Restores 15 HP on use. The cheapest healing item.
+  category: consumable
+  effectAmount: 15
+  stackSize: 20
+  value: 25
+  iconPath: Assets/Icons/Items/small_health_potion.png

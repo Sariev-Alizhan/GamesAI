@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: ancient_amulet
+type: item
+name: Ancient Amulet
+data:
+  description: A worn silver amulet engraved with an unfamiliar rune. Quest item.
+  category: quest
+  effectAmount: 0
+  stackSize: 1
+  value: 0
+  iconPath: Assets/Icons/Items/ancient_amulet.png

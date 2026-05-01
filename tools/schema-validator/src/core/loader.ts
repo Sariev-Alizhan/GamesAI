@@ -30,6 +30,24 @@ export interface LoadResult {
   issues: Issue[];
 }
 
+/**
+ * Files that look like YAML but aren't entity schemas:
+ *   - *.config.yaml / *.config.yml — validator/build configs (this includes
+ *     validator.config.yaml, our own config, which would otherwise be loaded
+ *     as a broken entity)
+ *   - Files starting with _ — convention for templates / internal docs
+ *   - .gitignored common patterns
+ */
+const NON_ENTITY_PATTERNS: RegExp[] = [
+  /\.config\.ya?ml$/i,
+  /^_/,
+  /^README\.ya?ml$/i,
+];
+
+function isEntityFile(filename: string): boolean {
+  return !NON_ENTITY_PATTERNS.some((p) => p.test(filename));
+}
+
 async function findYamlFiles(root: string): Promise<string[]> {
   const out: string[] = [];
   async function walk(dir: string): Promise<void> {
@@ -51,7 +69,7 @@ async function findYamlFiles(root: string): Promise<string[]> {
       }
       if (st.isDirectory()) {
         await walk(full);
-      } else if (name.endsWith('.yaml') || name.endsWith('.yml')) {
+      } else if ((name.endsWith('.yaml') || name.endsWith('.yml')) && isEntityFile(name)) {
         out.push(full);
       }
     }

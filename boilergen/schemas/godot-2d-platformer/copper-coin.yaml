@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: copper_coin
+type: item
+name: Copper Coin
+data:
+  description: Basic currency. Drops from common enemies.
+  category: currency
+  effectAmount: 1
+  stackSize: 999
+  value: 1
+  iconPath: res://assets/icons/copper_coin.png
