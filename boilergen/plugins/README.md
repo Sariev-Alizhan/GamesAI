@@ -1,6 +1,6 @@
 # Plugins
 
-Each plugin describes how to generate code for one game project. Plugins are **fully isolated** — adding a new project means adding a new sibling folder, with zero changes to existing plugins or to the core engine.
+Each plugin describes how to generate code for one game project. Plugins are **fully isolated** — adding a new project means adding a sibling folder, with zero changes to existing plugins or to the core engine.
 
 ## Layout
 
@@ -8,26 +8,48 @@ Each plugin describes how to generate code for one game project. Plugins are **f
 plugins/
 ├── gm1/                              ← active (current production)
 │   └── targets/
-│       ├── cpp-server/
-│       ├── node-api/
-│       ├── flutter-admin/
-│       └── shared/
-└── gm2/                              ← TODO, added later
+│       ├── cpp-server/<entity-type>/...
+│       ├── node-api/<entity-type>/...
+│       ├── flutter-admin/<entity-type>/...
+│       └── shared/<entity-type>/...
+└── gm2/                              ← deferred (Unity + Node)
 ```
 
-## How a plugin works
+## Convention
 
-A plugin is a folder with a `targets/` subdirectory. Each `targets/<target-name>/` contains `.hbs` templates organized however the plugin author wants.
-
-Example template path:
+Templates **must** follow this layout:
 
 ```
-plugins/gm1/targets/cpp-server/professions/Profession{{pascalCase id}}.cpp.hbs
-                  └─ target ─┘ └─────── output path (still un-rendered) ──────┘
+plugins/<plugin>/targets/<target>/<entity-type>/<output-path>.hbs
+                          │       │              │
+                          │       │              └─ rendered output path (Handlebars OK)
+                          │       └─ must equal schema.type — used for filtering
+                          └─ destination layer name
 ```
 
-When `boilergen generate` runs, both the path AND the content of each `.hbs` are rendered through Handlebars with the schema as context. The result is written to `<output-root>/<target>/<rendered-path>`.
+Example:
 
-## GM2 (planned)
+```
+plugins/gm1/targets/cpp-server/profession/Professions/Profession{{pascalCase id}}.cpp.hbs
+                  └─ target ─┘└entity-type┘└──── output path (still un-rendered) ─────┘
+```
 
-GM2 is a separate game project (Unity client, Node backend) currently out of scope for Boilergen. When ready, a `gm2/` plugin will live here as a sibling to `gm1/` — they share zero code and can evolve independently. Adding GM2 will not touch `gm1/` or the core engine.
+When `boilergen generate <schema>` runs:
+1. Schema's `type` is matched against `<entity-type>` folders. Templates whose folder doesn't match are silently filtered (a "weapon" generation never picks up "profession" templates).
+2. The output path AND content of each `.hbs` are rendered through Handlebars with the schema as context.
+3. Result is written to `<targetRoot>/<rendered-output-path>`.
+
+Templates that do not follow this convention (no entity-type folder) are loaded with a console warning and never match anything.
+
+## Inject templates
+
+Templates with YAML frontmatter modify existing files instead of creating new ones. See [boilergen/README.md](../README.md#inject-mode-in-place-file-editing) for details.
+
+## GM2 (deferred)
+
+GM2 is the same game on a different tech stack (Unity client, Node backend). Currently out of scope for Boilergen MVP. When v2 stabilizes, we may either:
+
+- Add a sibling `plugins/gm2/` plugin with its own templates (zero code shared with gm1/), OR
+- Introduce a shared schema layer where one YAML entity description generates code for both v1 and v2 plugins.
+
+Either approach is achievable without touching `gm1/` or the core engine.
