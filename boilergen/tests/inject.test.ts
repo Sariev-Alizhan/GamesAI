@@ -118,8 +118,9 @@ describe('generator inject mode', () => {
   });
 
   it('skipIf prevents duplicate injection (idempotency)', async () => {
+    // skipIf is a substring check (not regex) — see generator.ts comment.
     const pluginDir = await setupPlugin(
-      '---\nto: router.ts\ninject: after\nanchor: "// REGISTRY"\nskipIf: "use\\\\({{camelCase id}}\\\\)"\n---\nuse({{camelCase id}});\n',
+      '---\nto: router.ts\ninject: after\nanchor: "// REGISTRY"\nskipIf: "use({{camelCase id}})"\n---\nuse({{camelCase id}});\n',
     );
     const targetRoot = join(dir, 'project');
     await mkdir(targetRoot, { recursive: true });

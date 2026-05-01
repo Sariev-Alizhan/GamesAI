@@ -109,15 +109,13 @@ async function performInject(
   }
 
   if (renderedSkipIf) {
-    let pattern: RegExp;
-    try {
-      pattern = new RegExp(renderedSkipIf);
-    } catch (err) {
-      throw new Error(
-        `Invalid skipIf regex "${renderedSkipIf}": ${err instanceof Error ? err.message : String(err)}`,
-      );
-    }
-    if (pattern.test(content)) {
+    // skipIf is a literal substring check, not a regex. This is a deliberate
+    // choice: user-controlled regex is a ReDoS vector (catastrophic
+    // backtracking can hang the entire process). 95% of inject use cases
+    // are simple "is X already registered" checks where literal substring
+    // works perfectly. If full regex is ever needed, add a separate
+    // skipIfRegex field with proper safety (re2 / timeout / Atomics).
+    if (content.includes(renderedSkipIf)) {
       return { target: targetPath, skipped: `skipIf matched in ${targetPath}` };
     }
   }
