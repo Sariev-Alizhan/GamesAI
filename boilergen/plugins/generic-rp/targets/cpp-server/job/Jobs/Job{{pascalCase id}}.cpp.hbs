@@ -1,0 +1,20 @@
+// {{name}} — auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+// Type: job (RP profession with tiered grades)
+#include "BaseJob.h"
+#include <vector>
+
+class Job{{pascalCase id}} : public BaseJob {
+public:
+    Job{{pascalCase id}}()
+        : BaseJob("{{id}}", JobCategory::{{constantCase data.category}}) {
+        defaultDuty_ = {{data.defaultDuty}};
+        offDutyPay_  = {{data.offDutyPay}};
+
+        // Grades — every job is tiered. Order matters: index = grade level.
+        grades_ = {
+{{#each data.grades}}            { /* grade {{@index}} */ "{{this.name}}", {{this.payment}}, {{this.isBoss}} },
+{{/each}}        };
+    }
+};
+
+// Registration handled by build-time codegen — see Jobs/registry.cpp

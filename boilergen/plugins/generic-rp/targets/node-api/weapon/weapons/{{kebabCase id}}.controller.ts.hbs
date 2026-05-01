@@ -1,0 +1,32 @@
+// Auto-generated controller for {{name}} (weapon)
+import { Router } from 'express';
+import { db } from '../../db.js';
+
+export const {{camelCase id}}WeaponRouter = Router();
+
+const {{constantCase id}}_DEFINITION = {
+  id: '{{id}}',
+  combat: {
+    category: '{{data.combat.category}}',
+    damage: {{data.combat.damage}},
+    fireRate: {{data.combat.fireRate}},
+    magazineSize: {{data.combat.magazineSize}},
+    range: {{data.combat.range}},
+  },
+  economy: {
+    price: {{data.economy.price}},
+    vendor: '{{data.economy.vendor}}',
+    license: '{{data.economy.license}}',
+  },
+};
+
+{{camelCase id}}WeaponRouter.get('/api/weapons/{{kebabCase id}}', async (_, res) => {
+  const overrides = await db.weaponOverrides.findOne({ where: { id: '{{id}}' } });
+  res.json({ ...{{constantCase id}}_DEFINITION, ...(overrides ?? {}) });
+});
+
+{{camelCase id}}WeaponRouter.put('/api/weapons/{{kebabCase id}}/economy', async (req, res) => {
+  // Only economy is editable. Combat balance changes require gamedesigner sign-off.
+  await db.weaponOverrides.upsert({ id: '{{id}}', economy: req.body });
+  res.json({ ok: true });
+});

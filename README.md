@@ -13,8 +13,12 @@ Internal AI tooling and automation for game development at Grand Games.
 
 - **[handoff/](./handoff/)** — Materials prepared for Igor (lead dev): presentation, Q&A with the critical Q1–Q4 blockers for Stage 3, roadmap, screenshots.
 
-- **[brief-igor-v2.md](./brief-igor-v2.md)** — Pending brief for the GM1 lead dev. Once Q1–Q4 are answered, Boilergen Stage 3 (real templates) starts.
+- **[brief-igor-v2.md](./brief-igor-v2.md)** — Brief for the GM1 lead dev. Boilergen now ships universal RP plugin out-of-the-box; GM1 specifics land when Igor has time.
 
-## What's next
+## Vision and roadmap
 
-Future tools (AI code-review bot, LiveOps assistant, more MCP adapters, etc.) will live as sibling subfolders. Strategic direction in [`ROADMAP.md`](./ROADMAP.md).
+- **[VISION.md](./VISION.md)** — long-term strategic direction. Boilergen → full AI platform for gamedev across all engines, all departments, all roles.
+- **[ROADMAP.md](./ROADMAP.md)** — tactical 6–12 month plan, what we ship next.
+- **[knowledge-base/sources/community-sentiment-ai-gamedev.md](./knowledge-base/sources/community-sentiment-ai-gamedev.md)** — guardrails distilled from gamedev community sentiment toward AI. Read before any positioning, marketing, or feature decision.
+
+Future modules (Localization Assistant, Balance Simulator, QA tooling, LiveOps, etc.) will live as sibling subfolders following the same core+adapters+plugins pattern.

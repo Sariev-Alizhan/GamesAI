@@ -1,0 +1,43 @@
+// Auto-generated admin form for {{name}} (weapon)
+import 'package:flutter/material.dart';
+
+class {{pascalCase id}}WeaponForm extends StatefulWidget {
+  const {{pascalCase id}}WeaponForm({super.key});
+
+  @override
+  State<{{pascalCase id}}WeaponForm> createState() => _{{pascalCase id}}WeaponFormState();
+}
+
+class _{{pascalCase id}}WeaponFormState extends State<{{pascalCase id}}WeaponForm> {
+  int _price        = {{data.economy.price}};
+  String _vendor    = '{{data.economy.vendor}}';
+  String _license   = '{{data.economy.license}}';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{name}} — Weapon Editor')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Combat balance (read-only — gamedesigner territory)
+          Card(
+            color: Colors.red.shade50,
+            child: ListTile(
+              title: const Text('Combat balance (read-only)'),
+              subtitle: const Text(
+                'damage {{data.combat.damage}}  •  rate {{data.combat.fireRate}}/min  •  '
+                'mag {{data.combat.magazineSize}}  •  range {{data.combat.range}}m',
+              ),
+            ),
+          ),
+          const Divider(),
+          // Economy (editable)
+          ListTile(title: const Text('Price (cents)'), trailing: Text('\$$_price')),
+          ListTile(title: const Text('Vendor'), trailing: Text(_vendor)),
+          ListTile(title: const Text('Required license'), trailing: Text(_license)),
+        ],
+      ),
+    );
+  }
+}

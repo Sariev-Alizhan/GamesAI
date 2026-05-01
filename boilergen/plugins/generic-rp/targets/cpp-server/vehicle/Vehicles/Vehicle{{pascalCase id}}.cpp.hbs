@@ -1,0 +1,18 @@
+// {{name}} — auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+// Type: vehicle (RP drivable — split into engine + economy layers)
+#include "BaseVehicle.h"
+
+class Vehicle{{pascalCase id}} : public BaseVehicle {
+public:
+    Vehicle{{pascalCase id}}()
+        : BaseVehicle("{{id}}", VehicleCategory::{{constantCase data.economy.category}}) {
+        // Engine layer — bound to actual game engine
+        engineModel_   = "{{data.engine.model}}";
+        handlingRef_   = "{{data.engine.handling}}";
+
+        // Economy layer — pure RP
+        priceCents_    = {{data.economy.price}};
+        dealer_        = "{{data.economy.dealer}}";
+        tradeable_     = {{data.economy.tradeable}};
+    }
+};

@@ -1,0 +1,48 @@
+// Auto-generated admin form for {{name}} (job)
+import 'package:flutter/material.dart';
+
+class {{pascalCase id}}JobForm extends StatefulWidget {
+  const {{pascalCase id}}JobForm({super.key});
+
+  @override
+  State<{{pascalCase id}}JobForm> createState() => _{{pascalCase id}}JobFormState();
+}
+
+class _{{pascalCase id}}JobFormState extends State<{{pascalCase id}}JobForm> {
+  // Defaults from schema — admin edits override these on the server.
+  bool _defaultDuty   = {{data.defaultDuty}};
+  bool _offDutyPay    = {{data.offDutyPay}};
+
+  final List<_GradeRow> _grades = [
+{{#each data.grades}}    _GradeRow(name: '{{this.name}}', payment: {{this.payment}}, isBoss: {{this.isBoss}}),
+{{/each}}  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{name}} — Job Editor')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          SwitchListTile(value: _defaultDuty, onChanged: (v) => setState(() => _defaultDuty = v), title: const Text('Default duty')),
+          SwitchListTile(value: _offDutyPay,  onChanged: (v) => setState(() => _offDutyPay = v),  title: const Text('Pay while off-duty')),
+          const Divider(),
+          const Text('Grades', style: TextStyle(fontWeight: FontWeight.bold)),
+          ..._grades.asMap().entries.map((e) => _gradeTile(e.key, e.value)),
+        ],
+      ),
+    );
+  }
+
+  Widget _gradeTile(int idx, _GradeRow g) => ListTile(
+    title: Text('${idx}. ${g.name}'),
+    subtitle: Text('Pay: ${g.payment}${g.isBoss ? "  •  BOSS" : ""}'),
+  );
+}
+
+class _GradeRow {
+  String name;
+  int payment;
+  bool isBoss;
+  _GradeRow({required this.name, required this.payment, required this.isBoss});
+}

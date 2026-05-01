@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: taxi_driver
+type: job
+name: Таксист
+data:
+  category: transport
+  defaultDuty: true
+  offDutyPay: false
+  description: Водитель такси, возит пассажиров по городу за деньги.
+  # Tiered grades — every RP framework (QBCore, ESX, custom) does it this way.
+  # Each grade has its own pay rate; isBoss controls hire/fire permissions.
+  grades:
+    - name: Стажёр
+      payment: 50
+      isBoss: false
+    - name: Водитель
+      payment: 75
+      isBoss: false
+    - name: Опытный
+      payment: 100
+      isBoss: false
+    - name: Управляющий
+      payment: 150
+      isBoss: true

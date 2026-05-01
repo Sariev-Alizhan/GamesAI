@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: bmw_m5
+type: vehicle
+name: BMW M5 Competition
+data:
+  description: Спортивный седан премиум-класса.
+  # Engine layer — bound to the actual game engine. Changing these requires
+  # a code review (handling/physics implications). Read-only in admin UI.
+  engine:
+    model: bmw_m5_competition_2024
+    handling: handling_sport_sedan_v2
+  # Economy layer — pure RP, freely editable by admins via the dashboard.
+  economy:
+    price: 950000   # cents (= $9,500.00)
+    dealer: pdm     # Premium Deluxe Motorsport
+    category: super
+    tradeable: true

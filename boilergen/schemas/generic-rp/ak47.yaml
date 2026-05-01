@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: ak47
+type: weapon
+name: АК-47
+data:
+  description: Автомат Калашникова. Высокий урон, средняя точность.
+  # Combat layer — engine-bound ballistics. Changing these is gamedesigner
+  # territory (balance implications). Read-only in admin UI.
+  combat:
+    category: rifle
+    damage: 45
+    fireRate: 600    # rounds per minute
+    magazineSize: 30
+    range: 350       # effective range, meters
+  # Economy layer — pure RP. Admin can adjust price/license without rebalancing.
+  economy:
+    price: 1500000   # cents (= $15,000.00)
+    vendor: ammunation
+    license: rifle_class_a

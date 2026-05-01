@@ -1,0 +1,20 @@
+// {{name}} — auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+// Type: weapon (RP firearm — split into combat + economy layers)
+#include "BaseWeapon.h"
+
+class Weapon{{pascalCase id}} : public BaseWeapon {
+public:
+    Weapon{{pascalCase id}}()
+        : BaseWeapon("{{id}}", WeaponCategory::{{constantCase data.combat.category}}) {
+        // Combat layer — bound to game-engine ballistics
+        damage_         = {{data.combat.damage}};
+        fireRate_       = {{data.combat.fireRate}};
+        magazineSize_   = {{data.combat.magazineSize}};
+        rangeMeters_    = {{data.combat.range}};
+
+        // Economy layer — pure RP
+        priceCents_     = {{data.economy.price}};
+        vendor_         = "{{data.economy.vendor}}";
+        requiredLicense_ = "{{data.economy.license}}";
+    }
+};

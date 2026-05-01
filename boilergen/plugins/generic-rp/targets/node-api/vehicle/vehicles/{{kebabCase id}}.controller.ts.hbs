@@ -1,0 +1,30 @@
+// Auto-generated controller for {{name}} (vehicle)
+import { Router } from 'express';
+import { db } from '../../db.js';
+
+export const {{camelCase id}}VehicleRouter = Router();
+
+const {{constantCase id}}_DEFINITION = {
+  id: '{{id}}',
+  engine: {
+    model: '{{data.engine.model}}',
+    handling: '{{data.engine.handling}}',
+  },
+  economy: {
+    price: {{data.economy.price}},
+    dealer: '{{data.economy.dealer}}',
+    category: '{{data.economy.category}}',
+    tradeable: {{data.economy.tradeable}},
+  },
+};
+
+{{camelCase id}}VehicleRouter.get('/api/vehicles/{{kebabCase id}}', async (_, res) => {
+  const overrides = await db.vehicleOverrides.findOne({ where: { id: '{{id}}' } });
+  res.json({ ...{{constantCase id}}_DEFINITION, ...(overrides ?? {}) });
+});
+
+{{camelCase id}}VehicleRouter.put('/api/vehicles/{{kebabCase id}}/economy', async (req, res) => {
+  // Only economy is editable. Engine bindings require a code change + redeploy.
+  await db.vehicleOverrides.upsert({ id: '{{id}}', economy: req.body });
+  res.json({ ok: true });
+});

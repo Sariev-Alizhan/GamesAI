@@ -1,6 +1,26 @@
 # Boilergen
 
-Code generator for Grand Games projects. Turns YAML entity descriptions into boilerplate code across the GM1 stack (C++ server, Node API, Flutter admin, JSON i18n, DB migrations).
+**Scaffold tool for game developers.** Turns YAML entity descriptions into boilerplate code across your stack (C++ / Node / Flutter / JSON i18n / DB migrations / anything you write a template for).
+
+The 4 hours of copy-paste when adding a new profession / weapon / vehicle? Gone. The 4 hours of actually designing the gameplay? Yours to keep.
+
+## What this is — and isn't
+
+**Boilergen IS:**
+- A **deterministic templating engine**. You write the templates, you own the output. No surprises, no "AI invented something weird."
+- A **boilerplate eliminator**. Removes the rote 4-hour copy-paste so you can spend that time on the gameplay.
+- **Programmer in control.** Generated code is fully readable, fully editable, and yours from the moment it lands on disk.
+- **Open-source, MIT-style.** Fork it, change it, ship it.
+
+**Boilergen is NOT:**
+- An AI codegen replacement for programmers.
+- A generative anything (no AI art, no AI music, no AI dialogue, no AI level design).
+- An autocomplete-style tool that writes code as you type.
+- A SaaS lock-in.
+
+There's an **opt-in** AI Describe layer (natural language → YAML), clearly labeled, separate from the deterministic core. You always review the YAML before generation runs. If you don't want AI anywhere near your project, it's two clicks away from never appearing.
+
+See [`knowledge-base/sources/community-sentiment-ai-gamedev.md`](../knowledge-base/sources/community-sentiment-ai-gamedev.md) for why this framing matters.
 
 ## Quick start
 

@@ -1,0 +1,51 @@
+// Auto-generated admin form for {{name}} (vehicle)
+import 'package:flutter/material.dart';
+
+class {{pascalCase id}}VehicleForm extends StatefulWidget {
+  const {{pascalCase id}}VehicleForm({super.key});
+
+  @override
+  State<{{pascalCase id}}VehicleForm> createState() => _{{pascalCase id}}VehicleFormState();
+}
+
+class _{{pascalCase id}}VehicleFormState extends State<{{pascalCase id}}VehicleForm> {
+  // Economy fields are editable. Engine bindings are read-only — change in code.
+  int  _price     = {{data.economy.price}};
+  String _dealer  = '{{data.economy.dealer}}';
+  bool _tradeable = {{data.economy.tradeable}};
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{name}} — Vehicle Editor')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Engine layer (read-only)
+          Card(
+            color: Colors.grey.shade100,
+            child: ListTile(
+              title: const Text('Engine binding (read-only)'),
+              subtitle: Text('model: {{data.engine.model}}\nhandling: {{data.engine.handling}}'),
+            ),
+          ),
+          const Divider(),
+          // Economy layer (editable)
+          ListTile(
+            title: const Text('Price (cents)'),
+            trailing: Text('\$$_price'),
+          ),
+          ListTile(
+            title: const Text('Dealer'),
+            trailing: Text(_dealer),
+          ),
+          SwitchListTile(
+            title: const Text('Tradeable'),
+            value: _tradeable,
+            onChanged: (v) => setState(() => _tradeable = v),
+          ),
+        ],
+      ),
+    );
+  }
+}

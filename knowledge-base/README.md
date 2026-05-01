@@ -31,6 +31,7 @@ knowledge-base/
 ├── games/               ← entries about specific games
 ├── engines/             ← entries about engines / SDKs / frameworks
 ├── patterns/            ← cross-cutting architectural patterns
+├── sources/             ← curated external resources (awesome-lists, asset libs, etc.)
 └── research-notes/      ← raw research output, dated, kept for reference
 ```
 
@@ -65,6 +66,12 @@ knowledge-base/
 | [Component-Based Design](./patterns/component-based-design.md) | runtime architecture (classical) | high — Unity/Unreal/Godot model |
 | [Entity-Component-System (ECS)](./patterns/entity-component-system.md) | runtime architecture (modern) | medium — Bevy/DOTS/Flecs/EnTT |
 | [Asset Pipelines & Codegen Integration](./patterns/asset-pipelines.md) | build-time integration | high — informs how Boilergen plugs into a target project's build |
+
+### External resources (curated)
+
+| Entry | Description |
+|---|---|
+| [External Gamedev Resources](./sources/external-resources.md) | Curated directory of awesome-lists, asset libraries, publisher directories. Source-mining starting point for new entries. |
 
 ### Research notes
 
