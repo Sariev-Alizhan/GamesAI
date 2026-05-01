@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../boilergen.schema.json
 id: taxi_driver
 type: profession
 name: Таксист

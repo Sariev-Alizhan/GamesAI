@@ -4,7 +4,7 @@ import yaml from 'js-yaml';
 import { z } from 'zod';
 import type { Schema } from './types.js';
 
-const SchemaZod = z.object({
+export const SchemaZod = z.object({
   id: z.string().min(1),
   type: z.string().min(1),
   name: z.string().min(1),

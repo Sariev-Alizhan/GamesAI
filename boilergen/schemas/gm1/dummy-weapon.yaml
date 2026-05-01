@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../boilergen.schema.json
 id: ak47
 type: weapon
 name: АК-47

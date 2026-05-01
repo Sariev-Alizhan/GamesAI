@@ -3,6 +3,7 @@ import { Command } from 'commander';
 import { generateCommand } from './commands/generate.js';
 import { listCommand } from './commands/list.js';
 import { initCommand } from './commands/init.js';
+import { schemaExportCommand } from './commands/schema-export.js';
 
 const program = new Command();
 
@@ -34,6 +35,19 @@ program
   .action(async (options: { plugins: string }) => {
     try {
       await listCommand(options);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('schema-export')
+  .description('Print/save JSON Schema for YAML entity files (enables IDE autocomplete)')
+  .option('-o, --output <file>', 'Write to file instead of stdout')
+  .action(async (options: { output?: string }) => {
+    try {
+      await schemaExportCommand(options);
     } catch (err) {
       console.error(err instanceof Error ? err.message : err);
       process.exit(1);
