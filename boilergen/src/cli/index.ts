@@ -1,13 +1,26 @@
 #!/usr/bin/env node
-import { loadSchema } from '../core/schema-loader.js';
+import { Command } from 'commander';
+import { generateCommand } from './commands/generate.js';
 
-const schemaPath = process.argv[2] ?? './schemas/gm1/dummy-profession.yaml';
+const program = new Command();
 
-try {
-  const schema = await loadSchema(schemaPath);
-  console.log('Loaded schema:');
-  console.log(JSON.stringify(schema, null, 2));
-} catch (err) {
-  console.error(err instanceof Error ? err.message : err);
-  process.exit(1);
-}
+program
+  .name('boilergen')
+  .description('Code generator: YAML entity → boilerplate code across stack layers')
+  .version('1.0.0');
+
+program
+  .command('generate <schema>')
+  .description('Generate code from a YAML entity schema')
+  .option('-p, --plugin <dir>', 'Plugin directory', './plugins/gm1')
+  .option('-o, --output <dir>', 'Output base directory', './test-output')
+  .action(async (schema: string, options: { plugin: string; output: string }) => {
+    try {
+      await generateCommand(schema, options);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      process.exit(1);
+    }
+  });
+
+program.parse();

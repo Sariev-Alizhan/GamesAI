@@ -1,0 +1,8 @@
+// {{name}} (id: {{id}})
+#include "BaseProfession.h"
+
+class Profession{{pascalCase id}} : public BaseProfession {
+public:
+    Profession{{pascalCase id}}()
+        : BaseProfession("{{id}}", {{data.baseSalary}}) {}
+};
