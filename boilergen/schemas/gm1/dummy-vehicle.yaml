@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: lada_2107
+type: vehicle
+name: ВАЗ-2107
+data:
+  category: sedan
+  topSpeed: 150
+  acceleration: 14.5
+  fuelTank: 42
+  fuelConsumption: 9.5
+  seats: 5
+  trunkCapacity: 350
+  price: 80000
+  description: Классическая советская легковушка

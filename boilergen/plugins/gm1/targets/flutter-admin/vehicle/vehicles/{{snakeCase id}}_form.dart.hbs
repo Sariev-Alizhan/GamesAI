@@ -1,0 +1,35 @@
+// Auto-generated admin form for {{name}}
+import 'package:flutter/material.dart';
+
+class {{pascalCase id}}VehicleForm extends StatefulWidget {
+  const {{pascalCase id}}VehicleForm({super.key});
+
+  @override
+  State<{{pascalCase id}}VehicleForm> createState() => _{{pascalCase id}}VehicleFormState();
+}
+
+class _{{pascalCase id}}VehicleFormState extends State<{{pascalCase id}}VehicleForm> {
+  final _topSpeed = TextEditingController(text: '{{data.topSpeed}}');
+  final _acceleration = TextEditingController(text: '{{data.acceleration}}');
+  final _fuelTank = TextEditingController(text: '{{data.fuelTank}}');
+  final _fuelConsumption = TextEditingController(text: '{{data.fuelConsumption}}');
+  final _seats = TextEditingController(text: '{{data.seats}}');
+  final _trunkCapacity = TextEditingController(text: '{{data.trunkCapacity}}');
+  final _price = TextEditingController(text: '{{data.price}}');
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{name}}')),
+      body: ListView(padding: const EdgeInsets.all(16), children: [
+        TextField(controller: _topSpeed,        decoration: const InputDecoration(labelText: 'Top speed (km/h)')),
+        TextField(controller: _acceleration,    decoration: const InputDecoration(labelText: '0-100 (s)')),
+        TextField(controller: _fuelTank,        decoration: const InputDecoration(labelText: 'Fuel tank (L)')),
+        TextField(controller: _fuelConsumption, decoration: const InputDecoration(labelText: 'Consumption (L/100km)')),
+        TextField(controller: _seats,           decoration: const InputDecoration(labelText: 'Seats')),
+        TextField(controller: _trunkCapacity,   decoration: const InputDecoration(labelText: 'Trunk capacity (L)')),
+        TextField(controller: _price,           decoration: const InputDecoration(labelText: 'Price')),
+      ]),
+    );
+  }
+}

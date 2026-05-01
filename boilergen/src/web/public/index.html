@@ -99,6 +99,48 @@ header {
 }
 .gh-link:hover { color: var(--text); background: var(--bg-2); }
 
+.org-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text-muted);
+  padding: 4px 9px;
+  background: linear-gradient(135deg, rgba(247, 201, 72, 0.08), rgba(176, 139, 255, 0.06));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  letter-spacing: 0.2px;
+}
+.org-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(247, 201, 72, 0.4);
+}
+
+.session-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+}
+.stats-item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+.stats-item.save .stats-num { color: var(--green); }
+.stats-num { color: var(--text); font-size: 13px; font-weight: 600; }
+.stats-lbl { color: var(--text-dim); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.stats-divider { width: 1px; height: 18px; background: var(--border); }
+
 /* ========== MAIN LAYOUT ========== */
 main {
   display: grid;
@@ -475,9 +517,19 @@ main {
     </svg>
     <div class="brand-text">Boiler<span class="gen">gen</span></div>
   </div>
+  <span class="org-badge" title="Internal tool — Grand Games">
+    <span class="org-dot"></span>Internal · Grand Games
+  </span>
   <span class="dot-sep">·</span>
   <span class="subtitle">YAML → multi-stack code</span>
   <div class="spacer"></div>
+  <div class="session-stats" id="session-stats" title="Session statistics">
+    <span class="stats-item"><span class="stats-num" id="stats-files">0</span><span class="stats-lbl">files</span></span>
+    <span class="stats-divider"></span>
+    <span class="stats-item"><span class="stats-num" id="stats-runs">0</span><span class="stats-lbl">runs</span></span>
+    <span class="stats-divider"></span>
+    <span class="stats-item save"><span class="stats-num" id="stats-saved">0m</span><span class="stats-lbl">saved</span></span>
+  </div>
   <div class="plugin-info" id="plugin-info"><span class="pulse">loading plugin…</span></div>
   <a class="gh-link" href="https://github.com/Sariev-Alizhan/GamesAI" target="_blank" rel="noopener">
     <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -494,6 +546,7 @@ main {
       <div class="examples">
         <button class="example-btn" data-example="profession">profession</button>
         <button class="example-btn" data-example="weapon">weapon</button>
+        <button class="example-btn" data-example="vehicle">vehicle</button>
       </div>
     </div>
     <textarea id="yaml-input" spellcheck="false" placeholder="Paste or write entity YAML here..."></textarea>
@@ -568,7 +621,46 @@ data:
   price: 15000
   description: Автомат Калашникова
 `,
+  vehicle: `# yaml-language-server: $schema=../boilergen.schema.json
+id: lada_2107
+type: vehicle
+name: ВАЗ-2107
+data:
+  category: sedan
+  topSpeed: 150
+  acceleration: 14.5
+  fuelTank: 42
+  fuelConsumption: 9.5
+  seats: 5
+  trunkCapacity: 350
+  price: 80000
+  description: Классическая советская легковушка
+`,
 };
+
+// Estimated minutes saved per generated file (vs. manual boilerplate work).
+// Conservative: 30 min average per file across stack (file creation, naming,
+// imports, registration, basic structure).
+const MINUTES_SAVED_PER_FILE = 30;
+
+const sessionStats = { runs: 0, files: 0 };
+
+function formatSavedTime(minutes) {
+  if (minutes < 60) return `${minutes}m`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `${h}h` : `${h}h${m}m`;
+}
+
+function bumpStats(filesGenerated) {
+  sessionStats.runs += 1;
+  sessionStats.files += filesGenerated;
+  document.getElementById('stats-runs').textContent = String(sessionStats.runs);
+  document.getElementById('stats-files').textContent = String(sessionStats.files);
+  document.getElementById('stats-saved').textContent = formatSavedTime(
+    sessionStats.files * MINUTES_SAVED_PER_FILE,
+  );
+}
 
 const $ = (id) => document.getElementById(id);
 const yamlInput = $('yaml-input');
@@ -716,13 +808,16 @@ async function generate() {
     }
     lastFiles = data.files;
     activeIdx = data.files.length > 0 ? 0 : -1;
+    bumpStats(data.files.length);
     statusBar.className = 'success';
     statusText.style.color = 'var(--text)';
+    const savedMin = data.files.length * MINUTES_SAVED_PER_FILE;
     statusText.innerHTML = `
       <span class="badge blue">${escapeHtml(data.schema.id)}</span>
       <span class="badge"><span class="label">type</span> ${escapeHtml(data.schema.type)}</span>
       <span class="badge purple">matched ${data.matched}/${data.total}</span>
       <span class="badge green">${data.files.length} files</span>
+      ${data.files.length > 0 ? `<span class="badge" style="color:var(--accent);border-color:rgba(247,201,72,0.3);background:rgba(247,201,72,0.06);"><span class="label">vs manual</span> ~${formatSavedTime(savedMin)} saved</span>` : ''}
     `;
     renderFileList(lastFiles);
     if (activeIdx >= 0) selectFile(0);

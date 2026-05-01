@@ -1,0 +1,18 @@
+// {{name}} — auto-generated from schemas/gm1/{{kebabCase id}}.yaml
+#include "BaseVehicle.h"
+
+class Vehicle{{pascalCase id}} : public BaseVehicle {
+public:
+    Vehicle{{pascalCase id}}()
+        : BaseVehicle("{{id}}", VehicleCategory::{{constantCase data.category}}) {
+        topSpeed_         = {{data.topSpeed}};
+        acceleration_     = {{data.acceleration}}f;
+        fuelTank_         = {{data.fuelTank}}f;
+        fuelConsumption_  = {{data.fuelConsumption}}f;
+        seats_            = {{data.seats}};
+        trunkCapacity_    = {{data.trunkCapacity}};
+        price_            = {{data.price}};
+    }
+
+    const char* displayName() const override { return "{{name}}"; }
+};
