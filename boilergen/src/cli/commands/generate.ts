@@ -60,6 +60,15 @@ export async function generateCommand(
     console.log(`  ${tag} ${f}`);
   }
 
+  if (result.filesInjected.length > 0) {
+    const verbI = dryRun ? 'Would inject into' : 'Injected into';
+    const tagI = dryRun ? '[DRY-INJECT]' : '[INJECT]';
+    console.log(`${verbI} ${result.filesInjected.length} files:`);
+    for (const f of result.filesInjected) {
+      console.log(`  ${tagI} ${f}`);
+    }
+  }
+
   if (result.filesSkipped.length > 0) {
     console.log(`Skipped ${result.filesSkipped.length} templates:`);
     for (const s of result.filesSkipped) {

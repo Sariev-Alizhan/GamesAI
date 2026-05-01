@@ -1,6 +1,15 @@
-import { readdir } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { basename, join, relative, sep } from 'node:path';
-import type { Plugin, Template } from './types.js';
+import { z } from 'zod';
+import { parseFrontmatter } from './template-engine.js';
+import type { InjectSpec, Plugin, Template } from './types.js';
+
+const FrontmatterZod = z.object({
+  to: z.string().min(1),
+  inject: z.enum(['after', 'before']),
+  anchor: z.string().min(1),
+  skipIf: z.string().optional(),
+});
 
 async function findHbsFiles(rootDir: string): Promise<string[]> {
   const out: string[] = [];
@@ -51,8 +60,34 @@ export async function loadPlugin(pluginDir: string): Promise<Plugin> {
       continue;
     }
 
+    const content = await readFile(absPath, 'utf-8');
+    const { frontmatter } = parseFrontmatter(content);
+
+    let inject: InjectSpec | undefined;
+    if (frontmatter !== null) {
+      const result = FrontmatterZod.safeParse(frontmatter);
+      if (!result.success) {
+        const issues = result.error.issues
+          .map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`)
+          .join('; ');
+        throw new Error(`Invalid frontmatter in ${absPath}: ${issues}`);
+      }
+      inject = {
+        mode: result.data.inject,
+        to: result.data.to,
+        anchor: result.data.anchor,
+        ...(result.data.skipIf !== undefined && { skipIf: result.data.skipIf }),
+      };
+    }
+
     const outputRelPath = restPath.replace(/\.hbs$/, '');
-    templates.push({ absPath, target, entityType, outputRelPath });
+    templates.push({
+      absPath,
+      target,
+      entityType,
+      outputRelPath,
+      ...(inject !== undefined && { inject }),
+    });
   }
 
   if (skipped.length > 0) {

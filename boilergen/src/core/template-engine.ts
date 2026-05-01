@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import Handlebars from 'handlebars';
+import yaml from 'js-yaml';
 
 function tokenize(input: string): string[] {
   return input
@@ -51,7 +52,29 @@ export function renderString(template: string, data: object): string {
   return handlebars.compile(template, { noEscape: true })(data);
 }
 
+export function parseFrontmatter(content: string): {
+  frontmatter: unknown;
+  body: string;
+} {
+  if (!content.startsWith('---\n')) {
+    return { frontmatter: null, body: content };
+  }
+  const endIdx = content.indexOf('\n---\n', 4);
+  if (endIdx === -1) {
+    return { frontmatter: null, body: content };
+  }
+  const frontmatterText = content.slice(4, endIdx);
+  let parsed: unknown;
+  try {
+    parsed = yaml.load(frontmatterText);
+  } catch {
+    return { frontmatter: null, body: content };
+  }
+  return { frontmatter: parsed, body: content.slice(endIdx + 5) };
+}
+
 export async function renderFile(absPath: string, data: object): Promise<string> {
   const content = await readFile(absPath, 'utf-8');
-  return renderString(content, data);
+  const { body } = parseFrontmatter(content);
+  return renderString(body, data);
 }
