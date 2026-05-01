@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: level_1_grasslands
+type: level
+name: The Grasslands
+data:
+  worldId: world_overworld
+  objective: Defeat 10 slimes and reach the cave entrance.
+  enemyPool:
+    - slime
+    - giant_slime
+  itemPool:
+    - health_potion
+    - copper_coin
+  parScore: 500
+  musicTrack: res://audio/grasslands_theme.ogg
+  nextLevel: level_2_caves

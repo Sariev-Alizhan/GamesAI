@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: health_potion
+type: item
+name: Health Potion
+data:
+  description: Restores 25 HP on use.
+  category: consumable
+  effectAmount: 25
+  stackSize: 10
+  value: 50
+  iconPath: res://assets/icons/health_potion.png

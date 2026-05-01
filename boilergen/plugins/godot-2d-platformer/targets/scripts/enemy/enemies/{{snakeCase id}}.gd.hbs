@@ -1,0 +1,33 @@
+# Auto-generated from schemas/godot-2d-platformer/{{kebabCase id}}.yaml
+# Type: enemy
+class_name {{pascalCase id}}Enemy
+extends CharacterBody2D
+
+# Stats — overrideable per-instance via the .tres resource.
+@export var data: EnemyData
+
+# Defaults from schema (inlined for fast access — read from `data` if you need overrides):
+const DEFAULT_HEALTH := {{data.health}}
+const DEFAULT_DAMAGE := {{data.damage}}
+const DEFAULT_SPEED  := {{data.speed}}
+
+var current_health: int = DEFAULT_HEALTH
+
+func _ready() -> void:
+	if data == null:
+		push_warning("{{pascalCase id}}Enemy spawned without EnemyData resource attached.")
+		return
+	current_health = data.health
+
+func _physics_process(delta: float) -> void:
+	# TODO: implement {{data.behaviourType}} behaviour for {{name}}.
+	pass
+
+func take_damage(amount: int) -> void:
+	current_health -= amount
+	if current_health <= 0:
+		_on_death()
+
+func _on_death() -> void:
+	# TODO: emit signal, drop {{data.dropTable.length}} possible items, queue_free
+	queue_free()

@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: slime
+type: enemy
+name: Green Slime
+data:
+  description: Slow patrolling enemy. Easy starter mob.
+  health: 30
+  damage: 5
+  speed: 40           # pixels per second
+  behaviourType: patrol
+  dropTable:
+    - health_potion
+    - copper_coin

@@ -1,0 +1,31 @@
+# Auto-generated from schemas/godot-2d-platformer/{{kebabCase id}}.yaml
+# Type: level (world: {{data.worldId}})
+class_name {{pascalCase id}}Level
+extends Node
+
+@export var data: LevelData
+
+const PAR_SCORE := {{data.parScore}}
+const MUSIC_TRACK := "{{data.musicTrack}}"
+const NEXT_LEVEL := "{{data.nextLevel}}"
+
+signal level_completed(score: int, time: float)
+signal level_failed(reason: String)
+
+var _start_time_ms: int = 0
+var _player_score: int = 0
+
+func _ready() -> void:
+	_start_time_ms = Time.get_ticks_msec()
+	# TODO: load enemies from data.enemy_pool ({{#each data.enemyPool}}{{this}}{{#unless @last}}, {{/unless}}{{/each}})
+	# TODO: load items from data.item_pool ({{#each data.itemPool}}{{this}}{{#unless @last}}, {{/unless}}{{/each}})
+	# TODO: play AudioStream "{{data.musicTrack}}"
+
+func add_score(points: int) -> void:
+	_player_score += points
+	if _player_score >= PAR_SCORE:
+		_complete()
+
+func _complete() -> void:
+	var elapsed_sec := (Time.get_ticks_msec() - _start_time_ms) / 1000.0
+	level_completed.emit(_player_score, elapsed_sec)

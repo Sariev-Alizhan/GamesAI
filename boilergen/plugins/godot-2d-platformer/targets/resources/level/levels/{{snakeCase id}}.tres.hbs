@@ -1,0 +1,14 @@
+[gd_resource type="LevelData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/{{snakeCase id}}.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "{{id}}"
+display_name = "{{name}}"
+world_id = "{{data.worldId}}"
+enemy_pool = [{{#each data.enemyPool}}"{{this}}"{{#unless @last}}, {{/unless}}{{/each}}]
+item_pool = [{{#each data.itemPool}}"{{this}}"{{#unless @last}}, {{/unless}}{{/each}}]
+par_score = {{data.parScore}}
+music_track = "{{data.musicTrack}}"
+next_level = "{{data.nextLevel}}"

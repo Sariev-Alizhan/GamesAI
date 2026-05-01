@@ -1,0 +1,13 @@
+[gd_resource type="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/{{snakeCase id}}.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "{{id}}"
+display_name = "{{name}}"
+health = {{data.health}}
+damage = {{data.damage}}
+speed = {{data.speed}}
+behaviour_type = "{{data.behaviourType}}"
+drop_table = [{{#each data.dropTable}}"{{this}}"{{#unless @last}}, {{/unless}}{{/each}}]

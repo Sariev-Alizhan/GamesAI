@@ -1,0 +1,25 @@
+# Auto-generated from schemas/godot-2d-platformer/{{kebabCase id}}.yaml
+# Type: item ({{data.category}})
+class_name {{pascalCase id}}Item
+extends Node2D
+
+@export var data: ItemData
+
+const DEFAULT_EFFECT_AMOUNT := {{data.effectAmount}}
+const STACK_SIZE := {{data.stackSize}}
+const BASE_VALUE := {{data.value}}
+
+signal picked_up(by: Node)
+signal used(by: Node, amount: int)
+
+func _ready() -> void:
+	if data == null:
+		push_warning("{{pascalCase id}}Item spawned without ItemData resource attached.")
+
+func use(by: Node) -> void:
+	# TODO: apply {{data.category}} effect of {{data.effectAmount}} to `by`.
+	used.emit(by, DEFAULT_EFFECT_AMOUNT)
+
+func pickup(by: Node) -> void:
+	picked_up.emit(by)
+	queue_free()

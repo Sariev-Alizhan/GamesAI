@@ -1,0 +1,13 @@
+[gd_resource type="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/{{snakeCase id}}.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "{{id}}"
+display_name = "{{name}}"
+category = "{{data.category}}"
+effect_amount = {{data.effectAmount}}
+stack_size = {{data.stackSize}}
+value = {{data.value}}
+icon_path = "{{data.iconPath}}"
