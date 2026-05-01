@@ -14,7 +14,8 @@ A growing collection of tools, each focused on one boring-but-time-consuming par
 |---|---|---|
 | **[boilergen/](./boilergen/)** | YAML entity → boilerplate code across the stack (C++ / Node / Flutter / Godot / Unity / i18n) | v1.x — production-ready |
 | **[tools/localization-assistant/](./tools/localization-assistant/)** | AI fills missing translations in your locale JSON files | v0.1 — MVP |
-| _More modules coming_ | Game design balance simulator, QA tooling, LiveOps anomaly detection... | Phased per [VISION.md](./VISION.md) |
+| **[tools/schema-validator/](./tools/schema-validator/)** | Catches broken cross-references (loot pointing at a deleted item, level pool with a typo'd enemy id) before runtime | v0.1 — MVP |
+| _More modules coming_ | Balance simulator, QA tooling, LiveOps anomaly detection, AI code reviewer... | Phased per [VISION.md](./VISION.md) |
 
 Every module follows the same architecture: **deterministic core + AI as opt-in layer + open-source forever**.
 
@@ -39,7 +40,8 @@ GamesAI/
 │   └── tests/                       ~200 Vitest tests
 │
 ├── tools/
-│   └── localization-assistant/      Module 2: AI-powered locale filler
+│   ├── localization-assistant/      Module 2: AI-powered locale filler
+│   └── schema-validator/            Module 3: cross-reference checker for game data
 │
 ├── knowledge-base/                  Curated game-dev patterns (16 entries, fed into AI Describe via RAG)
 ├── extension/                       VS Code extension for Boilergen
@@ -76,7 +78,14 @@ npx localization-assistant fill --source en.json --target ru.json kk.json
 
 ## How modules connect
 
-Boilergen generates i18n stubs with `TODO` placeholders → Localization Assistant fills the TODOs with AI translations → both run in your normal CI/PR flow. Tomorrow we add a Balance Simulator that consumes the same YAML schemas Boilergen reads. The platform is the composition.
+The platform's value is the composition:
+
+1. **Boilergen** generates entity YAML schemas + i18n stubs.
+2. **Schema Validator** confirms every cross-reference resolves — broken `lootTable` ids fail the build.
+3. **Localization Assistant** fills the i18n stubs with AI translations.
+4. _(future)_ Balance Simulator reads the same schemas and runs combat simulations.
+
+Each module owns one boring-but-time-consuming part of game-dev. Together they replace ~40% of the rote work in a typical content cycle.
 
 ## Contributing
 
