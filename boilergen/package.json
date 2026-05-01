@@ -1,10 +1,11 @@
 {
   "name": "boilergen",
-  "version": "1.0.0",
-  "description": "Code generator for Grand Games projects. Turns YAML entity descriptions into boilerplate code across stack layers (C++, Node, Flutter).",
+  "version": "1.1.0",
+  "description": "Code generator for game development. YAML entity descriptions → boilerplate code across stack layers. Works as CLI, web playground, and MCP server (for Cursor / Claude Code / Windsurf).",
   "main": "./dist/cli/index.js",
   "bin": {
-    "boilergen": "./dist/cli/index.js"
+    "boilergen": "./dist/cli/index.js",
+    "boilergen-mcp": "./dist/mcp/server.js"
   },
   "scripts": {
     "dev": "tsx src/cli/index.ts",
@@ -14,6 +15,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "web": "tsx src/web/server.ts",
+    "mcp": "tsx src/mcp/server.ts",
     "clean": "rm -rf dist"
   },
   "keywords": [],
@@ -29,6 +31,7 @@
     "vitest": "^4.1.5"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@types/express": "^5.0.6",
     "chalk": "^5.6.2",
     "commander": "^14.0.3",
