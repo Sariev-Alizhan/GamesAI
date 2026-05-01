@@ -41,12 +41,13 @@ export function nest(flat: FlatLocale): NestedLocale {
 
 /**
  * Heuristically infer language code from filename.
- * en.json → en, ru.json → ru, locale-kk.json → kk, etc.
+ * en.json → en, ru.json → ru, locale-kk.json → kk, messages.kk.json → kk, etc.
  */
 export function inferLanguage(filePath: string): string {
   const name = basename(filePath, extname(filePath)).toLowerCase();
-  // Match common patterns: "en", "ru-RU", "locale-kk", "kk_KZ"
-  const m = name.match(/(?:^|[-_])([a-z]{2})(?:[-_][a-z]{2})?$/);
+  // Match common patterns: "en", "ru-RU", "locale-kk", "kk_KZ", "messages.kk".
+  // Separators include `.` so "messages.kk" → kk.
+  const m = name.match(/(?:^|[-_.])([a-z]{2})(?:[-_][a-z]{2})?$/);
   return m ? m[1]! : name;
 }
 

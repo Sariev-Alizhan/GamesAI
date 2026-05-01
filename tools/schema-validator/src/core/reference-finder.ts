@@ -27,14 +27,18 @@ function looksLikeReferenceField(fieldName: string): boolean {
 }
 
 /**
- * snake_case_id heuristic — strings that look like entity IDs.
- * Catches "taxi_driver", "ak_47", "level_1_grasslands".
- * Excludes things like "Hello world", "transport", "rifle".
+ * Snake-case ID heuristic — strings that look like entity IDs.
+ * Catches "taxi_driver", "ak_47", "level_1_grasslands", "slime", "gold_coin".
+ * Excludes things like "Hello world" (uppercase, spaces), "AK-47" (caps, dash).
+ *
+ * We accept single-word lowercase strings (e.g. "slime") — game-data IDs are
+ * often single words. Categories ("transport", "rifle") that look the same
+ * should be opted out via the knownEnums config.
  */
-const ID_LIKE_PATTERN = /^[a-z][a-z0-9_]*[a-z0-9]$/;
+const ID_LIKE_PATTERN = /^[a-z][a-z0-9_]*$/;
 
 function isIdLikeString(value: unknown): value is string {
-  return typeof value === 'string' && ID_LIKE_PATTERN.test(value) && value.includes('_');
+  return typeof value === 'string' && ID_LIKE_PATTERN.test(value);
 }
 
 interface WalkContext {

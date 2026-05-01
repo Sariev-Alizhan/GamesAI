@@ -30,10 +30,22 @@ describe('findReferences — heuristic detection (default)', () => {
     expect(refs).toHaveLength(1);
   });
 
-  it('detects single-string reference, not just array', () => {
-    const refs = findReferences(makeEntity({ nextLevel: 'level_2_caves' }));
+  it('detects single-string reference, not just array (with explicit field config)', () => {
+    // "nextLevel" doesn't match the default heuristic suffixes (Id/Pool/Table/Refs)
+    // so it requires explicit declaration as a reference field.
+    const refs = findReferences(
+      makeEntity({ nextLevel: 'level_2_caves' }),
+      { referenceFields: { nextLevel: 'level' } },
+    );
     expect(refs).toHaveLength(1);
     expect(refs[0]?.referencedId).toBe('level_2_caves');
+  });
+
+  it('detects single-string reference via heuristic (field with matching suffix)', () => {
+    // "*Id" matches heuristic, value is id-shaped → detected.
+    const refs = findReferences(makeEntity({ targetId: 'gold_coin' }));
+    expect(refs).toHaveLength(1);
+    expect(refs[0]?.referencedId).toBe('gold_coin');
   });
 
   it('skips non-id-shaped strings under heuristic mode', () => {
