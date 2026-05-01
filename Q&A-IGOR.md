@@ -291,7 +291,11 @@ router.use({{camelCase id}}Controller);
 
 ## Часть 5 — Если хочешь увидеть инструмент
 
-### Запустить локально (5 минут)
+### Открыть прямо сейчас (0 минут)
+
+🌐 **https://boilergen-eight.vercel.app** — задеплоено в продакшен на Vercel. Можно потыкать без установки.
+
+### Или запустить локально (5 минут)
 
 ```bash
 git clone https://github.com/Sariev-Alizhan/GamesAI

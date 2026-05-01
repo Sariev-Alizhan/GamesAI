@@ -4,6 +4,9 @@
 > Один YAML → готовые файлы во всех слоях стека (C++ сервер, Node API, Flutter админка, локализация).
 >
 > Этот документ — **визуальный гайд для разработчика**. Открой и пробегись.
+>
+> 🌐 **Живой UI:** https://boilergen-eight.vercel.app
+> 📦 **Репо:** https://github.com/Sariev-Alizhan/GamesAI
 
 ---
 

@@ -114,7 +114,12 @@ app.post('/api/preview', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Boilergen web playground running on http://localhost:${PORT}`);
-  console.log(`Using plugin: ${PLUGIN_DIR}`);
-});
+export default app;
+
+const isMain = process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
+if (isMain) {
+  app.listen(PORT, () => {
+    console.log(`Boilergen web playground running on http://localhost:${PORT}`);
+    console.log(`Using plugin: ${PLUGIN_DIR}`);
+  });
+}
