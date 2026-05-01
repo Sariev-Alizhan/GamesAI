@@ -1,11 +1,13 @@
 import { resolve } from 'node:path';
 import { loadSchema } from '../../core/schema-loader.js';
 import { loadPlugin } from '../../core/plugin-loader.js';
+import { loadConfig } from '../../core/config-loader.js';
 import { generate } from '../../core/generator.js';
 
 export interface GenerateCommandOptions {
   plugin: string;
   output: string;
+  config?: string;
   dryRun?: boolean;
 }
 
@@ -14,8 +16,19 @@ export async function generateCommand(
   options: GenerateCommandOptions,
 ): Promise<void> {
   const schemaPath = resolve(schemaArg);
-  const pluginPath = resolve(options.plugin);
-  const outputPath = resolve(options.output);
+
+  let pluginPath: string;
+  let targetRoots: Record<string, string>;
+
+  if (options.config) {
+    const config = await loadConfig(options.config);
+    console.log(`Loaded config: ${resolve(options.config)}`);
+    pluginPath = config.plugin;
+    targetRoots = config.targets;
+  } else {
+    pluginPath = resolve(options.plugin);
+    targetRoots = {};
+  }
 
   const schema = await loadSchema(schemaPath);
   console.log(`Loaded schema: ${schema.id} (${schema.type})`);
@@ -23,10 +36,12 @@ export async function generateCommand(
   const plugin = await loadPlugin(pluginPath);
   console.log(`Loaded plugin "${plugin.id}": ${plugin.templates.length} templates`);
 
-  const targetRoots: Record<string, string> = {};
-  for (const tpl of plugin.templates) {
-    if (!(tpl.target in targetRoots)) {
-      targetRoots[tpl.target] = resolve(outputPath, tpl.target);
+  if (!options.config) {
+    const outputPath = resolve(options.output);
+    for (const tpl of plugin.templates) {
+      if (!(tpl.target in targetRoots)) {
+        targetRoots[tpl.target] = resolve(outputPath, tpl.target);
+      }
     }
   }
 

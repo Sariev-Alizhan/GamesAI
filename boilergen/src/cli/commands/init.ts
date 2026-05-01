@@ -50,5 +50,8 @@ export async function initCommand(options: InitCommandOptions): Promise<void> {
   console.log(
     `Plugin: ${plugin.id} (${uniqueTargets.length} target${uniqueTargets.length === 1 ? '' : 's'}: ${uniqueTargets.join(', ')})`,
   );
-  console.log('Next: edit the config and replace ./TODO with actual paths in your project.');
+  console.log('');
+  console.log('Next steps:');
+  console.log(`  1. Edit ${outputPath} and replace ./TODO with actual paths.`);
+  console.log(`  2. Run: boilergen generate <schema> --config ${outputPath}`);
 }

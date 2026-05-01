@@ -16,8 +16,9 @@ program
   .description('Generate code from a YAML entity schema')
   .option('-p, --plugin <dir>', 'Plugin directory', './plugins/gm1')
   .option('-o, --output <dir>', 'Output base directory', './test-output')
+  .option('-c, --config <file>', 'Use boilergen.config.yaml (overrides --plugin/--output)')
   .option('--dry-run', 'Preview output without writing files')
-  .action(async (schema: string, options: { plugin: string; output: string; dryRun?: boolean }) => {
+  .action(async (schema: string, options: { plugin: string; output: string; config?: string; dryRun?: boolean }) => {
     try {
       await generateCommand(schema, options);
     } catch (err) {
