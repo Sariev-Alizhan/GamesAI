@@ -1,0 +1,37 @@
+// Auto-generated from schemas/unity-rpg/{{kebabCase id}}.yaml
+// Type: quest ({{data.category}}, objective: {{data.objectiveType}})
+using UnityEngine;
+using UnityEngine.Events;
+
+namespace YourGame.Quests
+{
+    public partial class {{pascalCase id}}Behaviour : MonoBehaviour
+    {
+        [SerializeField] private QuestData data;
+
+        private const int  TARGET_COUNT       = {{data.targetCount}};
+        private const string TARGET_ID        = "{{data.targetId}}";
+        private const int  XP_REWARD          = {{data.xpReward}};
+        private const int  GOLD_REWARD        = {{data.goldReward}};
+
+        public UnityEvent onCompleted;
+        public UnityEvent onFailed;
+
+        private int _progress;
+
+        public int Progress => _progress;
+        public bool IsCompleted => _progress >= TARGET_COUNT;
+
+        public void RegisterEvent(string eventTargetId)
+        {
+            if (IsCompleted) return;
+            if (eventTargetId != TARGET_ID) return;
+            _progress++;
+            if (IsCompleted)
+            {
+                // TODO: award XP_REWARD, GOLD_REWARD, items: {{#each data.itemRewards}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+                onCompleted?.Invoke();
+            }
+        }
+    }
+}

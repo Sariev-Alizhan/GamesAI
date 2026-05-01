@@ -1,0 +1,50 @@
+// Auto-generated from schemas/unity-rpg/{{kebabCase id}}.yaml
+// Type: weapon ({{data.category}})
+// Edit this file freely — Boilergen overwrites it on regenerate, so consider
+// moving custom logic to a partial class file: {{pascalCase id}}Behaviour.Custom.cs
+
+using UnityEngine;
+
+namespace YourGame.Weapons
+{
+    public partial class {{pascalCase id}}Behaviour : MonoBehaviour
+    {
+        [SerializeField] private WeaponData data;
+
+        // Cached defaults from the schema — useful for hot paths where you
+        // don't want a SerializedProperty lookup every frame.
+        private const int  DEFAULT_DAMAGE          = {{data.damage}};
+        private const float DEFAULT_ATTACK_SPEED   = {{data.attackSpeed}}f;
+        private const float DEFAULT_RANGE          = {{data.range}}f;
+        private const float DEFAULT_CRIT_CHANCE    = {{data.criticalChance}}f;
+
+        private float _lastSwingTime;
+
+        private void Awake()
+        {
+            if (data == null)
+            {
+                Debug.LogWarning("{{pascalCase id}}Behaviour spawned without WeaponData — using schema defaults.", this);
+            }
+        }
+
+        public bool TrySwing(out int outDamage, out bool isCritical)
+        {
+            float now = Time.time;
+            float cooldown = 1f / (data ? data.attackSpeed : DEFAULT_ATTACK_SPEED);
+            if (now - _lastSwingTime < cooldown)
+            {
+                outDamage = 0;
+                isCritical = false;
+                return false;
+            }
+            _lastSwingTime = now;
+
+            int baseDmg = data ? data.damage : DEFAULT_DAMAGE;
+            float crit = data ? data.criticalChance : DEFAULT_CRIT_CHANCE;
+            isCritical = Random.value < crit;
+            outDamage = isCritical ? baseDmg * 2 : baseDmg;
+            return true;
+        }
+    }
+}

@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: find_the_amulet
+type: quest
+name: Find the Lost Amulet
+data:
+  description: An old hermit asks you to retrieve a family heirloom from a goblin camp.
+  category: side
+  objectiveType: collect
+  targetId: ancient_amulet
+  targetCount: 1
+  xpReward: 200
+  goldReward: 100
+  prerequisiteQuestId: ""
+  itemRewards:
+    - silver_ring
+    - mana_potion

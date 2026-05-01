@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: forest_goblin
+type: enemy
+name: Forest Goblin
+data:
+  description: A small green humanoid that ambushes travelers in the woods.
+  level: 3
+  health: 45
+  damage: 8
+  xpReward: 25
+  goldDropMin: 2
+  goldDropMax: 8
+  aiType: melee
+  lootTable:
+    - rusty_dagger
+    - small_health_potion
+    - goblin_ear

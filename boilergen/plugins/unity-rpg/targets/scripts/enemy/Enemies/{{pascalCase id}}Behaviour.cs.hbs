@@ -1,0 +1,42 @@
+// Auto-generated from schemas/unity-rpg/{{kebabCase id}}.yaml
+// Type: enemy (level {{data.level}}, AI: {{data.aiType}})
+using UnityEngine;
+
+namespace YourGame.Enemies
+{
+    [RequireComponent(typeof(CharacterController))]
+    public partial class {{pascalCase id}}Behaviour : MonoBehaviour
+    {
+        [SerializeField] private EnemyData data;
+
+        private const int DEFAULT_HEALTH    = {{data.health}};
+        private const int DEFAULT_DAMAGE    = {{data.damage}};
+        private const int DEFAULT_XP_REWARD = {{data.xpReward}};
+
+        private int _currentHealth;
+
+        private void Awake()
+        {
+            _currentHealth = data ? data.maxHealth : DEFAULT_HEALTH;
+        }
+
+        public void TakeDamage(int amount)
+        {
+            _currentHealth -= amount;
+            if (_currentHealth <= 0) Die();
+        }
+
+        private void Die()
+        {
+            // TODO: drop loot from data.lootTable ({{#each data.lootTable}}{{this}}{{#unless @last}}, {{/unless}}{{/each}})
+            // TODO: award XP to killer
+            // TODO: play death animation, then Destroy(gameObject) after delay
+            Destroy(gameObject);
+        }
+
+        // {{data.aiType}} AI hook — implement in {{pascalCase id}}Behaviour.AI.cs (partial)
+        partial void Tick(float deltaTime);
+
+        private void Update() => Tick(Time.deltaTime);
+    }
+}

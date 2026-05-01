@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+id: iron_sword
+type: weapon
+name: Iron Sword
+data:
+  description: A reliable iron blade for any starting adventurer.
+  category: sword
+  damage: 15
+  attackSpeed: 1.2     # attacks per second
+  range: 2.0           # meters
+  criticalChance: 0.1  # 10%
+  goldValue: 50
+  iconPath: Assets/Icons/Weapons/iron_sword.png
