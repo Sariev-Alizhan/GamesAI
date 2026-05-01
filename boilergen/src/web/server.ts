@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
@@ -15,6 +16,8 @@ const PORT = Number.parseInt(process.env.PORT ?? '3000', 10);
 interface PreviewFile {
   path: string;
   content: string;
+  templateSource: string;
+  templatePath: string;
   target: string;
   entityType: string;
   inject?: { to: string; mode: 'after' | 'before'; anchor: string };
@@ -71,10 +74,13 @@ app.post('/api/preview', async (req, res) => {
     const files: PreviewFile[] = [];
     for (const tpl of matched) {
       const content = await renderFile(tpl.absPath, schema);
+      const templateSource = await readFile(tpl.absPath, 'utf-8');
       const renderedRelPath = renderString(tpl.outputRelPath, schema);
       const baseFile: PreviewFile = {
         path: `${tpl.target}/${renderedRelPath}`,
         content,
+        templateSource,
+        templatePath: tpl.absPath,
         target: tpl.target,
         entityType: tpl.entityType,
       };

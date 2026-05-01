@@ -182,14 +182,45 @@ main {
 }
 
 #file-content {
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
   background: #0d1117;
   min-width: 0;
   min-height: 0;
 }
-#file-content pre { margin: 0; padding: 16px !important; font-size: 13px !important; }
-#file-content code { font-family: var(--mono) !important; }
-#file-content .empty {
+#file-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-family: var(--mono);
+}
+#file-toolbar .breadcrumb { color: var(--muted); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#file-toolbar .breadcrumb .filename { color: var(--text); }
+#file-toolbar .stat { color: var(--muted); padding: 0 4px; }
+.tab-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tab-btn:hover { color: var(--text); border-color: var(--accent); }
+.tab-btn.active { color: #1a1a1a; background: var(--accent); border-color: var(--accent); }
+.tab-btn.copy { background: var(--green); color: #1a1a1a; border-color: var(--green); }
+.tab-btn.copy:hover { background: #4cc060; }
+.tab-btn.copied { background: var(--blue); border-color: var(--blue); }
+
+#file-body { flex: 1; overflow: auto; min-height: 0; }
+#file-body pre { margin: 0; padding: 16px !important; font-size: 13px !important; }
+#file-body code { font-family: var(--mono) !important; }
+#file-body .empty {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -199,6 +230,14 @@ main {
   gap: 8px;
   padding: 40px;
   text-align: center;
+}
+#file-body .hint {
+  color: var(--accent-2);
+  font-size: 11px;
+  padding: 6px 16px;
+  background: rgba(176, 139, 255, 0.05);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
 }
 
 .error-block {
@@ -244,7 +283,16 @@ main {
     </div>
     <div id="output-grid">
       <div id="file-list"></div>
-      <div id="file-content"><div class="empty">No file selected</div></div>
+      <div id="file-content">
+        <div id="file-toolbar" style="display:none;">
+          <div class="breadcrumb" id="breadcrumb"></div>
+          <span class="stat" id="stat"></span>
+          <button class="tab-btn active" id="tab-output">Output</button>
+          <button class="tab-btn" id="tab-source">Template (.hbs)</button>
+          <button class="tab-btn copy" id="copy-btn">📋 Copy</button>
+        </div>
+        <div id="file-body"><div class="empty">No file selected</div></div>
+      </div>
     </div>
   </section>
 </main>
@@ -283,13 +331,20 @@ const yamlInput = $('yaml-input');
 const generateBtn = $('generate-btn');
 const clearBtn = $('clear-btn');
 const fileList = $('file-list');
-const fileContent = $('file-content');
+const fileBody = $('file-body');
+const fileToolbar = $('file-toolbar');
+const breadcrumb = $('breadcrumb');
+const statEl = $('stat');
+const tabOutput = $('tab-output');
+const tabSource = $('tab-source');
+const copyBtn = $('copy-btn');
 const statusBar = $('status-bar');
 const statusText = $('status-text');
 const pluginInfo = $('plugin-info');
 
 let lastFiles = [];
 let activeIdx = -1;
+let activeView = 'output'; // 'output' | 'source'
 
 function langFromPath(path) {
   if (path.endsWith('.cpp') || path.endsWith('.h') || path.endsWith('.hpp')) return 'cpp';
@@ -322,13 +377,60 @@ function renderFileList(files) {
 function selectFile(idx) {
   activeIdx = idx;
   renderFileList(lastFiles);
-  const f = lastFiles[idx];
-  if (!f) return;
-  const lang = langFromPath(f.path);
-  fileContent.innerHTML = `<pre><code class="language-${lang}"></code></pre>`;
-  fileContent.querySelector('code').textContent = f.content;
-  if (window.Prism) Prism.highlightAllUnder(fileContent);
+  renderActiveView();
 }
+
+function renderActiveView() {
+  const f = lastFiles[activeIdx];
+  if (!f) {
+    fileToolbar.style.display = 'none';
+    fileBody.innerHTML = '<div class="empty">No file selected</div>';
+    return;
+  }
+  fileToolbar.style.display = 'flex';
+
+  const showingSource = activeView === 'source';
+  tabOutput.classList.toggle('active', !showingSource);
+  tabSource.classList.toggle('active', showingSource);
+
+  const text = showingSource ? f.templateSource : f.content;
+  const lang = showingSource ? 'handlebars' : langFromPath(f.path);
+  const path = showingSource ? f.templatePath : f.path;
+
+  breadcrumb.innerHTML = showingSource
+    ? `<span class="filename">${escapeHtml(path)}</span>`
+    : `<span class="filename">${escapeHtml(path)}</span>`;
+  statEl.textContent = `${text.length} chars · ${text.split('\n').length} lines`;
+
+  const hint = showingSource
+    ? '<div class="hint">↳ This is the .hbs template source. Compare with Output to see what got substituted.</div>'
+    : '';
+  fileBody.innerHTML = `${hint}<pre><code class="language-${lang}"></code></pre>`;
+  fileBody.querySelector('code').textContent = text;
+  if (window.Prism) Prism.highlightAllUnder(fileBody);
+}
+
+async function copyActive() {
+  const f = lastFiles[activeIdx];
+  if (!f) return;
+  const text = activeView === 'source' ? f.templateSource : f.content;
+  try {
+    await navigator.clipboard.writeText(text);
+    copyBtn.textContent = '✓ Copied';
+    copyBtn.classList.add('copied');
+    setTimeout(() => {
+      copyBtn.textContent = '📋 Copy';
+      copyBtn.classList.remove('copied');
+    }, 1500);
+  } catch {
+    copyBtn.textContent = '✗ failed';
+    setTimeout(() => { copyBtn.textContent = '📋 Copy'; }, 1500);
+  }
+}
+
+tabOutput.addEventListener('click', () => { activeView = 'output'; renderActiveView(); });
+tabSource.addEventListener('click', () => { activeView = 'source'; renderActiveView(); });
+copyBtn.addEventListener('click', copyActive);
 
 async function generate() {
   generateBtn.disabled = true;
@@ -346,7 +448,8 @@ async function generate() {
       lastFiles = [];
       activeIdx = -1;
       fileList.innerHTML = '';
-      fileContent.innerHTML = `<div class="error-block">${escapeHtml(data.error ?? 'Unknown error')}</div>`;
+      fileToolbar.style.display = 'none';
+      fileBody.innerHTML = `<div class="error-block">${escapeHtml(data.error ?? 'Unknown error')}</div>`;
       return;
     }
     lastFiles = data.files;
@@ -360,7 +463,10 @@ async function generate() {
     `;
     renderFileList(lastFiles);
     if (activeIdx >= 0) selectFile(0);
-    else fileContent.innerHTML = '<div class="empty">No matching templates for this entity type</div>';
+    else {
+      fileToolbar.style.display = 'none';
+      fileBody.innerHTML = '<div class="empty">No matching templates for this entity type</div>';
+    }
   } catch (err) {
     statusBar.className = 'error';
     statusText.textContent = '✗ ' + err.message;
@@ -386,7 +492,8 @@ clearBtn.addEventListener('click', () => {
   lastFiles = [];
   activeIdx = -1;
   fileList.innerHTML = '';
-  fileContent.innerHTML = '<div class="empty">No file selected</div>';
+  fileToolbar.style.display = 'none';
+  fileBody.innerHTML = '<div class="empty">No file selected</div>';
   statusBar.className = '';
   statusText.textContent = 'Ready. Click Generate to render templates.';
 });
