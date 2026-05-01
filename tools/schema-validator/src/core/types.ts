@@ -16,6 +16,12 @@ export interface Entity {
   name: string;
   /** Free-form data */
   data: Record<string, unknown>;
+  /**
+   * Namespace this entity belongs to. Set when namespaceByDirectory mode is on,
+   * derived from the first directory segment under the schemas root.
+   * Empty string for the global default namespace.
+   */
+  namespace: string;
 }
 
 export interface Reference {
@@ -23,9 +29,11 @@ export interface Reference {
   fromId: string;
   fromType: string;
   fromPath: string;
+  /** Namespace of the entity that owns this reference (empty for global) */
+  fromNamespace: string;
   /** Where in the entity (dotted path through .data, e.g. "data.dropTable[0]") */
   fieldPath: string;
-  /** The id-like string that was found */
+  /** The id-like string that was found, possibly prefixed "ns:id" for cross-namespace */
   referencedId: string;
   /** Optional: type hint for what this reference should resolve to.
    *  Comes from the validator config; null if we're inferring. */
@@ -87,6 +95,17 @@ export interface ValidatorConfig {
    * heuristic detection.
    */
   knownEnums?: string[];
+
+  /**
+   * If true, treat each top-level subdirectory under the schemas root as a
+   * separate namespace. Two entities with id "slime" in different
+   * subdirectories are no longer duplicates. References inside a namespace
+   * resolve same-namespace first; cross-namespace references must be
+   * explicitly prefixed: "other-namespace:entity-id".
+   *
+   * When false (default), the entire schemas tree shares one global namespace.
+   */
+  namespaceByDirectory?: boolean;
 }
 
 export interface ValidationResult {

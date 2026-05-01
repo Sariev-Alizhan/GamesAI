@@ -41,6 +41,7 @@ interface WalkContext {
   fromId: string;
   fromType: string;
   fromPath: string;
+  fromNamespace: string;
   refFields: Record<string, string>;
   useHeuristics: boolean;
   knownEnums: Set<string>;
@@ -62,6 +63,7 @@ function walkValue(value: unknown, fieldPath: string, fieldName: string, ctx: Wa
       fromId: ctx.fromId,
       fromType: ctx.fromType,
       fromPath: ctx.fromPath,
+      fromNamespace: ctx.fromNamespace,
       fieldPath,
       referencedId: value,
       expectedType: explicitType,
@@ -91,6 +93,7 @@ export function findReferences(
     fromId: entity.id,
     fromType: entity.type,
     fromPath: entity.path,
+    fromNamespace: entity.namespace,
     refFields: config.referenceFields ?? {},
     useHeuristics: config.useHeuristics ?? true,
     knownEnums: new Set(config.knownEnums ?? []),

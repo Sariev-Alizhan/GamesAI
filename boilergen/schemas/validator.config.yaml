@@ -1,0 +1,78 @@
+# Schema Validator config for the Boilergen demo schemas.
+# Used by:  schema-validator check ./boilergen/schemas --config ./boilergen/schemas/validator.config.yaml
+
+# Each top-level subdirectory under boilergen/schemas/ is a separate plugin
+# with its own id namespace. Without this, the same id ("taxi_driver") appearing
+# in both gm1/ (legacy dummy) and generic-rp/ (canonical example) would be a false
+# duplicate.
+namespaceByDirectory: true
+
+# Demo schemas reference items/enemies/levels we haven't defined as standalone
+# entities (e.g. "rusty_dagger" in a goblin's loot table). For real production
+# usage you'd add those entities; for these illustrative examples we accept the
+# orphans-and-broken-refs as part of being a starter pack.
+ignoreOrphans: true
+
+# Strings that look ID-shaped (snake_case) but are actually category labels or
+# enum values, not foreign-key references. Skip them during heuristic detection.
+knownEnums:
+  # Vehicle categories
+  - sedan
+  - super
+  - sports
+  - compact
+  - suv
+  - truck
+  # Weapon categories
+  - rifle
+  - pistol
+  - smg
+  - sniper
+  - melee
+  - sword
+  - bow
+  - staff
+  # Profession / Job categories
+  - transport
+  - service
+  - government
+  - civilian
+  # Quest categories / objective types
+  - main
+  - side
+  - repeatable
+  - kill
+  - collect
+  - talk_to
+  # Enemy AI types
+  - patrol
+  - chase
+  - stationary
+  - ranged
+  - caster
+  - melee
+  # Item categories
+  - consumable
+  - equipment
+  - quest
+  - currency
+  # Misc world identifiers used as constants, not entities
+  - world_overworld
+  - world_caves
+  - world_dungeon
+
+# Explicit reference-field type constraints — when present, we get
+# "expected item, found enemy" errors in addition to "id missing".
+referenceFields:
+  lootTable:           item
+  dropTable:           item
+  enemyPool:           enemy
+  itemPool:            item
+  itemRewards:         item
+  nextLevel:           level
+  prerequisiteQuestId: quest
+  targetId:            item
+
+# Disable suffix-based heuristics — we have explicit referenceFields above.
+# Pure-explicit mode catches more (precise type-mismatch checking) and false-positives less.
+useHeuristics: false

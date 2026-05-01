@@ -9,6 +9,7 @@ function makeEntity(data: Record<string, unknown>): Entity {
     type: 'enemy',
     name: 'Test',
     data,
+    namespace: '',
   };
 }
 

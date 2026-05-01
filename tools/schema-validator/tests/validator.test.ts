@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { validate } from '../src/core/validator.js';
 import type { Entity } from '../src/core/types.js';
 
-function entity(id: string, type: string, data: Record<string, unknown> = {}): Entity {
-  return { path: `/${id}.yaml`, id, type, name: id, data };
+function entity(id: string, type: string, data: Record<string, unknown> = {}, namespace = ''): Entity {
+  return { path: `/${id}.yaml`, id, type, name: id, data, namespace };
 }
 
 describe('validate — duplicate ids', () => {
