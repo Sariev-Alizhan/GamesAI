@@ -10,6 +10,11 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Note: we use `npm install` instead of `npm ci` because vitest 4's rolldown
+# uses platform-specific native bindings (.node files), and `npm ci` doesn't
+# always fetch optional cross-platform deps when package-lock was generated
+# on a different OS. `npm install` regenerates correctly on the runner.
+
 jobs:
   boilergen:
     name: Boilergen — typecheck + test + build
@@ -24,7 +29,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: boilergen/package-lock.json
-      - run: npm ci
+      - run: npm install
       - name: Typecheck
         run: npm run typecheck
       - name: Test
@@ -45,7 +50,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: tools/localization-assistant/package-lock.json
-      - run: npm ci
+      - run: npm install
       - name: Typecheck
         run: npm run typecheck
       - name: Test
@@ -65,7 +70,7 @@ jobs:
           cache-dependency-path: tools/schema-validator/package-lock.json
       - name: Install
         working-directory: ./tools/schema-validator
-        run: npm ci
+        run: npm install
       - name: Typecheck
         working-directory: ./tools/schema-validator
         run: npm run typecheck
