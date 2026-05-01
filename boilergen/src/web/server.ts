@@ -15,6 +15,9 @@ const projectRoot = resolve(__dirname, '../..');
 // Each immediate subdirectory containing a `targets/` folder is treated as a plugin.
 const PLUGINS_ROOT = process.env.BOILERGEN_PLUGINS_ROOT ?? resolve(projectRoot, 'plugins');
 const SCHEMAS_ROOT = process.env.BOILERGEN_SCHEMAS_ROOT ?? resolve(projectRoot, 'schemas');
+// KNOWLEDGE_BASE_ROOT defaults to ../knowledge-base/ (one level up from boilergen/).
+// AI Describe pulls relevant entries from here as RAG context.
+const KNOWLEDGE_BASE_ROOT = process.env.BOILERGEN_KNOWLEDGE_BASE_ROOT ?? resolve(projectRoot, '..', 'knowledge-base');
 
 // Backward-compat with single-plugin mode used by some tests.
 const LEGACY_PLUGIN_DIR = process.env.BOILERGEN_PLUGIN;
@@ -258,9 +261,14 @@ app.post('/api/plugin/:id/describe', async (req, res) => {
     }
     const plugin = await getPluginById(req.params.id);
     const entityTypes = [...new Set(plugin.templates.map((t) => t.entityType))].sort();
-    const result = await describeToYaml({ prompt: prompt.trim(), entityTypes });
+    const result = await describeToYaml({
+      prompt: prompt.trim(),
+      entityTypes,
+      knowledgeBaseRoot: KNOWLEDGE_BASE_ROOT,
+    });
     res.json({
       yaml: result.yaml,
+      ragSources: result.ragSources,
       usage: {
         inputTokens: result.inputTokens,
         outputTokens: result.outputTokens,
@@ -364,9 +372,14 @@ app.post('/api/describe', async (req, res) => {
     const id = await getDefaultPluginId();
     const plugin = await getPluginById(id);
     const entityTypes = [...new Set(plugin.templates.map((t) => t.entityType))].sort();
-    const result = await describeToYaml({ prompt: prompt.trim(), entityTypes });
+    const result = await describeToYaml({
+      prompt: prompt.trim(),
+      entityTypes,
+      knowledgeBaseRoot: KNOWLEDGE_BASE_ROOT,
+    });
     res.json({
       yaml: result.yaml,
+      ragSources: result.ragSources,
       usage: {
         inputTokens: result.inputTokens,
         outputTokens: result.outputTokens,

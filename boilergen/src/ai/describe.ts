@@ -4,10 +4,17 @@
 //
 // Uses prompt caching on the system prompt (stable across all requests)
 // so repeat invocations cost ~10% of the first one.
+//
+// Now augmented with a RAG layer: relevant entries from the project
+// knowledge-base are retrieved by keyword scoring and injected into the
+// system prompt, so the AI grounds its YAML in real game-dev patterns
+// (e.g. "RP jobs use tiered grades, not flat baseSalary") instead of
+// inventing field shapes.
 
 import Anthropic from '@anthropic-ai/sdk';
+import { buildRagContext } from './rag.js';
 
-const SYSTEM_PROMPT = `You are a YAML schema generator for Boilergen, a code-generation tool for game development.
+const SYSTEM_PROMPT_BASE = `You are a YAML schema generator for Boilergen, a code-generation tool for game development.
 
 Your job: convert a natural-language description of a game entity (in any language — Russian, English, etc.) into a valid Boilergen YAML schema.
 
@@ -28,14 +35,11 @@ data:                            # required, free-form object with entity-specif
 2. \`id\` must be valid snake_case: lowercase ASCII letters, digits, underscores. Translate Russian/Cyrillic IDs to Latin transliteration (e.g. "таксист" → "taxi_driver").
 3. \`type\` must be exactly one of the available entity types provided in the user's message. Do NOT invent new types.
 4. \`name\` should be the human-readable name in the original language used by the user (preserve Cyrillic).
-5. \`data\` fields should match the conventions for the entity type:
-   - profession: baseSalary (number), category (string), description (string)
-   - weapon: damage, fireRate, magazineSize, range, reloadTime, price (numbers), category, description (strings)
-   - vehicle: topSpeed, acceleration, fuelTank, fuelConsumption, seats, trunkCapacity, price (numbers), category, description (strings)
+5. \`data\` fields should match the conventions for the entity type. **If the system prompt includes "Relevant patterns from the Boilergen knowledge base" below, prefer those field shapes** — they reflect real games and will produce more useful generated code than guessed defaults.
 6. If the user's description is missing values, choose sensible defaults based on the entity type and any context they gave. Don't invent values for things they explicitly described.
 7. Do NOT add fields outside the schema (no extra top-level keys). Boilergen runs in strict mode and will reject unknown keys.
 
-# Examples
+# Examples (fallback patterns when no knowledge-base reference applies)
 
 User: "новая профессия таксиста, базовая зарплата 500, категория транспорт"
 Output:
@@ -86,6 +90,18 @@ export interface DescribeOptions {
   prompt: string;
   entityTypes: string[];
   apiKey?: string;
+  /**
+   * If set, the AI Describe call will pull relevant entries from this folder
+   * (the project knowledge-base) and inject them into the system prompt as
+   * grounding context. If unset or empty, falls back to no RAG.
+   */
+  knowledgeBaseRoot?: string;
+}
+
+export interface RagSource {
+  title: string;
+  path: string;
+  score: number;
 }
 
 export interface DescribeResult {
@@ -94,6 +110,11 @@ export interface DescribeResult {
   cacheWriteTokens: number;
   inputTokens: number;
   outputTokens: number;
+  /**
+   * Knowledge-base entries the AI consulted via RAG. Empty array if RAG
+   * was disabled, no KB exists, or no entries matched the query.
+   */
+  ragSources: RagSource[];
 }
 
 let cachedClient: Anthropic | null = null;
@@ -107,24 +128,42 @@ function getClient(apiKey?: string): Anthropic {
 export async function describeToYaml(opts: DescribeOptions): Promise<DescribeResult> {
   const client = getClient(opts.apiKey);
 
+  // RAG: pull relevant knowledge-base entries based on the prompt + entity types.
+  let ragContext = '';
+  let ragSources: RagSource[] = [];
+  if (opts.knowledgeBaseRoot) {
+    const rag = await buildRagContext(opts.knowledgeBaseRoot, opts.prompt, opts.entityTypes, 3);
+    ragContext = rag.context;
+    ragSources = rag.sources;
+  }
+
+  const systemBlocks: { type: 'text'; text: string; cache_control?: { type: 'ephemeral' } }[] = [
+    {
+      type: 'text',
+      text: SYSTEM_PROMPT_BASE,
+      cache_control: { type: 'ephemeral' },
+    },
+  ];
+
+  // RAG context goes as a separate (uncached) block — it changes per query so
+  // caching it would be useless and could thrash the cache for the base prompt.
+  if (ragContext) {
+    systemBlocks.push({
+      type: 'text',
+      text: ragContext,
+    });
+  }
+
   const userMessage = `Available entity types in this plugin: ${opts.entityTypes.join(', ')}.
 
 Description: ${opts.prompt}`;
 
-  // Cache the system prompt — it's stable across all requests, so after the
-  // first call subsequent ones read from cache at ~10% of normal cost.
   const response = await client.messages.create({
     model: 'claude-opus-4-7',
     max_tokens: 2048,
     thinking: { type: 'adaptive' },
     output_config: { effort: 'low' },
-    system: [
-      {
-        type: 'text',
-        text: SYSTEM_PROMPT,
-        cache_control: { type: 'ephemeral' },
-      },
-    ],
+    system: systemBlocks,
     messages: [{ role: 'user', content: userMessage }],
   });
 
@@ -142,5 +181,6 @@ Description: ${opts.prompt}`;
     cacheWriteTokens: response.usage.cache_creation_input_tokens ?? 0,
     inputTokens: response.usage.input_tokens,
     outputTokens: response.usage.output_tokens,
+    ragSources,
   };
 }

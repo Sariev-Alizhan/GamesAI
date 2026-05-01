@@ -1,4 +1,18 @@
 {
+  "name": "games-ai-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GamesAI monorepo root. Holds boilergen/ (the tool), knowledge-base/ (curated patterns), handoff/ (Igor materials), and supporting docs.",
+  "scripts": {
+    "build": "cd boilergen && npm install && npm run build",
+    "install:all": "cd boilergen && npm install",
+    "test": "cd boilergen && npm test",
+    "dev": "cd boilergen && npm run web",
+    "typecheck": "cd boilergen && npm run typecheck"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0"
   }
