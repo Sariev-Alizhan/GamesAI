@@ -1,0 +1,34 @@
+// Auto-generated admin form for {{name}}.
+// Edit defaults, save to override server-side values.
+import 'package:flutter/material.dart';
+
+class {{pascalCase id}}WeaponForm extends StatefulWidget {
+  const {{pascalCase id}}WeaponForm({super.key});
+
+  @override
+  State<{{pascalCase id}}WeaponForm> createState() => _{{pascalCase id}}WeaponFormState();
+}
+
+class _{{pascalCase id}}WeaponFormState extends State<{{pascalCase id}}WeaponForm> {
+  final _damage = TextEditingController(text: '{{data.damage}}');
+  final _fireRate = TextEditingController(text: '{{data.fireRate}}');
+  final _magazineSize = TextEditingController(text: '{{data.magazineSize}}');
+  final _range = TextEditingController(text: '{{data.range}}');
+  final _reloadTime = TextEditingController(text: '{{data.reloadTime}}');
+  final _price = TextEditingController(text: '{{data.price}}');
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{name}}')),
+      body: ListView(padding: const EdgeInsets.all(16), children: [
+        TextField(controller: _damage,       decoration: const InputDecoration(labelText: 'Damage')),
+        TextField(controller: _fireRate,     decoration: const InputDecoration(labelText: 'Fire rate (rpm)')),
+        TextField(controller: _magazineSize, decoration: const InputDecoration(labelText: 'Magazine size')),
+        TextField(controller: _range,        decoration: const InputDecoration(labelText: 'Range (m)')),
+        TextField(controller: _reloadTime,   decoration: const InputDecoration(labelText: 'Reload time (s)')),
+        TextField(controller: _price,        decoration: const InputDecoration(labelText: 'Price')),
+      ]),
+    );
+  }
+}

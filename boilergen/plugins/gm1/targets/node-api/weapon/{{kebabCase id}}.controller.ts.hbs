@@ -1,0 +1,21 @@
+// Auto-generated controller for {{name}}
+import { Router } from 'express';
+import { db } from '../../db.js';
+
+export const {{camelCase id}}Router = Router();
+
+const {{constantCase id}}_DEFAULTS = {
+  id: '{{id}}',
+  category: '{{data.category}}',
+  damage: {{data.damage}},
+  fireRate: {{data.fireRate}},
+  magazineSize: {{data.magazineSize}},
+  range: {{data.range}},
+  reloadTime: {{data.reloadTime}},
+  price: {{data.price}},
+} as const;
+
+{{camelCase id}}Router.get('/weapons/{{kebabCase id}}', async (_req, res) => {
+  const overrides = await db.weapons.findUnique({ where: { id: '{{id}}' } });
+  res.json({ ...{{constantCase id}}_DEFAULTS, ...(overrides ?? {}) });
+});

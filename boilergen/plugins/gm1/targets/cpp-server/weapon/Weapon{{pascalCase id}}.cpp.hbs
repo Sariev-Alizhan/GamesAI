@@ -1,0 +1,15 @@
+// {{name}} — auto-generated from schemas/gm1/{{kebabCase id}}.yaml
+#include "BaseWeapon.h"
+
+class Weapon{{pascalCase id}} : public BaseWeapon {
+public:
+    Weapon{{pascalCase id}}()
+        : BaseWeapon("{{id}}", WeaponCategory::{{constantCase data.category}}) {
+        damage_       = {{data.damage}};
+        fireRate_     = {{data.fireRate}};
+        magazineSize_ = {{data.magazineSize}};
+        range_        = {{data.range}};
+        reloadTime_   = {{data.reloadTime}}f;
+        price_        = {{data.price}};
+    }
+};

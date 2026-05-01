@@ -1,0 +1,12 @@
+id: ak47
+type: weapon
+name: АК-47
+data:
+  category: rifle
+  damage: 45
+  fireRate: 600
+  magazineSize: 30
+  range: 350
+  reloadTime: 2.4
+  price: 15000
+  description: Автомат Калашникова — надёжное оружие ближнего и среднего боя

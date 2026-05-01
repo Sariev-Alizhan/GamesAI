@@ -38,15 +38,20 @@ export async function generateCommand(
 
   if (!options.config) {
     const outputPath = resolve(options.output);
-    for (const tpl of plugin.templates) {
-      if (!(tpl.target in targetRoots)) {
-        targetRoots[tpl.target] = resolve(outputPath, tpl.target);
-      }
+    const matchingTargets = new Set(
+      plugin.templates.filter((t) => t.entityType === schema.type).map((t) => t.target),
+    );
+    for (const target of matchingTargets) {
+      targetRoots[target] = resolve(outputPath, target);
     }
   }
 
   const dryRun = options.dryRun ?? false;
   const result = await generate({ schema, plugin, targetRoots, dryRun });
+
+  console.log(
+    `Matched ${result.matchedTemplates}/${result.totalTemplates} templates for entity type "${schema.type}"`,
+  );
 
   const verb = dryRun ? 'Would generate' : 'Generated';
   const tag = dryRun ? '[DRY]' : '[OK]';

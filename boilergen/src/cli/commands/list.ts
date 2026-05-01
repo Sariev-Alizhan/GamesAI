@@ -35,19 +35,24 @@ export async function listCommand(options: ListCommandOptions): Promise<void> {
     try {
       const plugin = await loadPlugin(pluginDir);
 
-      const byTarget: Record<string, number> = {};
+      const byEntity: Record<string, Record<string, number>> = {};
       for (const tpl of plugin.templates) {
-        byTarget[tpl.target] = (byTarget[tpl.target] ?? 0) + 1;
+        if (!byEntity[tpl.entityType]) byEntity[tpl.entityType] = {};
+        const types = byEntity[tpl.entityType] ?? {};
+        types[tpl.target] = (types[tpl.target] ?? 0) + 1;
+        byEntity[tpl.entityType] = types;
       }
-      const targetSummary = Object.entries(byTarget)
-        .map(([t, n]) => `${t}: ${n}`)
-        .join(', ');
 
       console.log(`  ${plugin.id}`);
       console.log(`    Path:      ${plugin.rootDir}`);
-      console.log(
-        `    Templates: ${plugin.templates.length}${targetSummary ? ` (${targetSummary})` : ''}`,
-      );
+      console.log(`    Templates: ${plugin.templates.length}`);
+
+      for (const [entityType, byTarget] of Object.entries(byEntity).sort()) {
+        const targetList = Object.entries(byTarget)
+          .map(([t, n]) => `${t}: ${n}`)
+          .join(', ');
+        console.log(`      ${entityType.padEnd(12)} ${targetList}`);
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.log(`  ${pluginDir} (invalid: ${msg})`);

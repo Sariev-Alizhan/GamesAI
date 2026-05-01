@@ -8,6 +8,7 @@ export interface Schema {
 export interface Template {
   absPath: string;
   target: string;
+  entityType: string;
   outputRelPath: string;
 }
 

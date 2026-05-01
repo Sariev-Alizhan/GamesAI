@@ -14,17 +14,22 @@ export interface GenerateResult {
   filesCreated: string[];
   filesSkipped: Array<{ template: string; reason: string }>;
   errors: Array<{ template: string; message: string }>;
+  totalTemplates: number;
+  matchedTemplates: number;
 }
 
 export async function generate(opts: GenerateOptions): Promise<GenerateResult> {
   const { schema, plugin, targetRoots } = opts;
+  const matched = plugin.templates.filter((t) => t.entityType === schema.type);
   const result: GenerateResult = {
     filesCreated: [],
     filesSkipped: [],
     errors: [],
+    totalTemplates: plugin.templates.length,
+    matchedTemplates: matched.length,
   };
 
-  for (const tpl of plugin.templates) {
+  for (const tpl of matched) {
     const targetRoot = targetRoots[tpl.target];
     if (!targetRoot) {
       result.filesSkipped.push({

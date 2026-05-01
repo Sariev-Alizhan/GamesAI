@@ -33,14 +33,32 @@ export async function loadPlugin(pluginDir: string): Promise<Plugin> {
     throw err;
   }
 
-  const templates: Template[] = hbsFiles.map((absPath) => {
+  const templates: Template[] = [];
+  const skipped: Array<{ path: string; reason: string }> = [];
+
+  for (const absPath of hbsFiles) {
     const relFromTargets = relative(targetsDir, absPath);
     const parts = relFromTargets.split(sep);
     const target = parts[0] ?? '';
-    const restPath = parts.slice(1).join(sep);
+    const entityType = parts[1] ?? '';
+    const restPath = parts.slice(2).join(sep);
+
+    if (!target || !entityType || !restPath) {
+      skipped.push({
+        path: absPath,
+        reason: `expected layout 'targets/<target>/<entity-type>/<file>', got '${relFromTargets}'`,
+      });
+      continue;
+    }
+
     const outputRelPath = restPath.replace(/\.hbs$/, '');
-    return { absPath, target, outputRelPath };
-  });
+    templates.push({ absPath, target, entityType, outputRelPath });
+  }
+
+  if (skipped.length > 0) {
+    const list = skipped.map((s) => `  - ${s.path}: ${s.reason}`).join('\n');
+    console.warn(`Plugin "${id}": ${skipped.length} template(s) skipped due to layout:\n${list}`);
+  }
 
   return { id, rootDir: pluginDir, templates };
 }
