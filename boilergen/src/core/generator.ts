@@ -7,6 +7,7 @@ export interface GenerateOptions {
   schema: Schema;
   plugin: Plugin;
   targetRoots: Record<string, string>;
+  dryRun?: boolean;
 }
 
 export interface GenerateResult {
@@ -38,8 +39,10 @@ export async function generate(opts: GenerateOptions): Promise<GenerateResult> {
       const renderedContent = await renderFile(tpl.absPath, schema);
       const outputPath = resolve(targetRoot, renderedRelPath);
 
-      await mkdir(dirname(outputPath), { recursive: true });
-      await writeFile(outputPath, renderedContent, 'utf-8');
+      if (!opts.dryRun) {
+        await mkdir(dirname(outputPath), { recursive: true });
+        await writeFile(outputPath, renderedContent, 'utf-8');
+      }
 
       result.filesCreated.push(outputPath);
     } catch (err) {

@@ -8,6 +8,9 @@ dist/
 # Generator demo output (not committed)
 test-output/
 
+# Accidentally created configs (should live in target projects, not here)
+/boilergen.config.yaml
+
 # Environment
 .env
 .env.local

@@ -6,6 +6,7 @@ import { generate } from '../../core/generator.js';
 export interface GenerateCommandOptions {
   plugin: string;
   output: string;
+  dryRun?: boolean;
 }
 
 export async function generateCommand(
@@ -29,11 +30,14 @@ export async function generateCommand(
     }
   }
 
-  const result = await generate({ schema, plugin, targetRoots });
+  const dryRun = options.dryRun ?? false;
+  const result = await generate({ schema, plugin, targetRoots, dryRun });
 
-  console.log(`Generated ${result.filesCreated.length} files:`);
+  const verb = dryRun ? 'Would generate' : 'Generated';
+  const tag = dryRun ? '[DRY]' : '[OK]';
+  console.log(`${verb} ${result.filesCreated.length} files:`);
   for (const f of result.filesCreated) {
-    console.log(`  [OK] ${f}`);
+    console.log(`  ${tag} ${f}`);
   }
 
   if (result.filesSkipped.length > 0) {
