@@ -3,150 +3,247 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Boilergen — Code Generator Playground</title>
+<title>Boilergen — YAML → Code Generator</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='6' cy='16' r='3' fill='%23f7c948'/><path d='M9 16 L24 8' stroke='%238d96a3' stroke-width='1.5' stroke-linecap='round'/><path d='M9 16 L24 16' stroke='%238d96a3' stroke-width='1.5' stroke-linecap='round'/><path d='M9 16 L24 24' stroke='%238d96a3' stroke-width='1.5' stroke-linecap='round'/><circle cx='25' cy='8' r='2.5' fill='%23b08bff'/><circle cx='25' cy='16' r='2.5' fill='%2358a6ff'/><circle cx='25' cy='24' r='2.5' fill='%233fb950'/></svg>">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 :root {
-  --bg: #0e1116;
-  --panel: #161b22;
-  --panel-2: #1f2530;
-  --border: #2d3441;
+  --bg-0: #0a0c10;
+  --bg-1: #11141a;
+  --bg-2: #181c24;
+  --bg-3: #20252e;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
   --text: #e6edf3;
-  --muted: #7d8590;
-  --accent: #f0c645;
-  --accent-2: #b08bff;
+  --text-muted: #8d96a3;
+  --text-dim: #5d6573;
+
+  --accent: #f7c948;
+  --purple: #b08bff;
+  --blue: #58a6ff;
   --green: #3fb950;
   --red: #f85149;
-  --blue: #58a6ff;
-  --mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  --mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, system-ui, sans-serif;
+
+  --radius: 6px;
+  --radius-lg: 10px;
+  --transition: 120ms cubic-bezier(0.2, 0, 0, 1);
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
+
 html, body { height: 100%; }
 body {
-  background: var(--bg);
+  background: var(--bg-0);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.55;
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv02', 'cv03', 'cv11';
 }
+
+button { font: inherit; cursor: pointer; }
+
+/* ========== HEADER ========== */
 header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   padding: 12px 20px;
-  background: var(--panel);
+  background: var(--bg-1);
   border-bottom: 1px solid var(--border);
+  height: 56px;
 }
-.logo { font-weight: 700; font-size: 18px; color: var(--accent); }
-.logo .accent { color: var(--accent-2); }
-.subtitle { color: var(--muted); font-size: 13px; }
-.spacer { flex: 1; }
-.plugin-info { font-size: 12px; color: var(--muted); font-family: var(--mono); }
 
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand svg { width: 26px; height: 26px; flex-shrink: 0; }
+.brand-text {
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.brand-text .gen { color: var(--accent); }
+
+.dot-sep { color: var(--text-dim); margin: 0 4px; user-select: none; }
+.subtitle { color: var(--text-muted); font-size: 12.5px; }
+
+.spacer { flex: 1; }
+.plugin-info {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  padding: 5px 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.plugin-info .label { color: var(--text-dim); }
+
+.gh-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  transition: var(--transition);
+}
+.gh-link:hover { color: var(--text); background: var(--bg-2); }
+
+/* ========== MAIN LAYOUT ========== */
 main {
   display: grid;
-  grid-template-columns: minmax(360px, 40%) 1fr;
-  height: calc(100vh - 53px);
+  grid-template-columns: minmax(380px, 38%) 1fr;
+  height: calc(100vh - 56px);
 }
 
+/* ========== INPUT PANEL ========== */
 #input-panel {
   display: flex;
   flex-direction: column;
-  background: var(--panel);
+  background: var(--bg-1);
   border-right: 1px solid var(--border);
+  min-width: 0;
 }
+
 .panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 16px;
-  background: var(--panel-2);
+  padding: 12px 18px;
   border-bottom: 1px solid var(--border);
   font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--muted);
 }
-.panel-header strong { color: var(--text); text-transform: none; letter-spacing: 0; font-size: 13px; }
-.panel-header .examples { display: flex; gap: 6px; }
+.panel-title { color: var(--text); font-weight: 500; }
+.panel-title .icon { color: var(--text-muted); margin-right: 6px; }
+
+.examples { display: flex; gap: 4px; }
 .example-btn {
   background: transparent;
   border: 1px solid var(--border);
-  color: var(--muted);
+  color: var(--text-muted);
   padding: 4px 10px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-size: 11px;
-  cursor: pointer;
-  font-family: inherit;
+  font-family: var(--mono);
+  transition: var(--transition);
 }
-.example-btn:hover { color: var(--text); border-color: var(--accent); }
+.example-btn:hover {
+  color: var(--text);
+  background: var(--bg-2);
+  border-color: var(--border-strong);
+}
 
 #yaml-input {
   flex: 1;
-  background: var(--panel);
+  background: var(--bg-1);
   color: var(--text);
   border: none;
-  padding: 16px;
+  padding: 18px 20px;
   font-family: var(--mono);
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.7;
   resize: none;
   outline: none;
+  tab-size: 2;
+  font-feature-settings: 'calt', 'liga';
 }
-#yaml-input:focus { background: #181d24; }
+#yaml-input::placeholder { color: var(--text-dim); }
 
 .actions {
   display: flex;
+  align-items: center;
   gap: 8px;
-  padding: 12px 16px;
-  background: var(--panel-2);
+  padding: 12px 18px;
+  background: var(--bg-1);
   border-top: 1px solid var(--border);
 }
 .btn {
   background: var(--accent);
-  color: #1a1a1a;
+  color: #1a1305;
   border: none;
-  padding: 8px 18px;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius);
   font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  font-family: inherit;
+  font-size: 12.5px;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-.btn:hover { background: #ffd75d; }
-.btn:disabled { opacity: 0.5; cursor: wait; }
-.btn.secondary {
+.btn:hover { background: #ffd75d; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(247, 201, 72, 0.25); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: 0.5; cursor: wait; transform: none; box-shadow: none; }
+.btn .kbd {
+  background: rgba(0, 0, 0, 0.18);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-family: var(--mono);
+  font-weight: 500;
+}
+.btn.ghost {
   background: transparent;
-  color: var(--muted);
+  color: var(--text-muted);
   border: 1px solid var(--border);
+  font-weight: 500;
 }
-.btn.secondary:hover { color: var(--text); border-color: var(--text); }
+.btn.ghost:hover {
+  background: var(--bg-2);
+  color: var(--text);
+  border-color: var(--border-strong);
+  transform: none;
+  box-shadow: none;
+}
 
-#output-panel { display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+/* ========== OUTPUT PANEL ========== */
+#output-panel {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  min-height: 0;
+}
 
 #status-bar {
-  background: var(--panel-2);
-  padding: 10px 16px;
+  background: var(--bg-1);
+  padding: 10px 18px;
   border-bottom: 1px solid var(--border);
   font-size: 12px;
-  font-family: var(--mono);
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 40px;
+  gap: 8px;
+  min-height: 44px;
+  font-family: var(--mono);
+  transition: var(--transition);
 }
-#status-bar.success { border-bottom-color: var(--green); }
-#status-bar.error { border-bottom-color: var(--red); color: var(--red); }
+#status-bar.success { background: linear-gradient(to right, rgba(63, 185, 80, 0.06), transparent 50%); }
+#status-bar.error { color: var(--red); background: linear-gradient(to right, rgba(248, 81, 73, 0.08), transparent 50%); }
+
 .badge {
-  background: var(--panel);
-  padding: 2px 8px;
+  background: var(--bg-2);
+  color: var(--text);
+  padding: 3px 9px;
   border-radius: 10px;
   font-size: 11px;
   border: 1px solid var(--border);
+  font-family: var(--mono);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
-.badge.green { color: var(--green); border-color: var(--green); }
-.badge.blue { color: var(--blue); border-color: var(--blue); }
+.badge .label { color: var(--text-dim); font-size: 10px; }
+.badge.green { color: var(--green); border-color: rgba(63, 185, 80, 0.3); background: rgba(63, 185, 80, 0.06); }
+.badge.blue { color: var(--blue); border-color: rgba(88, 166, 255, 0.3); background: rgba(88, 166, 255, 0.06); }
+.badge.purple { color: var(--purple); border-color: rgba(176, 139, 255, 0.3); background: rgba(176, 139, 255, 0.06); }
 
 #output-grid {
   display: grid;
@@ -154,144 +251,291 @@ main {
   min-height: 0;
 }
 
+/* ========== FILE LIST ========== */
 #file-list {
-  background: var(--panel);
+  background: var(--bg-1);
   border-right: 1px solid var(--border);
   overflow-y: auto;
+  padding: 6px;
 }
 .file-item {
-  padding: 10px 14px;
+  padding: 9px 12px;
   cursor: pointer;
-  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 11.5px;
+  transition: var(--transition);
+  margin-bottom: 2px;
+  border-left: 2px solid transparent;
 }
-.file-item:hover { background: var(--panel-2); }
-.file-item.active { background: var(--panel-2); border-left: 3px solid var(--accent); padding-left: 11px; }
-.file-item .target { color: var(--blue); font-size: 10px; text-transform: uppercase; }
-.file-item .name { color: var(--text); margin-top: 2px; word-break: break-all; }
+.file-item:hover { background: var(--bg-2); }
+.file-item.active {
+  background: var(--bg-2);
+  border-left-color: var(--accent);
+}
+.file-item .target {
+  color: var(--blue);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+.file-item .name {
+  color: var(--text);
+  margin-top: 3px;
+  word-break: break-all;
+  line-height: 1.4;
+}
+.file-item.active .name { color: var(--accent); }
 .file-item .inject-tag {
   display: inline-block;
-  background: var(--accent-2);
-  color: #1a1a1a;
+  background: rgba(176, 139, 255, 0.15);
+  color: var(--purple);
   padding: 1px 6px;
   border-radius: 3px;
   font-size: 9px;
-  margin-top: 3px;
+  margin-top: 4px;
   font-weight: 600;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba(176, 139, 255, 0.25);
 }
 
+#file-list .empty-list {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 11.5px;
+  font-family: var(--mono);
+}
+
+/* ========== FILE CONTENT ========== */
 #file-content {
   display: flex;
   flex-direction: column;
-  background: #0d1117;
+  background: var(--bg-0);
   min-width: 0;
   min-height: 0;
 }
+
 #file-toolbar {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  background: var(--panel-2);
+  padding: 8px 14px;
+  background: var(--bg-1);
   border-bottom: 1px solid var(--border);
   font-size: 11px;
   font-family: var(--mono);
 }
-#file-toolbar .breadcrumb { color: var(--muted); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#file-toolbar .breadcrumb .filename { color: var(--text); }
-#file-toolbar .stat { color: var(--muted); padding: 0 4px; }
+#file-toolbar .breadcrumb {
+  color: var(--text-muted);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+#file-toolbar .breadcrumb .filename { color: var(--text); font-weight: 500; }
+#file-toolbar .stat {
+  color: var(--text-dim);
+  font-size: 10.5px;
+  padding: 0 6px;
+}
+
 .tab-btn {
   background: transparent;
-  border: 1px solid var(--border);
-  color: var(--muted);
+  border: 1px solid transparent;
+  color: var(--text-muted);
   padding: 4px 10px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-size: 11px;
-  cursor: pointer;
-  font-family: inherit;
+  font-family: var(--mono);
+  transition: var(--transition);
 }
-.tab-btn:hover { color: var(--text); border-color: var(--accent); }
-.tab-btn.active { color: #1a1a1a; background: var(--accent); border-color: var(--accent); }
-.tab-btn.copy { background: var(--green); color: #1a1a1a; border-color: var(--green); }
-.tab-btn.copy:hover { background: #4cc060; }
-.tab-btn.copied { background: var(--blue); border-color: var(--blue); }
+.tab-btn:hover {
+  color: var(--text);
+  background: var(--bg-2);
+}
+.tab-btn.active {
+  color: var(--accent);
+  background: rgba(247, 201, 72, 0.08);
+  border-color: rgba(247, 201, 72, 0.3);
+}
+.tab-btn.copy {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.tab-btn.copy:hover {
+  color: var(--green);
+  border-color: rgba(63, 185, 80, 0.4);
+  background: rgba(63, 185, 80, 0.06);
+}
+.tab-btn.copied {
+  color: var(--green);
+  border-color: rgba(63, 185, 80, 0.5);
+  background: rgba(63, 185, 80, 0.1);
+}
 
-#file-body { flex: 1; overflow: auto; min-height: 0; }
-#file-body pre { margin: 0; padding: 16px !important; font-size: 13px !important; }
-#file-body code { font-family: var(--mono) !important; }
-#file-body .empty {
+#file-body {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+#file-body pre {
+  margin: 0;
+  padding: 18px 20px !important;
+  font-size: 12.5px !important;
+  line-height: 1.65 !important;
+  background: transparent !important;
+}
+#file-body code {
+  font-family: var(--mono) !important;
+  font-feature-settings: 'calt', 'liga';
+}
+
+.empty-state {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--muted);
+  color: var(--text-dim);
   flex-direction: column;
-  gap: 8px;
-  padding: 40px;
+  gap: 12px;
+  padding: 60px 40px;
   text-align: center;
 }
-#file-body .hint {
-  color: var(--accent-2);
+.empty-state svg { opacity: 0.3; }
+.empty-state .title { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+.empty-state .desc { font-size: 12px; color: var(--text-dim); max-width: 320px; line-height: 1.6; }
+.empty-state kbd {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  padding: 2px 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text-muted);
+}
+
+.hint {
+  color: var(--purple);
   font-size: 11px;
-  padding: 6px 16px;
+  padding: 8px 20px;
   background: rgba(176, 139, 255, 0.05);
   border-bottom: 1px solid var(--border);
   font-family: var(--mono);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+.hint::before { content: '↳'; opacity: 0.6; }
 
 .error-block {
-  padding: 20px;
+  padding: 16px 20px;
   color: var(--red);
   font-family: var(--mono);
   font-size: 12px;
   white-space: pre-wrap;
-  background: rgba(248, 81, 73, 0.05);
-  border-left: 3px solid var(--red);
+  background: rgba(248, 81, 73, 0.04);
+  border-left: 2px solid var(--red);
   margin: 16px;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
 }
+
+/* ========== SCROLLBARS ========== */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 5px; border: 2px solid var(--bg-1); }
+::-webkit-scrollbar-thumb:hover { background: #2c3340; }
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 200ms ease-out; }
+
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.pulse { animation: pulse 1.4s ease-in-out infinite; }
 </style>
 </head>
 <body>
+
 <header>
-  <div class="logo">Boiler<span class="accent">gen</span></div>
-  <div class="subtitle">YAML → multi-stack code generator</div>
+  <div class="brand">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="6" cy="16" r="3" fill="#f7c948"/>
+      <path d="M9 16 L24 8" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M9 16 L24 16" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M9 16 L24 24" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="25" cy="8" r="2.5" fill="#b08bff"/>
+      <circle cx="25" cy="16" r="2.5" fill="#58a6ff"/>
+      <circle cx="25" cy="24" r="2.5" fill="#3fb950"/>
+    </svg>
+    <div class="brand-text">Boiler<span class="gen">gen</span></div>
+  </div>
+  <span class="dot-sep">·</span>
+  <span class="subtitle">YAML → multi-stack code</span>
   <div class="spacer"></div>
-  <div class="plugin-info" id="plugin-info">loading plugin…</div>
+  <div class="plugin-info" id="plugin-info"><span class="pulse">loading plugin…</span></div>
+  <a class="gh-link" href="https://github.com/Sariev-Alizhan/GamesAI" target="_blank" rel="noopener">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/>
+    </svg>
+    GitHub
+  </a>
 </header>
 
 <main>
   <section id="input-panel">
     <div class="panel-header">
-      <strong>YAML — entity description</strong>
+      <div class="panel-title"><span class="icon">📝</span>YAML</div>
       <div class="examples">
         <button class="example-btn" data-example="profession">profession</button>
         <button class="example-btn" data-example="weapon">weapon</button>
       </div>
     </div>
-    <textarea id="yaml-input" spellcheck="false"></textarea>
+    <textarea id="yaml-input" spellcheck="false" placeholder="Paste or write entity YAML here..."></textarea>
     <div class="actions">
-      <button class="btn" id="generate-btn">⚡ Generate</button>
-      <button class="btn secondary" id="clear-btn">Clear</button>
+      <button class="btn" id="generate-btn">
+        Generate <span class="kbd">⌘↵</span>
+      </button>
+      <button class="btn ghost" id="clear-btn">Clear</button>
     </div>
   </section>
 
   <section id="output-panel">
     <div id="status-bar">
-      <span id="status-text">Ready. Click Generate to render templates.</span>
+      <span id="status-text" style="color:var(--text-dim);">Ready — paste YAML and click Generate.</span>
     </div>
     <div id="output-grid">
-      <div id="file-list"></div>
+      <div id="file-list">
+        <div class="empty-list">Files appear here<br>after generation</div>
+      </div>
       <div id="file-content">
         <div id="file-toolbar" style="display:none;">
           <div class="breadcrumb" id="breadcrumb"></div>
           <span class="stat" id="stat"></span>
           <button class="tab-btn active" id="tab-output">Output</button>
-          <button class="tab-btn" id="tab-source">Template (.hbs)</button>
-          <button class="tab-btn copy" id="copy-btn">📋 Copy</button>
+          <button class="tab-btn" id="tab-source">.hbs</button>
+          <button class="tab-btn copy" id="copy-btn">Copy</button>
         </div>
-        <div id="file-body"><div class="empty">No file selected</div></div>
+        <div id="file-body">
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
+              <circle cx="6" cy="16" r="3" fill="#f7c948"/>
+              <path d="M9 16 L24 8" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M9 16 L24 16" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M9 16 L24 24" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="25" cy="8" r="2.5" fill="#b08bff"/>
+              <circle cx="25" cy="16" r="2.5" fill="#58a6ff"/>
+              <circle cx="25" cy="24" r="2.5" fill="#3fb950"/>
+            </svg>
+            <div class="title">No file selected</div>
+            <div class="desc">Click <strong>Generate</strong> or press <kbd>⌘↵</kbd> to render templates.<br>Generated files will appear in the list to the left.</div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -322,7 +566,7 @@ data:
   range: 350
   reloadTime: 2.4
   price: 15000
-  description: Автомат Калашникова — надёжное оружие
+  description: Автомат Калашникова
 `,
 };
 
@@ -344,29 +588,47 @@ const pluginInfo = $('plugin-info');
 
 let lastFiles = [];
 let activeIdx = -1;
-let activeView = 'output'; // 'output' | 'source'
+let activeView = 'output';
 
 function langFromPath(path) {
   if (path.endsWith('.cpp') || path.endsWith('.h') || path.endsWith('.hpp')) return 'cpp';
-  if (path.endsWith('.ts')) return 'typescript';
-  if (path.endsWith('.js')) return 'javascript';
+  if (path.endsWith('.ts') || path.endsWith('.tsx')) return 'typescript';
+  if (path.endsWith('.js') || path.endsWith('.jsx')) return 'javascript';
   if (path.endsWith('.dart')) return 'dart';
   if (path.endsWith('.json')) return 'json';
   if (path.endsWith('.yaml') || path.endsWith('.yml')) return 'yaml';
   if (path.endsWith('.sql')) return 'sql';
+  if (path.endsWith('.py')) return 'python';
+  if (path.endsWith('.cs')) return 'csharp';
   return 'text';
+}
+
+function emptyState(title, desc) {
+  return `<div class="empty-state fade-in">
+    <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
+      <circle cx="6" cy="16" r="3" fill="#f7c948"/>
+      <path d="M9 16 L24 8" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M9 16 L24 16" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M9 16 L24 24" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="25" cy="8" r="2.5" fill="#b08bff"/>
+      <circle cx="25" cy="16" r="2.5" fill="#58a6ff"/>
+      <circle cx="25" cy="24" r="2.5" fill="#3fb950"/>
+    </svg>
+    <div class="title">${title}</div>
+    <div class="desc">${desc}</div>
+  </div>`;
 }
 
 function renderFileList(files) {
   if (files.length === 0) {
-    fileList.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:12px;">No matching templates</div>';
+    fileList.innerHTML = '<div class="empty-list">No matching templates</div>';
     return;
   }
   fileList.innerHTML = files.map((f, i) => `
     <div class="file-item ${i === activeIdx ? 'active' : ''}" data-idx="${i}">
-      <div class="target">${f.target}${f.inject ? ' • inject' : ''}</div>
+      <div class="target">${f.target}${f.inject ? ' · inject' : ''}</div>
       <div class="name">${f.path}</div>
-      ${f.inject ? `<div class="inject-tag">${f.inject.mode.toUpperCase()} «${f.inject.anchor.slice(0, 20)}»</div>` : ''}
+      ${f.inject ? `<div class="inject-tag">${f.inject.mode.toUpperCase()} «${f.inject.anchor.slice(0, 22)}»</div>` : ''}
     </div>
   `).join('');
   fileList.querySelectorAll('.file-item').forEach((el) => {
@@ -384,7 +646,7 @@ function renderActiveView() {
   const f = lastFiles[activeIdx];
   if (!f) {
     fileToolbar.style.display = 'none';
-    fileBody.innerHTML = '<div class="empty">No file selected</div>';
+    fileBody.innerHTML = emptyState('No file selected', 'Click <strong>Generate</strong> or press <kbd>⌘↵</kbd> to render templates.');
     return;
   }
   fileToolbar.style.display = 'flex';
@@ -397,15 +659,13 @@ function renderActiveView() {
   const lang = showingSource ? 'handlebars' : langFromPath(f.path);
   const path = showingSource ? f.templatePath : f.path;
 
-  breadcrumb.innerHTML = showingSource
-    ? `<span class="filename">${escapeHtml(path)}</span>`
-    : `<span class="filename">${escapeHtml(path)}</span>`;
-  statEl.textContent = `${text.length} chars · ${text.split('\n').length} lines`;
+  breadcrumb.innerHTML = `<span class="filename">${escapeHtml(path)}</span>`;
+  statEl.textContent = `${text.length}c · ${text.split('\n').length}l`;
 
   const hint = showingSource
-    ? '<div class="hint">↳ This is the .hbs template source. Compare with Output to see what got substituted.</div>'
+    ? '<div class="hint">Raw template source. Compare with Output to see what got substituted.</div>'
     : '';
-  fileBody.innerHTML = `${hint}<pre><code class="language-${lang}"></code></pre>`;
+  fileBody.innerHTML = `${hint}<pre class="fade-in"><code class="language-${lang}"></code></pre>`;
   fileBody.querySelector('code').textContent = text;
   if (window.Prism) Prism.highlightAllUnder(fileBody);
 }
@@ -419,22 +679,23 @@ async function copyActive() {
     copyBtn.textContent = '✓ Copied';
     copyBtn.classList.add('copied');
     setTimeout(() => {
-      copyBtn.textContent = '📋 Copy';
+      copyBtn.textContent = 'Copy';
       copyBtn.classList.remove('copied');
     }, 1500);
   } catch {
     copyBtn.textContent = '✗ failed';
-    setTimeout(() => { copyBtn.textContent = '📋 Copy'; }, 1500);
+    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
   }
 }
 
-tabOutput.addEventListener('click', () => { activeView = 'output'; renderActiveView(); });
-tabSource.addEventListener('click', () => { activeView = 'source'; renderActiveView(); });
-copyBtn.addEventListener('click', copyActive);
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
 
 async function generate() {
   generateBtn.disabled = true;
-  generateBtn.textContent = '⚡ Generating…';
+  const originalText = generateBtn.innerHTML;
+  generateBtn.innerHTML = '<span class="pulse">Generating…</span>';
   try {
     const res = await fetch('/api/preview', {
       method: 'POST',
@@ -444,10 +705,11 @@ async function generate() {
     const data = await res.json();
     if (!res.ok) {
       statusBar.className = 'error';
+      statusText.style.color = 'var(--red)';
       statusText.textContent = '✗ ' + (data.error ?? 'Unknown error');
       lastFiles = [];
       activeIdx = -1;
-      fileList.innerHTML = '';
+      fileList.innerHTML = '<div class="empty-list">No files generated</div>';
       fileToolbar.style.display = 'none';
       fileBody.innerHTML = `<div class="error-block">${escapeHtml(data.error ?? 'Unknown error')}</div>`;
       return;
@@ -455,34 +717,33 @@ async function generate() {
     lastFiles = data.files;
     activeIdx = data.files.length > 0 ? 0 : -1;
     statusBar.className = 'success';
+    statusText.style.color = 'var(--text)';
     statusText.innerHTML = `
-      <span class="badge blue">${data.schema.id}</span>
-      <span class="badge">type: ${data.schema.type}</span>
-      <span class="badge green">matched ${data.matched} / ${data.total} templates</span>
-      <span class="badge">${data.files.length} files generated</span>
+      <span class="badge blue">${escapeHtml(data.schema.id)}</span>
+      <span class="badge"><span class="label">type</span> ${escapeHtml(data.schema.type)}</span>
+      <span class="badge purple">matched ${data.matched}/${data.total}</span>
+      <span class="badge green">${data.files.length} files</span>
     `;
     renderFileList(lastFiles);
     if (activeIdx >= 0) selectFile(0);
     else {
       fileToolbar.style.display = 'none';
-      fileBody.innerHTML = '<div class="empty">No matching templates for this entity type</div>';
+      fileBody.innerHTML = emptyState('No matching templates', `Plugin has ${data.total} templates, but none for entity type <strong>"${escapeHtml(data.schema.type)}"</strong>.<br>Try the <strong>${data.schema.type === 'profession' ? 'weapon' : 'profession'}</strong> example.`);
     }
   } catch (err) {
     statusBar.className = 'error';
+    statusText.style.color = 'var(--red)';
     statusText.textContent = '✗ ' + err.message;
   } finally {
     generateBtn.disabled = false;
-    generateBtn.textContent = '⚡ Generate';
+    generateBtn.innerHTML = originalText;
   }
-}
-
-function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 document.querySelectorAll('.example-btn').forEach((b) => {
   b.addEventListener('click', () => {
     yamlInput.value = examples[b.dataset.example];
+    yamlInput.focus();
   });
 });
 
@@ -491,12 +752,17 @@ clearBtn.addEventListener('click', () => {
   yamlInput.value = '';
   lastFiles = [];
   activeIdx = -1;
-  fileList.innerHTML = '';
+  fileList.innerHTML = '<div class="empty-list">Files appear here<br>after generation</div>';
   fileToolbar.style.display = 'none';
-  fileBody.innerHTML = '<div class="empty">No file selected</div>';
+  fileBody.innerHTML = emptyState('No file selected', 'Click <strong>Generate</strong> or press <kbd>⌘↵</kbd> to render templates.');
   statusBar.className = '';
-  statusText.textContent = 'Ready. Click Generate to render templates.';
+  statusText.style.color = 'var(--text-dim)';
+  statusText.textContent = 'Ready — paste YAML and click Generate.';
+  yamlInput.focus();
 });
+tabOutput.addEventListener('click', () => { activeView = 'output'; renderActiveView(); });
+tabSource.addEventListener('click', () => { activeView = 'source'; renderActiveView(); });
+copyBtn.addEventListener('click', copyActive);
 
 yamlInput.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -509,17 +775,17 @@ yamlInput.addEventListener('keydown', (e) => {
 yamlInput.value = examples.weapon;
 fetch('/api/plugin').then((r) => r.json()).then((p) => {
   if (p.error) {
-    pluginInfo.textContent = 'plugin error: ' + p.error;
+    pluginInfo.innerHTML = '<span style="color:var(--red);">plugin error</span>';
     return;
   }
   const byType = {};
   p.templates.forEach((t) => {
     byType[t.entityType] = (byType[t.entityType] ?? 0) + 1;
   });
-  const types = Object.entries(byType).map(([t, n]) => `${t} ×${n}`).join(', ');
-  pluginInfo.textContent = `plugin: ${p.id} · ${p.templates.length} templates (${types})`;
-}).catch((e) => {
-  pluginInfo.textContent = 'plugin: error loading';
+  const types = Object.entries(byType).map(([t, n]) => `${t} ×${n}`).join(' · ');
+  pluginInfo.innerHTML = `<span class="label">plugin:</span> ${escapeHtml(p.id)} <span class="label">·</span> ${p.templates.length} tpl <span class="label">(${escapeHtml(types)})</span>`;
+}).catch(() => {
+  pluginInfo.innerHTML = '<span style="color:var(--red);">offline</span>';
 });
 </script>
 </body>
