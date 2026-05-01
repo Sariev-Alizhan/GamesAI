@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  boilergen:
+    name: Boilergen — typecheck + test + build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./boilergen
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: boilergen/package-lock.json
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+
+  localization-assistant:
+    name: Localization Assistant — typecheck + test + build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./tools/localization-assistant
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: tools/localization-assistant/package-lock.json
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+
+  schema-validator:
+    name: Schema Validator — typecheck + test + build + smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: tools/schema-validator/package-lock.json
+      - name: Install
+        working-directory: ./tools/schema-validator
+        run: npm ci
+      - name: Typecheck
+        working-directory: ./tools/schema-validator
+        run: npm run typecheck
+      - name: Test
+        working-directory: ./tools/schema-validator
+        run: npm test
+      - name: Build
+        working-directory: ./tools/schema-validator
+        run: npm run build
+      - name: Smoke run on boilergen schemas
+        working-directory: ./tools/schema-validator
+        run: node dist/cli/index.js check ../../boilergen/schemas --config ../../boilergen/schemas/validator.config.yaml
