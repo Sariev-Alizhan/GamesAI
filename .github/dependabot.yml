@@ -1,0 +1,82 @@
+version: 2
+
+updates:
+  # GitHub Actions themselves
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+
+  # Boilergen
+  - package-ecosystem: npm
+    directory: "/boilergen"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - boilergen
+    # Group patch + minor updates into one PR per ecosystem to reduce noise.
+    groups:
+      boilergen-minor:
+        update-types:
+          - minor
+          - patch
+
+  # Localization Assistant
+  - package-ecosystem: npm
+    directory: "/tools/localization-assistant"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - localization-assistant
+    groups:
+      localization-minor:
+        update-types:
+          - minor
+          - patch
+
+  # Schema Validator
+  - package-ecosystem: npm
+    directory: "/tools/schema-validator"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - schema-validator
+    groups:
+      schema-validator-minor:
+        update-types:
+          - minor
+          - patch
+
+  # VS Code extension
+  - package-ecosystem: npm
+    directory: "/extension"
+    schedule:
+      interval: monthly
+      day: monday
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - extension
+
+  # Repo root (small fallback package.json)
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 2
+    labels:
+      - dependencies

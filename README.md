@@ -1,5 +1,10 @@
 # GamesAI
 
+[![CI](https://github.com/Sariev-Alizhan/GamesAI/actions/workflows/ci.yml/badge.svg)](https://github.com/Sariev-Alizhan/GamesAI/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![Modules](https://img.shields.io/badge/modules-3-success)](#what-is-gamesai)
+[![Live demo](https://img.shields.io/badge/live-boilergen--eight.vercel.app-orange)](https://boilergen-eight.vercel.app)
+
 > Open-source AI platform for game development. Tools that eliminate the rote work in every department of a game studio so the team can focus on what's actually engineering, design, and creative work.
 
 🌐 **Live demo:** https://boilergen-eight.vercel.app
