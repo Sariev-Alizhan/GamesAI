@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boilergen — Code Generator Playground</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0e1116;
+  --panel: #161b22;
+  --panel-2: #1f2530;
+  --border: #2d3441;
+  --text: #e6edf3;
+  --muted: #7d8590;
+  --accent: #f0c645;
+  --accent-2: #b08bff;
+  --green: #3fb950;
+  --red: #f85149;
+  --blue: #58a6ff;
+  --mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+}
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.logo { font-weight: 700; font-size: 18px; color: var(--accent); }
+.logo .accent { color: var(--accent-2); }
+.subtitle { color: var(--muted); font-size: 13px; }
+.spacer { flex: 1; }
+.plugin-info { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+
+main {
+  display: grid;
+  grid-template-columns: minmax(360px, 40%) 1fr;
+  height: calc(100vh - 53px);
+}
+
+#input-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+.panel-header strong { color: var(--text); text-transform: none; letter-spacing: 0; font-size: 13px; }
+.panel-header .examples { display: flex; gap: 6px; }
+.example-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.example-btn:hover { color: var(--text); border-color: var(--accent); }
+
+#yaml-input {
+  flex: 1;
+  background: var(--panel);
+  color: var(--text);
+  border: none;
+  padding: 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+}
+#yaml-input:focus { background: #181d24; }
+
+.actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--panel-2);
+  border-top: 1px solid var(--border);
+}
+.btn {
+  background: var(--accent);
+  color: #1a1a1a;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn:hover { background: #ffd75d; }
+.btn:disabled { opacity: 0.5; cursor: wait; }
+.btn.secondary {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.btn.secondary:hover { color: var(--text); border-color: var(--text); }
+
+#output-panel { display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+
+#status-bar {
+  background: var(--panel-2);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-family: var(--mono);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+}
+#status-bar.success { border-bottom-color: var(--green); }
+#status-bar.error { border-bottom-color: var(--red); color: var(--red); }
+.badge {
+  background: var(--panel);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  border: 1px solid var(--border);
+}
+.badge.green { color: var(--green); border-color: var(--green); }
+.badge.blue { color: var(--blue); border-color: var(--blue); }
+
+#output-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 0;
+}
+
+#file-list {
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+}
+.file-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.file-item:hover { background: var(--panel-2); }
+.file-item.active { background: var(--panel-2); border-left: 3px solid var(--accent); padding-left: 11px; }
+.file-item .target { color: var(--blue); font-size: 10px; text-transform: uppercase; }
+.file-item .name { color: var(--text); margin-top: 2px; word-break: break-all; }
+.file-item .inject-tag {
+  display: inline-block;
+  background: var(--accent-2);
+  color: #1a1a1a;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  margin-top: 3px;
+  font-weight: 600;
+}
+
+#file-content {
+  overflow: auto;
+  background: #0d1117;
+  min-width: 0;
+  min-height: 0;
+}
+#file-content pre { margin: 0; padding: 16px !important; font-size: 13px !important; }
+#file-content code { font-family: var(--mono) !important; }
+#file-content .empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--muted);
+  flex-direction: column;
+  gap: 8px;
+  padding: 40px;
+  text-align: center;
+}
+
+.error-block {
+  padding: 20px;
+  color: var(--red);
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+  background: rgba(248, 81, 73, 0.05);
+  border-left: 3px solid var(--red);
+  margin: 16px;
+  border-radius: 0 4px 4px 0;
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Boiler<span class="accent">gen</span></div>
+  <div class="subtitle">YAML → multi-stack code generator</div>
+  <div class="spacer"></div>
+  <div class="plugin-info" id="plugin-info">loading plugin…</div>
+</header>
+
+<main>
+  <section id="input-panel">
+    <div class="panel-header">
+      <strong>YAML — entity description</strong>
+      <div class="examples">
+        <button class="example-btn" data-example="profession">profession</button>
+        <button class="example-btn" data-example="weapon">weapon</button>
+      </div>
+    </div>
+    <textarea id="yaml-input" spellcheck="false"></textarea>
+    <div class="actions">
+      <button class="btn" id="generate-btn">⚡ Generate</button>
+      <button class="btn secondary" id="clear-btn">Clear</button>
+    </div>
+  </section>
+
+  <section id="output-panel">
+    <div id="status-bar">
+      <span id="status-text">Ready. Click Generate to render templates.</span>
+    </div>
+    <div id="output-grid">
+      <div id="file-list"></div>
+      <div id="file-content"><div class="empty">No file selected</div></div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>
+const examples = {
+  profession: `# yaml-language-server: $schema=../boilergen.schema.json
+id: taxi_driver
+type: profession
+name: Таксист
+data:
+  baseSalary: 500
+  category: transport
+  description: Возит пассажиров за деньги
+`,
+  weapon: `# yaml-language-server: $schema=../boilergen.schema.json
+id: ak47
+type: weapon
+name: АК-47
+data:
+  category: rifle
+  damage: 45
+  fireRate: 600
+  magazineSize: 30
+  range: 350
+  reloadTime: 2.4
+  price: 15000
+  description: Автомат Калашникова — надёжное оружие
+`,
+};
+
+const $ = (id) => document.getElementById(id);
+const yamlInput = $('yaml-input');
+const generateBtn = $('generate-btn');
+const clearBtn = $('clear-btn');
+const fileList = $('file-list');
+const fileContent = $('file-content');
+const statusBar = $('status-bar');
+const statusText = $('status-text');
+const pluginInfo = $('plugin-info');
+
+let lastFiles = [];
+let activeIdx = -1;
+
+function langFromPath(path) {
+  if (path.endsWith('.cpp') || path.endsWith('.h') || path.endsWith('.hpp')) return 'cpp';
+  if (path.endsWith('.ts')) return 'typescript';
+  if (path.endsWith('.js')) return 'javascript';
+  if (path.endsWith('.dart')) return 'dart';
+  if (path.endsWith('.json')) return 'json';
+  if (path.endsWith('.yaml') || path.endsWith('.yml')) return 'yaml';
+  if (path.endsWith('.sql')) return 'sql';
+  return 'text';
+}
+
+function renderFileList(files) {
+  if (files.length === 0) {
+    fileList.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:12px;">No matching templates</div>';
+    return;
+  }
+  fileList.innerHTML = files.map((f, i) => `
+    <div class="file-item ${i === activeIdx ? 'active' : ''}" data-idx="${i}">
+      <div class="target">${f.target}${f.inject ? ' • inject' : ''}</div>
+      <div class="name">${f.path}</div>
+      ${f.inject ? `<div class="inject-tag">${f.inject.mode.toUpperCase()} «${f.inject.anchor.slice(0, 20)}»</div>` : ''}
+    </div>
+  `).join('');
+  fileList.querySelectorAll('.file-item').forEach((el) => {
+    el.addEventListener('click', () => selectFile(parseInt(el.dataset.idx, 10)));
+  });
+}
+
+function selectFile(idx) {
+  activeIdx = idx;
+  renderFileList(lastFiles);
+  const f = lastFiles[idx];
+  if (!f) return;
+  const lang = langFromPath(f.path);
+  fileContent.innerHTML = `<pre><code class="language-${lang}"></code></pre>`;
+  fileContent.querySelector('code').textContent = f.content;
+  if (window.Prism) Prism.highlightAllUnder(fileContent);
+}
+
+async function generate() {
+  generateBtn.disabled = true;
+  generateBtn.textContent = '⚡ Generating…';
+  try {
+    const res = await fetch('/api/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ yaml: yamlInput.value }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      statusBar.className = 'error';
+      statusText.textContent = '✗ ' + (data.error ?? 'Unknown error');
+      lastFiles = [];
+      activeIdx = -1;
+      fileList.innerHTML = '';
+      fileContent.innerHTML = `<div class="error-block">${escapeHtml(data.error ?? 'Unknown error')}</div>`;
+      return;
+    }
+    lastFiles = data.files;
+    activeIdx = data.files.length > 0 ? 0 : -1;
+    statusBar.className = 'success';
+    statusText.innerHTML = `
+      <span class="badge blue">${data.schema.id}</span>
+      <span class="badge">type: ${data.schema.type}</span>
+      <span class="badge green">matched ${data.matched} / ${data.total} templates</span>
+      <span class="badge">${data.files.length} files generated</span>
+    `;
+    renderFileList(lastFiles);
+    if (activeIdx >= 0) selectFile(0);
+    else fileContent.innerHTML = '<div class="empty">No matching templates for this entity type</div>';
+  } catch (err) {
+    statusBar.className = 'error';
+    statusText.textContent = '✗ ' + err.message;
+  } finally {
+    generateBtn.disabled = false;
+    generateBtn.textContent = '⚡ Generate';
+  }
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+document.querySelectorAll('.example-btn').forEach((b) => {
+  b.addEventListener('click', () => {
+    yamlInput.value = examples[b.dataset.example];
+  });
+});
+
+generateBtn.addEventListener('click', generate);
+clearBtn.addEventListener('click', () => {
+  yamlInput.value = '';
+  lastFiles = [];
+  activeIdx = -1;
+  fileList.innerHTML = '';
+  fileContent.innerHTML = '<div class="empty">No file selected</div>';
+  statusBar.className = '';
+  statusText.textContent = 'Ready. Click Generate to render templates.';
+});
+
+yamlInput.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    generate();
+  }
+});
+
+// Bootstrap
+yamlInput.value = examples.weapon;
+fetch('/api/plugin').then((r) => r.json()).then((p) => {
+  if (p.error) {
+    pluginInfo.textContent = 'plugin error: ' + p.error;
+    return;
+  }
+  const byType = {};
+  p.templates.forEach((t) => {
+    byType[t.entityType] = (byType[t.entityType] ?? 0) + 1;
+  });
+  const types = Object.entries(byType).map(([t, n]) => `${t} ×${n}`).join(', ');
+  pluginInfo.textContent = `plugin: ${p.id} · ${p.templates.length} templates (${types})`;
+}).catch((e) => {
+  pluginInfo.textContent = 'plugin: error loading';
+});
+</script>
+</body>
+</html>

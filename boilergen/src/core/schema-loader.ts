@@ -11,16 +11,13 @@ export const SchemaZod = z.object({
   data: z.record(z.string(), z.unknown()).default({}),
 });
 
-export async function loadSchema(filePath: string): Promise<Schema> {
-  const absPath = resolve(filePath);
-  const raw = await readFile(absPath, 'utf-8');
-
+export function parseSchema(yamlContent: string, sourceLabel = '<input>'): Schema {
   let parsed: unknown;
   try {
-    parsed = yaml.load(raw);
+    parsed = yaml.load(yamlContent);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(`Failed to parse YAML at ${absPath}:\n${msg}`);
+    throw new Error(`Failed to parse YAML in ${sourceLabel}:\n${msg}`);
   }
 
   const result = SchemaZod.safeParse(parsed);
@@ -28,8 +25,14 @@ export async function loadSchema(filePath: string): Promise<Schema> {
     const issues = result.error.issues
       .map((i) => `  - ${i.path.join('.') || '(root)'}: ${i.message}`)
       .join('\n');
-    throw new Error(`Schema validation failed for ${absPath}:\n${issues}`);
+    throw new Error(`Schema validation failed for ${sourceLabel}:\n${issues}`);
   }
 
   return result.data;
+}
+
+export async function loadSchema(filePath: string): Promise<Schema> {
+  const absPath = resolve(filePath);
+  const raw = await readFile(absPath, 'utf-8');
+  return parseSchema(raw, absPath);
 }

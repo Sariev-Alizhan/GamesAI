@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "web": "tsx src/web/server.ts",
     "clean": "rm -rf dist"
   },
   "keywords": [],
@@ -27,8 +28,10 @@
     "vitest": "^4.1.5"
   },
   "dependencies": {
+    "@types/express": "^5.0.6",
     "chalk": "^5.6.2",
     "commander": "^14.0.3",
+    "express": "^5.2.1",
     "handlebars": "^4.7.9",
     "js-yaml": "^4.1.1",
     "zod": "^4.4.1"

@@ -12,6 +12,15 @@ node dist/cli/index.js generate ./schemas/gm1/dummy-profession.yaml
 
 Output goes to `./test-output/<target>/<rendered-path>`.
 
+### Web playground (visual UI)
+
+```bash
+npm run web
+# open http://localhost:3000
+```
+
+Live preview of YAML → generated files in the browser. Edit the schema, click Generate, click any file to see rendered content with syntax highlighting. No files are written to disk — pure preview. Useful for trying out schemas, demos, and onboarding non-CLI users.
+
 ## Commands
 
 ```
@@ -47,9 +56,13 @@ src/
 │   ├── config-loader.ts     # boilergen.config.yaml parser
 │   └── generator.ts         # orchestrator (write + inject modes)
 │
-└── cli/                     # thin Commander wrapper over core
-    ├── index.ts
-    └── commands/{generate,list,init,schema-export}.ts
+├── cli/                     # thin Commander wrapper over core
+│   ├── index.ts
+│   └── commands/{generate,list,init,schema-export}.ts
+│
+└── web/                     # browser playground (Express)
+    ├── server.ts
+    └── public/index.html
 
 plugins/<plugin>/targets/<target>/<entity-type>/<output-path>.hbs
 schemas/<plugin>/<entity>.yaml
@@ -142,6 +155,7 @@ Bootstrap with `boilergen init` to get a pre-filled template.
 | Script | Purpose |
 |---|---|
 | `npm run dev` | Run CLI via `tsx` (no build step needed) |
+| `npm run web` | Start web playground at http://localhost:3000 |
 | `npm run build` | Compile TypeScript to `dist/` |
 | `npm run start` | Run compiled version |
 | `npm run typecheck` | Verify types without emitting |

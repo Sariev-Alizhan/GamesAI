@@ -97,7 +97,15 @@ async function performInject(
   }
 
   if (renderedSkipIf) {
-    if (new RegExp(renderedSkipIf).test(content)) {
+    let pattern: RegExp;
+    try {
+      pattern = new RegExp(renderedSkipIf);
+    } catch (err) {
+      throw new Error(
+        `Invalid skipIf regex "${renderedSkipIf}": ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+    if (pattern.test(content)) {
       return { target: targetPath, skipped: `skipIf matched in ${targetPath}` };
     }
   }
