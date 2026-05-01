@@ -1,0 +1,85 @@
+{
+  "name": "boilergen-vscode",
+  "displayName": "Boilergen",
+  "description": "YAML → multi-stack code generator. Right-click a schema, generate boilerplate across C++ / Node / Flutter / i18n in one command.",
+  "version": "0.1.0",
+  "publisher": "grandgames",
+  "engines": {
+    "vscode": "^1.118.0"
+  },
+  "categories": ["Other", "Programming Languages"],
+  "keywords": ["codegen", "yaml", "boilerplate", "gamedev", "scaffolding"],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:yaml",
+    "onCommand:boilergen.preview",
+    "onCommand:boilergen.generate"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "boilergen.preview",
+        "title": "Boilergen: Preview Generated Files",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "boilergen.generate",
+        "title": "Boilergen: Generate Files",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "boilergen.openPlayground",
+        "title": "Boilergen: Open Playground"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "resourceExtname == .yaml || resourceExtname == .yml",
+          "command": "boilergen.preview",
+          "group": "boilergen@1"
+        },
+        {
+          "when": "resourceExtname == .yaml || resourceExtname == .yml",
+          "command": "boilergen.generate",
+          "group": "boilergen@2"
+        }
+      ],
+      "editor/title": [
+        {
+          "when": "resourceExtname == .yaml || resourceExtname == .yml",
+          "command": "boilergen.preview",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Boilergen",
+      "properties": {
+        "boilergen.boilergenPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to your Boilergen project (the folder containing src/ and plugins/). If empty, the extension looks for ./boilergen/ in the workspace."
+        },
+        "boilergen.defaultPlugin": {
+          "type": "string",
+          "default": "gm1",
+          "description": "Plugin name to use by default (must exist under <boilergenPath>/plugins/)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --target=node18",
+    "watch": "npm run build -- --watch",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@types/vscode": "^1.118.0",
+    "@vscode/vsce": "^3.9.1",
+    "esbuild": "^0.28.0",
+    "typescript": "^6.0.3"
+  }
+}
