@@ -70,7 +70,7 @@ export function parseFrontmatter(content: string): {
   } catch {
     return { frontmatter: null, body: content };
   }
-  return { frontmatter: parsed, body: content.slice(endIdx + 5) };
+  return { frontmatter: parsed ?? null, body: content.slice(endIdx + 5) };
 }
 
 export async function renderFile(absPath: string, data: object): Promise<string> {

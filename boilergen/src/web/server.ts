@@ -73,9 +73,17 @@ app.post('/api/preview', async (req, res) => {
 
     const files: PreviewFile[] = [];
     for (const tpl of matched) {
+      const renderedRelPath = renderString(tpl.outputRelPath, schema);
+      // Safety: reject path-traversal attempts at the preview layer too,
+      // mirroring the generator's ensureWithin guard.
+      if (renderedRelPath.split(/[/\\]/).some((seg) => seg === '..')) {
+        res.status(400).json({
+          error: `Refusing to render path with traversal segments: ${renderedRelPath}. Check schema.id for ../ characters.`,
+        });
+        return;
+      }
       const content = await renderFile(tpl.absPath, schema);
       const templateSource = await readFile(tpl.absPath, 'utf-8');
-      const renderedRelPath = renderString(tpl.outputRelPath, schema);
       const baseFile: PreviewFile = {
         path: `${tpl.target}/${renderedRelPath}`,
         content,

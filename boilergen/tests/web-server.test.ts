@@ -132,6 +132,30 @@ describe('web server /api/preview', () => {
     const data = await res.json();
     expect(data.error).toContain('yaml');
   });
+
+  it('blocks path-traversal in id (returns 400, not the malicious path)', async () => {
+    const res = await fetch(`${serverUrl}/api/preview`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        yaml: 'id: ../../etc/passwd\ntype: profession\nname: Hack\ndata: {}',
+      }),
+    });
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toMatch(/traversal|outside/i);
+  });
+
+  it('rejects unknown top-level fields (typo guard)', async () => {
+    const res = await fetch(`${serverUrl}/api/preview`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        yaml: 'id: x\ntype: profession\nname: Test\nextra: oops\n',
+      }),
+    });
+    expect(res.status).toBe(400);
+  });
 });
 
 describe('web server static files', () => {

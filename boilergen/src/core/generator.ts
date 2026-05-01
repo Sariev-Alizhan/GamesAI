@@ -1,7 +1,17 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { dirname, relative, resolve, sep } from 'node:path';
 import { renderFile, renderString } from './template-engine.js';
 import type { Plugin, Schema, Template } from './types.js';
+
+function ensureWithin(absPath: string, root: string): void {
+  const rel = relative(root, absPath);
+  if (rel.startsWith('..') || (rel !== '' && rel.split(sep)[0] === '..')) {
+    throw new Error(
+      `Refusing to write outside target root: "${absPath}" escapes "${root}". ` +
+        `Check schema.id and template paths for traversal characters (../).`,
+    );
+  }
+}
 
 export interface GenerateOptions {
   schema: Schema;
@@ -53,6 +63,7 @@ export async function generate(opts: GenerateOptions): Promise<GenerateResult> {
         const renderedRelPath = renderString(tpl.outputRelPath, schema);
         const renderedContent = await renderFile(tpl.absPath, schema);
         const outputPath = resolve(targetRoot, renderedRelPath);
+        ensureWithin(outputPath, resolve(targetRoot));
 
         if (!opts.dryRun) {
           await mkdir(dirname(outputPath), { recursive: true });
@@ -85,6 +96,7 @@ async function performInject(
   const renderedBody = await renderFile(tpl.absPath, schema);
 
   const targetPath = resolve(targetRoot, renderedTo);
+  ensureWithin(targetPath, resolve(targetRoot));
 
   let content: string;
   try {

@@ -4,12 +4,14 @@ import yaml from 'js-yaml';
 import { z } from 'zod';
 import type { Schema } from './types.js';
 
-export const SchemaZod = z.object({
-  id: z.string().min(1),
-  type: z.string().min(1),
-  name: z.string().min(1),
-  data: z.record(z.string(), z.unknown()).default({}),
-});
+export const SchemaZod = z
+  .object({
+    id: z.string().min(1),
+    type: z.string().min(1),
+    name: z.string().min(1),
+    data: z.record(z.string(), z.unknown()).default({}),
+  })
+  .strict();
 
 export function parseSchema(yamlContent: string, sourceLabel = '<input>'): Schema {
   let parsed: unknown;
