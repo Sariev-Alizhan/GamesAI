@@ -194,6 +194,57 @@ main {
   border-color: var(--border-strong);
 }
 
+/* Plugin selector inside input-panel header */
+.plugin-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: linear-gradient(to bottom, var(--bg-2), var(--bg-1));
+  border-bottom: 1px solid var(--border);
+  font-size: 11.5px;
+  font-family: var(--mono);
+  flex-wrap: wrap;
+}
+.plugin-row .label-tiny {
+  color: var(--text-dim);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-right: 2px;
+}
+.plugin-tab {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 4px 11px;
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-family: var(--mono);
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.plugin-tab:hover {
+  color: var(--text);
+  background: var(--bg-2);
+  border-color: var(--border-strong);
+}
+.plugin-tab.active {
+  color: var(--accent-bright);
+  background: rgba(220, 38, 38, 0.12);
+  border-color: rgba(220, 38, 38, 0.5);
+}
+.plugin-tab .count {
+  color: var(--text-dim);
+  font-size: 10px;
+}
+.plugin-tab.active .count {
+  color: var(--accent-bright);
+  opacity: 0.7;
+}
+
 #yaml-input {
   flex: 1;
   background: var(--bg-1);
@@ -663,12 +714,16 @@ main {
 
 <main>
   <section id="input-panel">
+    <div class="plugin-row" id="plugin-row">
+      <span class="label-tiny">Plugin:</span>
+      <span id="plugin-tabs" style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span style="color:var(--text-dim);" class="pulse">loading…</span>
+      </span>
+    </div>
     <div class="panel-header">
       <div class="panel-title"><span class="icon">📝</span>YAML</div>
-      <div class="examples">
-        <button class="example-btn" data-example="profession">profession</button>
-        <button class="example-btn" data-example="weapon">weapon</button>
-        <button class="example-btn" data-example="vehicle">vehicle</button>
+      <div class="examples" id="examples-row">
+        <span style="color:var(--text-dim);font-size:11px;">no examples yet</span>
       </div>
     </div>
     <textarea id="yaml-input" spellcheck="false" placeholder="Paste or write entity YAML here..."></textarea>
@@ -749,45 +804,13 @@ main {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
 <script>
-const examples = {
-  profession: `# yaml-language-server: $schema=../boilergen.schema.json
-id: taxi_driver
-type: profession
-name: Таксист
-data:
-  baseSalary: 500
-  category: transport
-  description: Возит пассажиров за деньги
-`,
-  weapon: `# yaml-language-server: $schema=../boilergen.schema.json
-id: ak47
-type: weapon
-name: АК-47
-data:
-  category: rifle
-  damage: 45
-  fireRate: 600
-  magazineSize: 30
-  range: 350
-  reloadTime: 2.4
-  price: 15000
-  description: Автомат Калашникова
-`,
-  vehicle: `# yaml-language-server: $schema=../boilergen.schema.json
-id: lada_2107
-type: vehicle
-name: ВАЗ-2107
-data:
-  category: sedan
-  topSpeed: 150
-  acceleration: 14.5
-  fuelTank: 42
-  fuelConsumption: 9.5
-  seats: 5
-  trunkCapacity: 350
-  price: 80000
-  description: Классическая советская легковушка
-`,
+// Multi-plugin state. Plugins, examples, and current selection are loaded
+// dynamically from the server. No hardcoded examples — every example comes
+// from boilergen/schemas/<plugin-id>/ via /api/plugin/:id/example/:slug.
+const state = {
+  plugins: [],          // [{ id, templateCount, entityTypes }]
+  currentPluginId: null,
+  currentExamples: [],  // [{ slug }]
 };
 
 // Estimated minutes saved per generated file (vs. manual boilerplate work).
@@ -937,11 +960,17 @@ function escapeHtml(s) {
 }
 
 async function generate() {
+  if (!state.currentPluginId) {
+    statusBar.className = 'error';
+    statusText.style.color = 'var(--red)';
+    statusText.textContent = '✗ No plugin selected';
+    return;
+  }
   generateBtn.disabled = true;
   const originalText = generateBtn.innerHTML;
   generateBtn.innerHTML = '<span class="pulse">Generating…</span>';
   try {
-    const res = await fetch('/api/preview', {
+    const res = await fetch(`/api/plugin/${encodeURIComponent(state.currentPluginId)}/preview`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ yaml: yamlInput.value }),
@@ -987,12 +1016,8 @@ async function generate() {
   }
 }
 
-document.querySelectorAll('.example-btn').forEach((b) => {
-  b.addEventListener('click', () => {
-    yamlInput.value = examples[b.dataset.example];
-    yamlInput.focus();
-  });
-});
+// Examples are wired up dynamically inside renderExamples() below — no
+// static handlers needed.
 
 // ===== AI Describe modal =====
 const aiModal = $('ai-modal');
@@ -1024,7 +1049,8 @@ async function submitAiPrompt() {
   aiSubmit.innerHTML = '<span class="pulse">Generating…</span>';
   aiError.style.display = 'none';
   try {
-    const res = await fetch('/api/describe', {
+    if (!state.currentPluginId) throw new Error('No plugin selected');
+    const res = await fetch(`/api/plugin/${encodeURIComponent(state.currentPluginId)}/describe`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt }),
@@ -1090,22 +1116,130 @@ yamlInput.addEventListener('keydown', (e) => {
   }
 });
 
-// Bootstrap
-yamlInput.value = examples.weapon;
-fetch('/api/plugin').then((r) => r.json()).then((p) => {
-  if (p.error) {
-    pluginInfo.innerHTML = '<span style="color:var(--red);">plugin error</span>';
+// =====================================================================
+// Multi-plugin bootstrap
+// =====================================================================
+
+const pluginTabsEl = document.getElementById('plugin-tabs');
+const examplesRow = document.getElementById('examples-row');
+
+function renderPluginTabs() {
+  if (state.plugins.length === 0) {
+    pluginTabsEl.innerHTML = '<span style="color:var(--red);">no plugins found</span>';
     return;
   }
-  const byType = {};
-  p.templates.forEach((t) => {
-    byType[t.entityType] = (byType[t.entityType] ?? 0) + 1;
+  pluginTabsEl.innerHTML = state.plugins.map((p) => {
+    const active = p.id === state.currentPluginId ? 'active' : '';
+    return `<button class="plugin-tab ${active}" data-plugin-id="${escapeHtml(p.id)}">
+      ${escapeHtml(p.id)}
+      <span class="count">${p.templateCount}t · ${p.entityTypes.length}e</span>
+    </button>`;
+  }).join('');
+  pluginTabsEl.querySelectorAll('.plugin-tab').forEach((el) => {
+    el.addEventListener('click', () => switchPlugin(el.dataset.pluginId));
   });
-  const types = Object.entries(byType).map(([t, n]) => `${t} ×${n}`).join(' · ');
-  pluginInfo.innerHTML = `<span class="label">plugin:</span> ${escapeHtml(p.id)} <span class="label">·</span> ${p.templates.length} tpl <span class="label">(${escapeHtml(types)})</span>`;
-}).catch(() => {
-  pluginInfo.innerHTML = '<span style="color:var(--red);">offline</span>';
-});
+}
+
+function renderHeaderPluginInfo() {
+  const p = state.plugins.find((x) => x.id === state.currentPluginId);
+  if (!p) {
+    pluginInfo.innerHTML = '<span style="color:var(--red);">no plugin</span>';
+    return;
+  }
+  const types = p.entityTypes.join(' · ');
+  pluginInfo.innerHTML = `<span class="label">active:</span> ${escapeHtml(p.id)} <span class="label">·</span> ${p.templateCount} tpl <span class="label">(${escapeHtml(types)})</span>`;
+}
+
+async function loadExamplesForCurrentPlugin() {
+  if (!state.currentPluginId) return;
+  try {
+    const res = await fetch(`/api/plugin/${encodeURIComponent(state.currentPluginId)}/examples`);
+    const data = await res.json();
+    state.currentExamples = data.examples || [];
+  } catch {
+    state.currentExamples = [];
+  }
+  renderExamples();
+}
+
+function renderExamples() {
+  if (state.currentExamples.length === 0) {
+    examplesRow.innerHTML = '<span style="color:var(--text-dim);font-size:11px;">no examples in this plugin</span>';
+    return;
+  }
+  examplesRow.innerHTML = state.currentExamples.map((e) =>
+    `<button class="example-btn" data-example-slug="${escapeHtml(e.slug)}">${escapeHtml(e.slug)}</button>`
+  ).join('');
+  examplesRow.querySelectorAll('.example-btn').forEach((el) => {
+    el.addEventListener('click', () => loadExample(el.dataset.exampleSlug));
+  });
+}
+
+async function loadExample(slug) {
+  try {
+    const res = await fetch(`/api/plugin/${encodeURIComponent(state.currentPluginId)}/example/${encodeURIComponent(slug)}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      statusBar.className = 'error';
+      statusText.style.color = 'var(--red)';
+      statusText.textContent = '✗ ' + (data.error || `Failed to load example "${slug}"`);
+      return;
+    }
+    const data = await res.json();
+    yamlInput.value = data.yaml;
+    yamlInput.focus();
+  } catch (err) {
+    statusBar.className = 'error';
+    statusText.style.color = 'var(--red)';
+    statusText.textContent = '✗ ' + err.message;
+  }
+}
+
+async function switchPlugin(pluginId) {
+  if (state.currentPluginId === pluginId) return;
+  state.currentPluginId = pluginId;
+  renderPluginTabs();
+  renderHeaderPluginInfo();
+  // Clear current results — they belonged to the old plugin.
+  lastFiles = [];
+  activeIdx = -1;
+  fileList.innerHTML = '<div class="empty-list">Switched plugin —<br>load an example or paste YAML</div>';
+  fileToolbar.style.display = 'none';
+  fileBody.innerHTML = emptyState('Plugin switched', `Now using <strong>${escapeHtml(pluginId)}</strong>. Pick an example below or paste your own YAML and Generate.`);
+  statusBar.className = '';
+  statusText.style.color = 'var(--text-dim)';
+  statusText.textContent = `Active plugin: ${pluginId}`;
+  await loadExamplesForCurrentPlugin();
+  // Auto-load first example to give immediate visual feedback.
+  if (state.currentExamples.length > 0) {
+    await loadExample(state.currentExamples[0].slug);
+  }
+}
+
+async function bootstrap() {
+  try {
+    const res = await fetch('/api/plugins');
+    const data = await res.json();
+    state.plugins = data.plugins || [];
+    if (state.plugins.length === 0) {
+      pluginTabsEl.innerHTML = '<span style="color:var(--red);">no plugins found in plugins/</span>';
+      pluginInfo.innerHTML = '<span style="color:var(--red);">no plugins</span>';
+      return;
+    }
+    state.currentPluginId = data.default || state.plugins[0].id;
+    renderPluginTabs();
+    renderHeaderPluginInfo();
+    await loadExamplesForCurrentPlugin();
+    if (state.currentExamples.length > 0) {
+      await loadExample(state.currentExamples[0].slug);
+    }
+  } catch (err) {
+    pluginTabsEl.innerHTML = '<span style="color:var(--red);">bootstrap failed: ' + escapeHtml(err.message) + '</span>';
+    pluginInfo.innerHTML = '<span style="color:var(--red);">offline</span>';
+  }
+}
+
+bootstrap();
 </script>
 </body>
 </html>
