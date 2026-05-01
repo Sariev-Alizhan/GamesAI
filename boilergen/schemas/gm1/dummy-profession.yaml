@@ -1,0 +1,7 @@
+id: taxi_driver
+type: profession
+name: Таксист
+data:
+  baseSalary: 500
+  category: transport
+  description: Возит пассажиров за деньги

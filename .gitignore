@@ -1,0 +1,30 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Internal docs (not committed to repo)
+questions_gor_Igor.pdf
+
+# Logs
+*.log
+npm-debug.log*
+
+# Subproject artifacts (catches any nested project)
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Cache
+.cache/
+.npm
