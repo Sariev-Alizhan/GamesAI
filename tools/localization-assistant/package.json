@@ -1,0 +1,40 @@
+{
+  "name": "localization-assistant",
+  "version": "0.1.0",
+  "description": "AI-powered locale file filler for game development. Reads source-language JSON, finds missing keys in target locales, generates translations via Claude with game context.",
+  "type": "module",
+  "main": "./dist/cli/index.js",
+  "bin": {
+    "localization-assistant": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/cli/index.ts",
+    "build": "tsc",
+    "start": "node dist/cli/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.92.0",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  },
+  "license": "MIT",
+  "author": "Sariev-Alizhan",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sariev-Alizhan/GamesAI",
+    "directory": "tools/localization-assistant"
+  }
+}
