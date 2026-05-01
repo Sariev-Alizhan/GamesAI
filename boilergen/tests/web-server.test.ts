@@ -42,8 +42,13 @@ beforeAll(async () => {
   serverUrl = `http://localhost:${port}`;
   serverProcess = spawn('npx', ['tsx', 'src/web/server.ts'], {
     env: { ...process.env, PORT: String(port), BOILERGEN_PLUGIN: pluginDir },
-    stdio: 'pipe',
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
+  // Must drain stdout/stderr — undrained pipes fill their buffer (~64KB on macOS)
+  // and block the spawned process on the next write, causing intermittent test
+  // failures when the server logs more than the buffer can hold.
+  serverProcess.stdout?.on('data', () => {});
+  serverProcess.stderr?.on('data', () => {});
   await waitForServer(serverUrl);
 }, 15000);
 

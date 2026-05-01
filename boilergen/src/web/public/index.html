@@ -261,6 +261,110 @@ main {
   transform: none;
   box-shadow: none;
 }
+.btn.ai {
+  background: linear-gradient(135deg, var(--purple), #8b5cf6);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset;
+}
+.btn.ai:hover {
+  background: linear-gradient(135deg, #c5a3ff, var(--purple));
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(176, 139, 255, 0.35), 0 1px 0 rgba(255, 255, 255, 0.12) inset;
+}
+
+/* ========== AI DESCRIBE MODAL ========== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-backdrop.open { display: flex; animation: fadeIn 160ms ease-out; }
+.modal {
+  background: var(--bg-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  width: min(560px, 90vw);
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.modal-header .icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--purple), #8b5cf6);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.modal-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.modal-subtitle { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+.modal-body { padding: 16px 20px; overflow-y: auto; }
+.modal-body label { display: block; color: var(--text-muted); font-size: 11.5px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.modal-body textarea {
+  width: 100%;
+  background: var(--bg-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 12px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  border-radius: var(--radius);
+  resize: vertical;
+  min-height: 110px;
+  outline: none;
+  line-height: 1.5;
+}
+.modal-body textarea:focus { border-color: var(--purple); }
+.modal-hint {
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.modal-hint .ex {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-style: italic;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.modal-footer {
+  padding: 12px 20px;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.modal-error {
+  padding: 10px 12px;
+  margin-top: 12px;
+  background: rgba(248, 81, 73, 0.06);
+  border: 1px solid rgba(248, 81, 73, 0.3);
+  border-left: 3px solid var(--red);
+  color: var(--red);
+  font-size: 12px;
+  border-radius: var(--radius);
+  font-family: var(--mono);
+}
 
 /* ========== OUTPUT PANEL ========== */
 #output-panel {
@@ -572,6 +676,9 @@ main {
       <button class="btn" id="generate-btn">
         Generate <span class="kbd">⌘↵</span>
       </button>
+      <button class="btn ai" id="ai-describe-btn" title="Describe in natural language → AI generates the YAML">
+        ✨ AI Describe
+      </button>
       <button class="btn ghost" id="clear-btn">Clear</button>
     </div>
   </section>
@@ -611,6 +718,33 @@ main {
     </div>
   </section>
 </main>
+
+<!-- AI Describe Modal -->
+<div class="modal-backdrop" id="ai-modal" role="dialog" aria-hidden="true">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="icon">✨</div>
+      <div>
+        <div class="modal-title">AI Describe</div>
+        <div class="modal-subtitle">Опиши сущность словами — AI сделает YAML</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <label for="ai-prompt">Описание (любой язык)</label>
+      <textarea id="ai-prompt" placeholder="Например: новая профессия таксиста, базовая зарплата 500, категория транспорт"></textarea>
+      <div class="modal-hint">
+        Powered by Claude. Описание превращается в YAML, который потом проходит обычный pipeline.
+        <span class="ex">"weapon М4 carbine, damage 30, fire rate 800, magazine 30"</span>
+        <span class="ex">"BMW M5 sedan, top speed 305, 4.4 sec 0-100, 5 seats"</span>
+      </div>
+      <div class="modal-error" id="ai-error" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn ghost" id="ai-cancel">Cancel</button>
+      <button class="btn ai" id="ai-submit">✨ Generate YAML</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
@@ -858,6 +992,78 @@ document.querySelectorAll('.example-btn').forEach((b) => {
     yamlInput.value = examples[b.dataset.example];
     yamlInput.focus();
   });
+});
+
+// ===== AI Describe modal =====
+const aiModal = $('ai-modal');
+const aiPrompt = $('ai-prompt');
+const aiError = $('ai-error');
+const aiSubmit = $('ai-submit');
+const aiCancel = $('ai-cancel');
+const aiOpen = $('ai-describe-btn');
+
+function openAiModal() {
+  aiError.style.display = 'none';
+  aiModal.classList.add('open');
+  aiModal.setAttribute('aria-hidden', 'false');
+  setTimeout(() => aiPrompt.focus(), 50);
+}
+function closeAiModal() {
+  aiModal.classList.remove('open');
+  aiModal.setAttribute('aria-hidden', 'true');
+}
+async function submitAiPrompt() {
+  const prompt = aiPrompt.value.trim();
+  if (!prompt) {
+    aiError.textContent = 'Введите описание сущности';
+    aiError.style.display = 'block';
+    return;
+  }
+  aiSubmit.disabled = true;
+  const original = aiSubmit.textContent;
+  aiSubmit.innerHTML = '<span class="pulse">Generating…</span>';
+  aiError.style.display = 'none';
+  try {
+    const res = await fetch('/api/describe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      aiError.textContent = data.error || 'Unknown error';
+      aiError.style.display = 'block';
+      return;
+    }
+    if (data.yaml.startsWith('# ERROR:')) {
+      aiError.textContent = data.yaml.replace(/^# ERROR:\s*/, '');
+      aiError.style.display = 'block';
+      return;
+    }
+    yamlInput.value = data.yaml;
+    closeAiModal();
+    yamlInput.focus();
+    // Auto-trigger generate so user sees the result immediately
+    setTimeout(() => generate(), 100);
+  } catch (err) {
+    aiError.textContent = err.message;
+    aiError.style.display = 'block';
+  } finally {
+    aiSubmit.disabled = false;
+    aiSubmit.textContent = original;
+  }
+}
+
+aiOpen.addEventListener('click', openAiModal);
+aiCancel.addEventListener('click', closeAiModal);
+aiSubmit.addEventListener('click', submitAiPrompt);
+aiModal.addEventListener('click', (e) => { if (e.target === aiModal) closeAiModal(); });
+aiPrompt.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    submitAiPrompt();
+  }
+  if (e.key === 'Escape') closeAiModal();
 });
 
 generateBtn.addEventListener('click', generate);

@@ -5,6 +5,7 @@ import express from 'express';
 import { loadPlugin } from '../core/plugin-loader.js';
 import { parseSchema } from '../core/schema-loader.js';
 import { renderFile, renderString } from '../core/template-engine.js';
+import { describeToYaml } from '../ai/describe.js';
 import type { Plugin } from '../core/types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -111,6 +112,37 @@ app.post('/api/preview', async (req, res) => {
     res.json(response);
   } catch (err) {
     res.status(400).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+app.post('/api/describe', async (req, res) => {
+  try {
+    const { prompt } = req.body as { prompt?: string };
+    if (typeof prompt !== 'string' || !prompt.trim()) {
+      res.status(400).json({ error: 'Body must be { prompt: string } with a non-empty prompt' });
+      return;
+    }
+    if (!process.env.ANTHROPIC_API_KEY) {
+      res.status(503).json({
+        error:
+          'AI describe is not configured. Set ANTHROPIC_API_KEY in the environment to enable this feature.',
+      });
+      return;
+    }
+    const plugin = await getPlugin();
+    const entityTypes = [...new Set(plugin.templates.map((t) => t.entityType))].sort();
+    const result = await describeToYaml({ prompt: prompt.trim(), entityTypes });
+    res.json({
+      yaml: result.yaml,
+      usage: {
+        inputTokens: result.inputTokens,
+        outputTokens: result.outputTokens,
+        cacheReadTokens: result.cacheReadTokens,
+        cacheWriteTokens: result.cacheWriteTokens,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
