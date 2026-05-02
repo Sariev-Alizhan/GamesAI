@@ -40,8 +40,13 @@ async function findManifestFile(resourceDir: string): Promise<string | null> {
  *
  * Returns the resources flat — categorisation folders are not preserved.
  */
-async function discoverResources(rootDir: string): Promise<FxResource[]> {
+async function discoverResources(rootDir: string): Promise<{
+  resources: FxResource[];
+  /** Folders we walked into and could plausibly be resources but lacked a manifest. Used to distinguish "dep doesn't exist" from "dep exists but is built-from-source / pre-build state". */
+  unmanifestedFolders: Set<string>;
+}> {
   const out: FxResource[] = [];
+  const unmanifested = new Set<string>();
 
   async function walk(dir: string): Promise<void> {
     const entries = await readdir(dir, { withFileTypes: true });
@@ -56,7 +61,17 @@ async function discoverResources(rootDir: string): Promise<FxResource[]> {
       return; // resources don't nest — treat children as resource-internal
     }
 
-    // Otherwise recurse — this is a categorisation folder
+    // Heuristic: if we're not at the root and this folder doesn't look like a
+    // categorisation folder (which usually contains [bracketed] names), record
+    // it as a pre-build / unmanifested folder. Conservative: only record top
+    // level — a deep tree wouldn't be a "resource without manifest."
+    const folderName = dir.split(sep).filter(Boolean).pop() ?? '';
+    const isCategorisationFolder = folderName.startsWith('[') && folderName.endsWith(']');
+    if (dir !== rootDir && !isCategorisationFolder) {
+      unmanifested.add(folderName);
+    }
+
+    // Recurse into subfolders
     for (const e of entries) {
       if (!e.isDirectory()) continue;
       if (e.name.startsWith('.')) continue;
@@ -66,7 +81,7 @@ async function discoverResources(rootDir: string): Promise<FxResource[]> {
   }
 
   await walk(rootDir);
-  return out;
+  return { resources: out, unmanifestedFolders: unmanifested };
 }
 
 function isWildcard(p: string): boolean {
@@ -86,7 +101,7 @@ export async function validateFiveMResources(
   rootDir: string,
   config: FxValidatorConfig = {},
 ): Promise<FxValidationResult> {
-  const resources = await discoverResources(rootDir);
+  const { resources, unmanifestedFolders } = await discoverResources(rootDir);
   const issues: FxIssue[] = [];
   const allowedGames = config.allowedGames ?? DEFAULT_ALLOWED_GAMES;
 
@@ -137,7 +152,7 @@ export async function validateFiveMResources(
       });
     }
 
-    // Required: fx_version, game
+    // Required: fx_version, game (or games — multi-game variant)
     if (getString(r.manifest, 'fx_version') === undefined) {
       issues.push({
         severity: 'error',
@@ -148,25 +163,33 @@ export async function validateFiveMResources(
         details: { field: 'fx_version' },
       });
     }
+    // Accept either `game 'gta5'` OR `games {'gta5'}` — both are FiveM-valid.
+    // Some resources (like PolyZone) use the plural form to declare multi-game support.
     const game = getString(r.manifest, 'game');
-    if (game === undefined) {
+    const games = getArray(r.manifest, 'games');
+    const declaredGames = game !== undefined ? [game] : games;
+    if (declaredGames.length === 0) {
       issues.push({
         severity: 'error',
         category: 'missing-required-field',
         resource: r.name,
-        message: `${r.manifestFile} missing required field "game"`,
+        message: `${r.manifestFile} missing required field "game" (or "games")`,
         path: join(r.path, r.manifestFile),
         details: { field: 'game' },
       });
-    } else if (!allowedGames.includes(game)) {
-      issues.push({
-        severity: 'warning',
-        category: 'unknown-game',
-        resource: r.name,
-        message: `game "${game}" is not in allowed list (${allowedGames.join(', ')})`,
-        path: join(r.path, r.manifestFile),
-        details: { value: game, allowed: allowedGames },
-      });
+    } else {
+      for (const g of declaredGames) {
+        if (!allowedGames.includes(g)) {
+          issues.push({
+            severity: 'warning',
+            category: 'unknown-game',
+            resource: r.name,
+            message: `game "${g}" is not in allowed list (${allowedGames.join(', ')})`,
+            path: join(r.path, r.manifestFile),
+            details: { value: g, allowed: allowedGames },
+          });
+        }
+      }
     }
 
     // Dependencies
@@ -189,16 +212,29 @@ export async function validateFiveMResources(
           path: join(r.path, r.manifestFile),
           details: { declared: dep, actual: lcMatches[0]!.name },
         });
-      } else {
+        continue;
+      }
+      // Folder exists but no manifest — could be a TS-built resource pre-build (oxmysql, ox_lib) or
+      // a non-resource folder coincidentally named like a dep. Warning, not error.
+      if (unmanifestedFolders.has(dep)) {
         issues.push({
-          severity: 'error',
-          category: 'dependency-not-found',
+          severity: 'warning',
+          category: 'dependency-no-manifest',
           resource: r.name,
-          message: `dependency "${dep}" — no resource with that name found in tree`,
+          message: `dependency "${dep}" — folder exists but has no fxmanifest.lua (likely TS-built resource needing 'npm run build', or pre-release source checkout)`,
           path: join(r.path, r.manifestFile),
           details: { dep },
         });
+        continue;
       }
+      issues.push({
+        severity: 'error',
+        category: 'dependency-not-found',
+        resource: r.name,
+        message: `dependency "${dep}" — no resource with that name found in tree`,
+        path: join(r.path, r.manifestFile),
+        details: { dep },
+      });
     }
 
     // Script files: client_scripts, server_scripts, shared_scripts, files

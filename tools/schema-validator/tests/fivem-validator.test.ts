@@ -86,6 +86,21 @@ describe('validateFiveMResources — required fields', () => {
     const result = await validateFiveMResources(root);
     expect(categorise(result)['unknown-game']).toBe(1);
   });
+
+  it('accepts plural "games {...}" as alternative to singular "game" — multi-game variant', async () => {
+    // Found in production: PolyZone (qbcore-framework/PolyZone) declares
+    // games {'gta5'} as plural table to indicate multi-game support.
+    // Both forms are valid in FiveM; linter must not false-positive on this.
+    await makeResource(join(root, 'PolyZone'), `fx_version 'cerulean'\ngames {'gta5'}`);
+    const result = await validateFiveMResources(root);
+    expect(categorise(result)['missing-required-field']).toBe(undefined);
+  });
+
+  it('checks every game listed in plural form against allowed list', async () => {
+    await makeResource(join(root, 'r'), `fx_version 'cerulean'\ngames {'gta5', 'fivenights'}`);
+    const result = await validateFiveMResources(root);
+    expect(categorise(result)['unknown-game']).toBe(1);
+  });
 });
 
 describe('validateFiveMResources — dependency resolution', () => {
@@ -132,6 +147,27 @@ describe('validateFiveMResources — dependency resolution', () => {
     );
     const result = await validateFiveMResources(root);
     expect(result.stats.errors).toBe(0);
+  });
+
+  it('reports dependency-no-manifest (warning) when dep folder exists but has no manifest', async () => {
+    // Found in production: oxmysql is a TypeScript-built resource — its source
+    // checkout has no fxmanifest.lua until 'npm run build' generates one.
+    // Treating this as a hard error is a false positive against any real FiveM
+    // server that uses TS-built resources. Downgrade to warning.
+    await mkdir(join(root, 'oxmysql'), { recursive: true });
+    await writeFile(join(root, 'oxmysql', 'package.json'), '{}', 'utf-8');
+    await writeFile(join(root, 'oxmysql', 'README.md'), 'oxmysql', 'utf-8');
+
+    await makeResource(
+      join(root, 'consumer'),
+      `fx_version 'cerulean'\ngame 'gta5'\ndependencies { 'oxmysql' }`,
+    );
+    const result = await validateFiveMResources(root);
+    const cats = categorise(result);
+    expect(cats['dependency-no-manifest']).toBe(1);
+    expect(cats['dependency-not-found']).toBe(undefined);
+    const issue = result.issues.find((i) => i.category === 'dependency-no-manifest');
+    expect(issue?.severity).toBe('warning');
   });
 });
 

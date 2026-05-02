@@ -23,10 +23,11 @@ export interface FxResource {
 export type FxIssueCategory =
   | 'missing-manifest'        // folder has no fxmanifest.lua / __resource.lua
   | 'manifest-parse-error'    // lexer or required field issue
-  | 'missing-required-field'  // fx_version or game absent
+  | 'missing-required-field'  // fx_version or game/games absent
   | 'unknown-game'            // game value is not 'gta5' / 'rdr3' / 'common'
   | 'dependency-not-found'    // dependencies { 'qb-core' } but no folder exists
   | 'dependency-case-mismatch'// folder is 'QB-Core', manifest says 'qb-core' (Linux footgun)
+  | 'dependency-no-manifest'  // dep folder exists but is built-from-source (e.g. oxmysql before build)
   | 'missing-script-file'     // client_scripts referenced file doesn't exist
   | 'cross-resource-no-dep'   // referenced @other-resource/file but other-resource not in deps
   | 'duplicate-resource';     // same folder name appears twice (case-different)
