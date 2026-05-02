@@ -98,12 +98,18 @@ npx localization-assistant fill --source en.json --target ru.json kk.json
 
 The platform's value is the composition:
 
-1. **Boilergen** generates entity YAML schemas + i18n stubs.
-2. **Schema Validator** confirms every cross-reference resolves — broken `lootTable` ids fail the build.
-3. **Localization Assistant** fills the i18n stubs with AI translations.
+1. **Boilergen** generates entity YAML schemas + i18n stubs + (FiveM target) full QBCore-compatible resources across 7 entity types (job/vehicle/weapon/business/organization/family/property).
+2. **Schema Validator** confirms cross-references resolve in YAML/JSON game data **AND** (FiveM mode) lints `fxmanifest.lua` graphs against case-sensitivity / missing-script / unmanifested-dep footguns.
+3. **Localization Assistant** lints locale JSONs (placeholder parity, length overflow per language, per-key caps) **AND** fills missing keys via Claude or DeepL Pro.
 4. _(future)_ Balance Simulator reads the same schemas and runs combat simulations.
 
 Each module owns one boring-but-time-consuming part of game-dev. Together they replace ~40% of the rote work in a typical content cycle.
+
+### See it work end-to-end
+
+[**CASE-STUDY-PLATFORM-LOOP.md**](./CASE-STUDY-PLATFORM-LOOP.md) — From a single YAML to a working FiveM/QBCore resource in 60 seconds. Reproducible step-by-step with exact commands and verification output.
+
+[**tools/schema-validator/CASE-STUDY-QBCORE.md**](./tools/schema-validator/CASE-STUDY-QBCORE.md) — Schema Validator's FiveM-mode catching real warnings in upstream qbcore-framework code.
 
 ## Contributing
 
