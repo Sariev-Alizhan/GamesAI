@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+# Reference: a legal/government organization (police department).
+# Different from "job" — organization has hierarchy + territories,
+# job has pay grades. A player can be employed by a job AND belong to an org.
+id: lspd
+type: organization
+name: Полицейский Департамент
+data:
+  category: government       # gang / legal / government / civilian
+  description: Полицейский департамент — поддержание порядка, расследования.
+  color: "#1E3A8A"           # tag colour for UI
+  maxMembers: 80
+  ranks:
+    - name: Курсант
+      level: 0
+      isLeader: false
+    - name: Офицер
+      level: 1
+      isLeader: false
+    - name: Сержант
+      level: 2
+      isLeader: false
+    - name: Лейтенант
+      level: 3
+      isLeader: false
+    - name: Капитан
+      level: 4
+      isLeader: false
+    - name: Шеф полиции
+      level: 5
+      isLeader: true
+  territories:
+    - downtown_district
+    - airport_zone

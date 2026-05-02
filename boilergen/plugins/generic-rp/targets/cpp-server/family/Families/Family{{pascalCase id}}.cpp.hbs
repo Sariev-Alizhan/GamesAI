@@ -1,0 +1,19 @@
+// {{name}} — auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+// Type: family (RP roleplay family unit)
+#include "BaseFamily.h"
+#include <vector>
+
+class Family{{pascalCase id}} : public BaseFamily {
+public:
+    Family{{pascalCase id}}()
+        : BaseFamily("{{id}}", FamilyCategory::{{constantCase data.category}}) {
+        maxMembers_       = {{data.maxMembers}};
+        housePropertyId_  = "{{data.housePropertyId}}";
+
+        // Roles — kinship slots inside the family (head / spouse / child / etc.).
+        // Each role caps how many members can hold it concurrently.
+        roles_ = {
+{{#each data.roles}}            { /* role */ "{{this.name}}", {{this.isHead}}, {{this.maxOccupants}} },
+{{/each}}        };
+    }
+};

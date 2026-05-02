@@ -60,6 +60,25 @@ knownEnums:
   - world_overworld
   - world_caves
   - world_dungeon
+  # Business categories
+  - shop
+  - restaurant
+  - garage
+  - casino
+  - bank
+  # Organization categories (gang/legal/government/civilian already covered above)
+  - gang
+  - legal
+  - mafia
+  - dynasty
+  # Property categories
+  - apartment
+  - house
+  - business_slot
+  # Ownership / owner types
+  - state
+  - player
+  - organization
 
 # Explicit reference-field type constraints — when present, we get
 # "expected item, found enemy" errors in addition to "id missing".
@@ -72,6 +91,11 @@ referenceFields:
   nextLevel:           level
   prerequisiteQuestId: quest
   targetId:            item
+  # generic-rp cross-references — added with business/organization/family/property
+  housePropertyId:     property
+  # NOTE: business.locationId, organization.territories[], property.locationId all
+  # refer to geographic zones for which there is no `location` entity type yet.
+  # When `location` entity is added, wire them here.
 
 # Disable suffix-based heuristics — we have explicit referenceFields above.
 # Pure-explicit mode catches more (precise type-mismatch checking) and false-positives less.

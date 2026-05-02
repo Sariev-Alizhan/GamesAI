@@ -1,0 +1,49 @@
+// Auto-generated admin form for {{name}} (business)
+import 'package:flutter/material.dart';
+
+class {{pascalCase id}}BusinessForm extends StatefulWidget {
+  const {{pascalCase id}}BusinessForm({super.key});
+
+  @override
+  State<{{pascalCase id}}BusinessForm> createState() => _{{pascalCase id}}BusinessFormState();
+}
+
+class _{{pascalCase id}}BusinessFormState extends State<{{pascalCase id}}BusinessForm> {
+  int  _funds          = {{data.funds}};
+  int  _markupPercent  = {{data.markupPercent}};
+  String _ownerType    = '{{data.ownerType}}';
+
+  final List<_GradeRow> _grades = [
+{{#each data.grades}}    _GradeRow(name: '{{this.name}}', payment: {{this.payment}}, isBoss: {{this.isBoss}}),
+{{/each}}  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{name}} — Business Editor')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          ListTile(title: const Text('Funds (cents)'), trailing: Text('$_funds')),
+          ListTile(title: const Text('Markup %'),       trailing: Text('$_markupPercent')),
+          ListTile(title: const Text('Owner type'),     trailing: Text(_ownerType)),
+          const Divider(),
+          const Text('Grades', style: TextStyle(fontWeight: FontWeight.bold)),
+          ..._grades.asMap().entries.map((e) => _gradeTile(e.key, e.value)),
+        ],
+      ),
+    );
+  }
+
+  Widget _gradeTile(int idx, _GradeRow g) => ListTile(
+    title: Text('${idx}. ${g.name}'),
+    subtitle: Text('Pay: ${g.payment}${g.isBoss ? "  •  BOSS" : ""}'),
+  );
+}
+
+class _GradeRow {
+  String name;
+  int payment;
+  bool isBoss;
+  _GradeRow({required this.name, required this.payment, required this.isBoss});
+}

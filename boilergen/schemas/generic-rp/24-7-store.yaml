@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+# Reference: small 24/7 convenience store. State-owned by default; can be
+# bought out by a player as a typical RP business progression.
+id: store_24_7
+type: business
+name: Магазин 24/7
+data:
+  category: shop
+  description: Круглосуточный магазин — снеки, вода, базовая аптечка.
+  ownerType: state           # state / player / organization
+  funds: 50000               # starting bank balance, cents
+  markupPercent: 25          # +25% on item base prices
+  locationId: downtown_main_st_42
+  grades:
+    - name: Кассир
+      payment: 100
+      isBoss: false
+    - name: Старший кассир
+      payment: 175
+      isBoss: false
+    - name: Управляющий
+      payment: 300
+      isBoss: true

@@ -1,0 +1,22 @@
+// {{name}} — auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+// Type: business (RP commercial enterprise — shop / restaurant / garage / etc.)
+#include "BaseBusiness.h"
+#include <vector>
+
+class Business{{pascalCase id}} : public BaseBusiness {
+public:
+    Business{{pascalCase id}}()
+        : BaseBusiness("{{id}}", BusinessCategory::{{constantCase data.category}}) {
+        ownerType_       = OwnerType::{{constantCase data.ownerType}};
+        funds_           = {{data.funds}};
+        markupPercent_   = {{data.markupPercent}};
+        locationId_      = "{{data.locationId}}";
+
+        // Grades — same tiered structure as jobs. Order matters: index = grade level.
+        grades_ = {
+{{#each data.grades}}            { /* grade {{@index}} */ "{{this.name}}", {{this.payment}}, {{this.isBoss}} },
+{{/each}}        };
+    }
+};
+
+// Registration handled by build-time codegen — see Businesses/registry.cpp

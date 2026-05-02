@@ -1,0 +1,52 @@
+// Auto-generated admin form for {{name}} (organization)
+import 'package:flutter/material.dart';
+
+class {{pascalCase id}}OrgForm extends StatefulWidget {
+  const {{pascalCase id}}OrgForm({super.key});
+
+  @override
+  State<{{pascalCase id}}OrgForm> createState() => _{{pascalCase id}}OrgFormState();
+}
+
+class _{{pascalCase id}}OrgFormState extends State<{{pascalCase id}}OrgForm> {
+  String _color        = '{{data.color}}';
+  int    _maxMembers   = {{data.maxMembers}};
+
+  final List<_RankRow> _ranks = [
+{{#each data.ranks}}    _RankRow(name: '{{this.name}}', level: {{this.level}}, isLeader: {{this.isLeader}}),
+{{/each}}  ];
+
+  final List<String> _territories = [
+{{#each data.territories}}    '{{this}}',
+{{/each}}  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{name}} — Organization Editor')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          ListTile(title: const Text('Tag color'),  trailing: Text(_color)),
+          ListTile(title: const Text('Max members'), trailing: Text('$_maxMembers')),
+          const Divider(),
+          const Text('Ranks', style: TextStyle(fontWeight: FontWeight.bold)),
+          ..._ranks.map((r) => ListTile(
+            title: Text('Rank ${r.level}: ${r.name}'),
+            subtitle: r.isLeader ? const Text('LEADER') : null,
+          )),
+          const Divider(),
+          const Text('Territories', style: TextStyle(fontWeight: FontWeight.bold)),
+          ..._territories.map((t) => ListTile(title: Text(t))),
+        ],
+      ),
+    );
+  }
+}
+
+class _RankRow {
+  String name;
+  int level;
+  bool isLeader;
+  _RankRow({required this.name, required this.level, required this.isLeader});
+}

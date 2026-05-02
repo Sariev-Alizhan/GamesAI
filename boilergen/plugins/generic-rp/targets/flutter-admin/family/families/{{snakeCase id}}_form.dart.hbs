@@ -1,0 +1,45 @@
+// Auto-generated admin form for {{name}} (family)
+import 'package:flutter/material.dart';
+
+class {{pascalCase id}}FamilyForm extends StatefulWidget {
+  const {{pascalCase id}}FamilyForm({super.key});
+
+  @override
+  State<{{pascalCase id}}FamilyForm> createState() => _{{pascalCase id}}FamilyFormState();
+}
+
+class _{{pascalCase id}}FamilyFormState extends State<{{pascalCase id}}FamilyForm> {
+  int    _maxMembers      = {{data.maxMembers}};
+  String _housePropertyId = '{{data.housePropertyId}}';
+
+  final List<_RoleRow> _roles = [
+{{#each data.roles}}    _RoleRow(name: '{{this.name}}', isHead: {{this.isHead}}, maxOccupants: {{this.maxOccupants}}),
+{{/each}}  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{name}} — Family Editor')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          ListTile(title: const Text('Max members'),     trailing: Text('$_maxMembers')),
+          ListTile(title: const Text('House property'),  trailing: Text(_housePropertyId)),
+          const Divider(),
+          const Text('Roles', style: TextStyle(fontWeight: FontWeight.bold)),
+          ..._roles.map((r) => ListTile(
+            title: Text(r.name),
+            subtitle: Text('Max: ${r.maxOccupants}${r.isHead ? "  •  HEAD" : ""}'),
+          )),
+        ],
+      ),
+    );
+  }
+}
+
+class _RoleRow {
+  String name;
+  bool isHead;
+  int maxOccupants;
+  _RoleRow({required this.name, required this.isHead, required this.maxOccupants});
+}

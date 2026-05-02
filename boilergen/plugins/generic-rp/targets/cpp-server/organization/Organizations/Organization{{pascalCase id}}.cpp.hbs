@@ -1,0 +1,24 @@
+// {{name}} — auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+// Type: organization (RP faction — gang / legal / government / civilian)
+#include "BaseOrganization.h"
+#include <vector>
+
+class Organization{{pascalCase id}} : public BaseOrganization {
+public:
+    Organization{{pascalCase id}}()
+        : BaseOrganization("{{id}}", OrgCategory::{{constantCase data.category}}) {
+        color_           = "{{data.color}}";
+        maxMembers_      = {{data.maxMembers}};
+
+        // Ranks — like job grades but indicate hierarchy, not pay.
+        ranks_ = {
+{{#each data.ranks}}            { /* rank {{this.level}} */ "{{this.name}}", {{this.level}}, {{this.isLeader}} },
+{{/each}}        };
+
+        // Territories — zone ids the org claims. Validated by Schema Validator
+        // against existing zone/property entries.
+        territories_ = {
+{{#each data.territories}}            "{{this}}",
+{{/each}}        };
+    }
+};

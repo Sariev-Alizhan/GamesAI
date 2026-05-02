@@ -1,0 +1,27 @@
+// Auto-generated controller for {{name}} (business)
+import { Router } from 'express';
+import { db } from '../../db.js';
+
+export const {{camelCase id}}BusinessRouter = Router();
+
+const {{constantCase id}}_DEFINITION = {
+  id: '{{id}}',
+  category: '{{data.category}}',
+  ownerType: '{{data.ownerType}}',
+  funds: {{data.funds}},
+  markupPercent: {{data.markupPercent}},
+  locationId: '{{data.locationId}}',
+  grades: [
+{{#each data.grades}}    { level: {{@index}}, name: '{{this.name}}', payment: {{this.payment}}, isBoss: {{this.isBoss}} },
+{{/each}}  ],
+};
+
+{{camelCase id}}BusinessRouter.get('/api/businesses/{{kebabCase id}}', async (_, res) => {
+  const overrides = await db.businessOverrides.findOne({ where: { id: '{{id}}' } });
+  res.json({ ...{{constantCase id}}_DEFINITION, ...(overrides ?? {}) });
+});
+
+{{camelCase id}}BusinessRouter.put('/api/businesses/{{kebabCase id}}', async (req, res) => {
+  await db.businessOverrides.upsert({ id: '{{id}}', ...req.body });
+  res.json({ ok: true });
+});

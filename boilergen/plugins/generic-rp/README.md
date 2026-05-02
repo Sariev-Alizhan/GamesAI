@@ -37,9 +37,30 @@ A firearm or melee. Two layers:
 - **combat** — `damage`, `fireRate`, `magazineSize`, `range`. Engine-bound.
 - **economy** — `price`, `vendor`, `license` (which RP license is required to buy). Pure RP layer.
 
+### `business` (4 templates × 4 layers + i18n)
+
+A commercial enterprise (shop / restaurant / garage / casino / bank). Owned by `state`, `player`, or `organization`. Has tiered `grades` like jobs (employee → manager → boss), a `funds` balance, a `markupPercent` over base item prices, and a `locationId` reference.
+
+### `organization` (4 templates × 4 layers + i18n)
+
+A faction or legal organization (gang / legal / government / civilian). Has hierarchical `ranks` (level 0 → leader), a `color` for UI tags, `maxMembers`, and a list of `territories` (zone ids). Different from `job` — a player may hold a `job` AND belong to an `organization`.
+
+### `family` (4 templates × 4 layers + i18n)
+
+A roleplay family unit (civilian / mafia / dynasty). Mirrors Grand Mobile's "Family" system. Has kinship `roles` (head / spouse / child) with `maxOccupants` per role, plus a `housePropertyId` cross-reference to a `property` entity.
+
+### `property` (4 templates × 4 layers + i18n)
+
+Real estate (apartment / house / garage / business_slot). Has `locationId`, `purchasePrice`, `rentPricePerDay`, `maxOccupants`, an `ownership` field (`state` / `player_<id>` / `organization_<id>`), and a list of feature tags.
+
 ## Schema examples
 
-See [`schemas/generic-rp/`](../../schemas/generic-rp/) — three real-shaped schemas demonstrating each entity type. Use them as starting points.
+See [`schemas/generic-rp/`](../../schemas/generic-rp/) — seven real-shaped schemas demonstrating each entity type:
+
+- `taxi-driver.yaml` (job), `bmw-m5.yaml` (vehicle), `ak47.yaml` (weapon)
+- `24-7-store.yaml` (business), `police-department.yaml` (organization), `ivanov-family.yaml` (family), `apartment-riverside-204.yaml` (property)
+
+Use them as starting points.
 
 ## Output structure
 

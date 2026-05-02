@@ -1,0 +1,19 @@
+{
+  "organization.{{snakeCase id}}.name": {
+    "ru": "{{name}}",
+    "en": "TODO: translate {{name}}",
+    "kk": "TODO: аудару {{name}}"
+  },
+  "organization.{{snakeCase id}}.description": {
+    "ru": "{{data.description}}",
+    "en": "TODO: translate description",
+    "kk": "TODO: сипаттаманы аудару"
+  }
+{{#each data.ranks}},
+  "organization.{{snakeCase ../id}}.rank.{{this.level}}": {
+    "ru": "{{this.name}}",
+    "en": "TODO: translate rank {{this.level}}",
+    "kk": "TODO: разряд {{this.level}}"
+  }
+{{/each}}
+}

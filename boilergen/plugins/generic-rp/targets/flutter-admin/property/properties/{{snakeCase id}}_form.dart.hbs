@@ -1,0 +1,41 @@
+// Auto-generated admin form for {{name}} (property)
+import 'package:flutter/material.dart';
+
+class {{pascalCase id}}PropertyForm extends StatefulWidget {
+  const {{pascalCase id}}PropertyForm({super.key});
+
+  @override
+  State<{{pascalCase id}}PropertyForm> createState() => _{{pascalCase id}}PropertyFormState();
+}
+
+class _{{pascalCase id}}PropertyFormState extends State<{{pascalCase id}}PropertyForm> {
+  String _locationId       = '{{data.locationId}}';
+  int    _purchasePrice    = {{data.purchasePrice}};
+  int    _rentPricePerDay  = {{data.rentPricePerDay}};
+  int    _maxOccupants     = {{data.maxOccupants}};
+  String _ownership        = '{{data.ownership}}';
+
+  final List<String> _features = [
+{{#each data.features}}    '{{this}}',
+{{/each}}  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{name}} — Property Editor')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          ListTile(title: const Text('Location'),         trailing: Text(_locationId)),
+          ListTile(title: const Text('Purchase price'),   trailing: Text('$_purchasePrice')),
+          ListTile(title: const Text('Rent / day'),       trailing: Text('$_rentPricePerDay')),
+          ListTile(title: const Text('Max occupants'),    trailing: Text('$_maxOccupants')),
+          ListTile(title: const Text('Ownership'),        trailing: Text(_ownership)),
+          const Divider(),
+          const Text('Features', style: TextStyle(fontWeight: FontWeight.bold)),
+          ..._features.map((f) => ListTile(title: Text(f))),
+        ],
+      ),
+    );
+  }
+}

@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+# Reference: a civilian roleplay family — mirrors Grand Mobile's "Family"
+# system (support.grnd.gg). Roles are kinship slots (head/spouse/child),
+# not pay grades. housePropertyId references a property entry.
+id: ivanov_family
+type: family
+name: Семья Ивановых
+data:
+  category: civilian         # civilian / mafia / dynasty
+  description: Обычная семья — родители и дети живут под одной крышей.
+  maxMembers: 8
+  housePropertyId: apartment_riverside_204   # cross-ref → property entity
+  roles:
+    - name: Глава семьи
+      isHead: true
+      maxOccupants: 1
+    - name: Супруг(а)
+      isHead: false
+      maxOccupants: 1
+    - name: Ребёнок
+      isHead: false
+      maxOccupants: 6

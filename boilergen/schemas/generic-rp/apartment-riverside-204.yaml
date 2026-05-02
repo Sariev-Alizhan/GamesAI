@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../boilergen.schema.json
+# Reference: a 2-bedroom apartment for rent or sale. Referenced by
+# ivanov-family.yaml (housePropertyId).
+id: apartment_riverside_204
+type: property
+name: Квартира Riverside, 204
+data:
+  category: apartment        # apartment / house / garage / business_slot
+  description: Двухкомнатная квартира с видом на реку. Удобно для семьи из 4х.
+  locationId: riverside_district_204
+  purchasePrice: 250000      # cents — full purchase
+  rentPricePerDay: 1500      # cents per day if rented
+  maxOccupants: 4
+  ownership: state           # state / player_<id> / organization_<id>
+  features:
+    - "garage_2_slots"
+    - "storage_50_kg"
+    - "balcony"

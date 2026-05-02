@@ -1,0 +1,21 @@
+// {{name}} — auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+// Type: property (RP real estate — apartment / house / garage / business slot)
+#include "BaseProperty.h"
+#include <vector>
+#include <string>
+
+class Property{{pascalCase id}} : public BaseProperty {
+public:
+    Property{{pascalCase id}}()
+        : BaseProperty("{{id}}", PropertyCategory::{{constantCase data.category}}) {
+        locationId_       = "{{data.locationId}}";
+        purchasePrice_    = {{data.purchasePrice}};
+        rentPricePerDay_  = {{data.rentPricePerDay}};
+        maxOccupants_     = {{data.maxOccupants}};
+        ownership_        = "{{data.ownership}}";
+
+        features_ = {
+{{#each data.features}}            "{{this}}",
+{{/each}}        };
+    }
+};
