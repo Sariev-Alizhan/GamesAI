@@ -1,0 +1,19 @@
+-- {{name}} — QBCore property config
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+
+Config = Config or {}
+
+Config.Property = {
+    name             = '{{id}}',
+    label            = '{{name}}',
+    description      = '{{data.description}}',
+    category         = '{{data.category}}',     -- apartment / house / garage / business_slot
+    locationId       = '{{data.locationId}}',
+    purchasePrice    = {{data.purchasePrice}},
+    rentPricePerDay  = {{data.rentPricePerDay}},
+    maxOccupants     = {{data.maxOccupants}},
+    ownership        = '{{data.ownership}}',
+    features = {
+{{#each data.features}}        '{{this}}',
+{{/each}}    },
+}

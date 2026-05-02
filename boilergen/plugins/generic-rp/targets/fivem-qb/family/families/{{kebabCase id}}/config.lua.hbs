@@ -1,0 +1,18 @@
+-- {{name}} — family config
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+
+Config = Config or {}
+
+Config.Family = {
+    name             = '{{id}}',
+    label            = '{{name}}',
+    description      = '{{data.description}}',
+    category         = '{{data.category}}',     -- civilian / mafia / dynasty
+    maxMembers       = {{data.maxMembers}},
+    housePropertyId  = '{{data.housePropertyId}}',
+    -- Roles are kinship slots (head / spouse / child / etc.).
+    -- Each role caps how many concurrent members can hold it.
+    roles = {
+{{#each data.roles}}        { name = '{{this.name}}', isHead = {{this.isHead}}, maxOccupants = {{this.maxOccupants}} },
+{{/each}}    },
+}

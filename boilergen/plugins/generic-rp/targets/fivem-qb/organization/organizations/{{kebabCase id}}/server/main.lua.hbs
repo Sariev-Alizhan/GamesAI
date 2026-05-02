@@ -1,0 +1,32 @@
+-- {{name}} — server-side QBCore organization registration
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+
+local QBCore = exports['qb-core']:GetCoreObject()
+
+CreateThread(function()
+    -- For gang-flavoured orgs, slot directly into QBCore.Shared.Gangs.
+    -- QBCore's gang system reads from this table at runtime.
+    if Config.Organization.category == 'gang' or Config.Organization.category == 'mafia' then
+        if not QBCore.Shared.Gangs then
+            QBCore.Shared.Gangs = {}
+        end
+        QBCore.Shared.Gangs[Config.Organization.name] = {
+            label  = Config.Organization.label,
+            grades = Config.Organization.ranks,
+        }
+    end
+
+    -- Always expose through a Boilergen-namespaced global so legal/
+    -- government/civilian orgs are reachable without abusing Shared.Gangs.
+    _G.BoilergenOrganizations = _G.BoilergenOrganizations or {}
+    _G.BoilergenOrganizations[Config.Organization.name] = Config.Organization
+
+    print(('[{{kebabCase id}}] Registered organization "%s" (category=%s, ranks=%d, territories=%d).'):format(
+        Config.Organization.label,
+        Config.Organization.category,
+        #Config.Organization.ranks,
+        #Config.Organization.territories
+    ))
+end)
+
+exports('GetOrgConfig', function() return Config.Organization end)

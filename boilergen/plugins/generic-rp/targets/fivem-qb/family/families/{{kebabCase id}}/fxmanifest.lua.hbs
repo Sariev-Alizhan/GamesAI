@@ -1,0 +1,19 @@
+-- Auto-generated FiveM/QBCore family resource for {{name}}
+-- Source: schemas/generic-rp/{{kebabCase id}}.yaml
+-- Note: QBCore has no canonical "family" system — this is a custom convention
+-- modelled on Grand Mobile's Family feature (support.grnd.gg). The resource
+-- exposes Config.Family for any downstream UI / persistence layer to consume.
+
+fx_version 'cerulean'
+game 'gta5'
+
+author 'Boilergen'
+description '{{name}} — auto-generated family config (custom QBCore convention)'
+version '0.1.0'
+
+shared_scripts { 'config.lua' }
+server_scripts { 'server/main.lua' }
+
+dependencies { 'qb-core' }
+
+lua54 'yes'

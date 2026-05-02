@@ -34,11 +34,11 @@ async function generateOne(schemaFile: string) {
   return result;
 }
 
-describe('generic-rp plugin (7 entity types + FiveM-QB target on job/vehicle/weapon)', () => {
-  it('exposes 39 templates: 4 base targets × 7 entity types + FiveM-QB on job/vehicle/weapon', async () => {
+describe('generic-rp plugin — full FiveM-QB coverage on all 7 entity types', () => {
+  it('exposes 51 templates: 4 base targets × 7 entity types + FiveM-QB on all 7', async () => {
     const plugin = await loadPlugin(PLUGIN_DIR);
     expect(plugin.id).toBe('generic-rp');
-    expect(plugin.templates).toHaveLength(39);
+    expect(plugin.templates).toHaveLength(51);
 
     const byEntity = plugin.templates.reduce<Record<string, number>>((acc, t) => {
       acc[t.entityType] = (acc[t.entityType] ?? 0) + 1;
@@ -46,16 +46,16 @@ describe('generic-rp plugin (7 entity types + FiveM-QB target on job/vehicle/wea
     }, {});
     // FiveM-QB target adds:
     //   - job: 5 files (fxmanifest, config, server, client, migration)
-    //   - vehicle: 3 files (fxmanifest, config, server) — no client logic for static config
-    //   - weapon: 3 files (fxmanifest, config, server)
+    //   - other entities: 3 files each (fxmanifest, config, server) — no
+    //     client/migration since their runtime contracts are simpler.
     expect(byEntity).toEqual({
-      job: 9,         // 4 base + 5 fivem-qb
-      vehicle: 7,     // 4 base + 3 fivem-qb
-      weapon: 7,      // 4 base + 3 fivem-qb
-      business: 4,
-      organization: 4,
-      family: 4,
-      property: 4,
+      job: 9,            // 4 base + 5 fivem-qb
+      vehicle: 7,        // 4 base + 3 fivem-qb
+      weapon: 7,
+      business: 7,
+      organization: 7,
+      family: 7,
+      property: 7,
     });
   });
 
@@ -222,5 +222,69 @@ describe('generic-rp plugin (7 entity types + FiveM-QB target on job/vehicle/wea
     const server = await readFile(join(root, 'server', 'main.lua'), 'utf-8');
     expect(server).toContain('QBCore.Shared.Weapons[hash]');
     expect(server).toContain('GetHashKey(Config.Weapon.weaponHash)');
+  });
+
+  it('generates FiveM-QB business resource with grades + funds + markup', async () => {
+    await generateOne('24-7-store.yaml');
+    const root = join(outDir, 'fivem-qb', 'businesses', 'store-24-7');
+
+    const config = await readFile(join(root, 'config.lua'), 'utf-8');
+    expect(config).toContain("name          = 'store_24_7'");
+    expect(config).toContain("category      = 'shop'");
+    expect(config).toContain("ownerType     = 'state'");
+    expect(config).toContain('funds         = 50000');
+    expect(config).toContain('markupPercent = 25');
+    expect(config).toContain("['0'] = { name = 'Кассир'");
+    expect(config).toContain("['2'] = { name = 'Управляющий', payment = 300, isboss = true }");
+
+    const server = await readFile(join(root, 'server', 'main.lua'), 'utf-8');
+    expect(server).toContain('_G.BoilergenBusinesses');
+    expect(server).toContain("exports('GetBusinessConfig'");
+  });
+
+  it('generates FiveM-QB organization resource — gangs slot into QBCore.Shared.Gangs', async () => {
+    await generateOne('police-department.yaml');
+    const root = join(outDir, 'fivem-qb', 'organizations', 'lspd');
+
+    const config = await readFile(join(root, 'config.lua'), 'utf-8');
+    expect(config).toContain("name        = 'lspd'");
+    expect(config).toContain("category    = 'government'");
+    expect(config).toContain("color       = '#1E3A8A'");
+    expect(config).toContain('maxMembers  = 80');
+    expect(config).toContain("['5'] = { name = 'Шеф полиции', isboss = true }");
+    expect(config).toContain("'downtown_district'");
+
+    const server = await readFile(join(root, 'server', 'main.lua'), 'utf-8');
+    // Shared.Gangs registration only fires for gang/mafia categories
+    expect(server).toContain("Config.Organization.category == 'gang'");
+    expect(server).toContain('_G.BoilergenOrganizations');
+  });
+
+  it('generates FiveM-QB family resource with kinship roles (custom convention)', async () => {
+    await generateOne('ivanov-family.yaml');
+    const root = join(outDir, 'fivem-qb', 'families', 'ivanov-family');
+
+    const config = await readFile(join(root, 'config.lua'), 'utf-8');
+    expect(config).toContain("name             = 'ivanov_family'");
+    expect(config).toContain("category         = 'civilian'");
+    expect(config).toContain('maxMembers       = 8');
+    expect(config).toContain("housePropertyId  = 'apartment_riverside_204'");
+    expect(config).toContain("name = 'Глава семьи', isHead = true, maxOccupants = 1");
+    expect(config).toContain("name = 'Ребёнок', isHead = false, maxOccupants = 6");
+  });
+
+  it('generates FiveM-QB property resource with feature list and ownership', async () => {
+    await generateOne('apartment-riverside-204.yaml');
+    const root = join(outDir, 'fivem-qb', 'properties', 'apartment-riverside-204');
+
+    const config = await readFile(join(root, 'config.lua'), 'utf-8');
+    expect(config).toContain("name             = 'apartment_riverside_204'");
+    expect(config).toContain("category         = 'apartment'");
+    expect(config).toContain('purchasePrice    = 250000');
+    expect(config).toContain('rentPricePerDay  = 1500');
+    expect(config).toContain('maxOccupants     = 4');
+    expect(config).toContain("ownership        = 'state'");
+    expect(config).toContain("'garage_2_slots'");
+    expect(config).toContain("'balcony'");
   });
 });

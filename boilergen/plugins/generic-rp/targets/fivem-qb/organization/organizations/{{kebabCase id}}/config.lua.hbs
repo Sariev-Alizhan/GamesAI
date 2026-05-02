@@ -1,0 +1,23 @@
+-- {{name}} — QBCore organization config
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+--
+-- QBCore's Shared.Gangs is the canonical registry for gang-style organizations.
+-- We register through it for category 'gang'; for other categories
+-- (legal/government/civilian) we expose only via _G/exports.
+
+Config = Config or {}
+
+Config.Organization = {
+    name        = '{{id}}',
+    label       = '{{name}}',
+    description = '{{data.description}}',
+    category    = '{{data.category}}',     -- gang / legal / government / civilian / mafia / dynasty
+    color       = '{{data.color}}',
+    maxMembers  = {{data.maxMembers}},
+    ranks = {
+{{#each data.ranks}}        ['{{this.level}}'] = { name = '{{this.name}}', isboss = {{this.isLeader}} },
+{{/each}}    },
+    territories = {
+{{#each data.territories}}        '{{this}}',
+{{/each}}    },
+}

@@ -1,0 +1,17 @@
+-- {{name}} — server-side family registration
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+
+local QBCore = exports['qb-core']:GetCoreObject()
+
+CreateThread(function()
+    _G.BoilergenFamilies = _G.BoilergenFamilies or {}
+    _G.BoilergenFamilies[Config.Family.name] = Config.Family
+    print(('[{{kebabCase id}}] Registered family "%s" (category=%s, max=%d, roles=%d).'):format(
+        Config.Family.label,
+        Config.Family.category,
+        Config.Family.maxMembers,
+        #Config.Family.roles
+    ))
+end)
+
+exports('GetFamilyConfig', function() return Config.Family end)

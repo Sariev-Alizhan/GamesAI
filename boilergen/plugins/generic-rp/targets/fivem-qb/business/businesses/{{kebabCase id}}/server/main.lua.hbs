@@ -1,0 +1,24 @@
+-- {{name}} — server-side QBCore business registration
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+--
+-- QBCore doesn't have a single canonical "businesses" registry the way it
+-- has Shared.Vehicles / Shared.Weapons. The convention varies by framework
+-- variant: qb-shops, qb-businesses, qbx_management, etc. We expose
+-- Config.Business as a global so any of those resources can read it.
+
+local QBCore = exports['qb-core']:GetCoreObject()
+
+CreateThread(function()
+    -- Stash on a known global namespace for downstream resources
+    -- to read. Server owners may also seed their own DB row from this.
+    _G.BoilergenBusinesses = _G.BoilergenBusinesses or {}
+    _G.BoilergenBusinesses[Config.Business.name] = Config.Business
+    print(('[{{kebabCase id}}] Registered business "%s" (category=%s, funds=%d).'):format(
+        Config.Business.label,
+        Config.Business.category,
+        Config.Business.funds
+    ))
+end)
+
+-- Export so other resources can fetch the config without poking globals.
+exports('GetBusinessConfig', function() return Config.Business end)

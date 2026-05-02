@@ -1,0 +1,18 @@
+-- {{name}} — QBCore business config
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+
+Config = Config or {}
+
+Config.Business = {
+    name          = '{{id}}',
+    label         = '{{name}}',
+    category      = '{{data.category}}',          -- shop / restaurant / garage / casino / bank
+    description   = '{{data.description}}',
+    ownerType     = '{{data.ownerType}}',         -- state / player / organization
+    funds         = {{data.funds}},
+    markupPercent = {{data.markupPercent}},
+    locationId    = '{{data.locationId}}',
+    grades = {
+{{#each data.grades}}        ['{{@index}}'] = { name = '{{this.name}}', payment = {{this.payment}}, isboss = {{this.isBoss}} },
+{{/each}}    },
+}

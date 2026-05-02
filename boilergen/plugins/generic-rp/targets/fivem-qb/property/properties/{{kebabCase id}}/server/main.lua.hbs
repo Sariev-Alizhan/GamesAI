@@ -1,0 +1,16 @@
+-- {{name}} — server-side property registration
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+
+local QBCore = exports['qb-core']:GetCoreObject()
+
+CreateThread(function()
+    _G.BoilergenProperties = _G.BoilergenProperties or {}
+    _G.BoilergenProperties[Config.Property.name] = Config.Property
+    print(('[{{kebabCase id}}] Registered property "%s" (category=%s, price=%d).'):format(
+        Config.Property.label,
+        Config.Property.category,
+        Config.Property.purchasePrice
+    ))
+end)
+
+exports('GetPropertyConfig', function() return Config.Property end)
