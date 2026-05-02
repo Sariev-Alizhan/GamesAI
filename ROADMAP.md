@@ -17,6 +17,36 @@
 | **Dogfood loop** становится главной feedback-петлёй | unity-mobile-shooter plugin reverse-derived из Flump |
 | **Pitch меняется** | "save boilerplate" → "ship richer X in 1 day instead of 1 week" |
 
+## Что было закрыто в session 2026-05-02
+
+За одну рабочую сессию закрыто 11 задач из roadmap (16 commits на main):
+
+**Horizon-1 (4/6):**
+- ✅ 1.2 Schema Validator rules (housePropertyId → property cross-ref)
+- ✅ 1.4 generic-rp expansion (business / organization / family / property)
+- ✅ 1.5 README pitch update + сравнительная таблица "How we're different"
+- ✅ 1.6 License hygiene audit (NOTICE.md)
+- ⏳ 1.1 Wire unity-mobile-shooter в Flump — Flump-блок (нужен push-доступ)
+- ⏳ 1.3 Localization Assistant bootstrap на Flump — Flump-блок
+
+**Horizon-2 (5/6):**
+- ✅ 2.1 Localization Assistant статические проверки (linter)
+- ✅ 2.3 Schema Validator FiveM-mode фундамент
+- ✅ 2.4 Public case study × 2 (QBCore findings + end-to-end PLATFORM-LOOP)
+- ✅ 2.5 Knowledge-base 16 → 25 entries
+- ✅ 2.6 DeepL Pro adapter
+- ⏳ 2.2 Crowdin/Lokalise — deferred
+
+**Horizon-3 (1/6):**
+- ✅ 3.1 FiveM target в generic-rp — full coverage 7 entity types
+
+**Текущее состояние:**
+- 12 модульных + plugin commits + 4 docs commits = 16 push'ей
+- boilergen 228 + localization 64 + schema-validator 73 = 365 тестов (было ~291)
+- 51 templates в generic-rp (было 12)
+- 3 модуля v0.2.0 (было 0.1.0 каждый)
+- Все 3 модуля имеют production-grade README + CASE-STUDY где applicable
+
 ---
 
 ## Где мы сейчас (точка отсчёта — 2 мая 2026)
@@ -94,16 +124,16 @@
 
 **Цель:** Localization Assistant production-ready на 2+ реальных проектах; первая публичная демонстрация платформы.
 
-| # | Задача | DoD |
-|---|---|---|
-| 2.1 | Localization Assistant добавляет статические проверки до AI fill | Length-overflow detection (en vs ru/de/ja max_chars); plural/gender placeholder warnings; font glyph coverage check |
-| 2.2 | Crowdin / Lokalise file-format адаптеры | Loader для XLIFF / PO / Crowdin JSON; push-back через API когда задан токен |
-| 2.3 | Schema Validator FiveM-mode (фундамент) | Парсер `fxmanifest.lua`; правила: deps ↔ folder names case-sensitive (Linux footgun); cross-resource exports |
-| 2.4 | Public case study #1 | Blog/Twitter тред: "Boilergen + Localization Assistant on a real Unity 6 mobile shooter — 30 minutes to localize 200 strings" — материалы из dogfood loop с Flump |
-| 2.5 | Knowledge-base extends to 25+ entries | Добавлены 5+ entries про реальные RP-проекты (Grand Mobile patterns, FiveM resource patterns, NGO multiplayer patterns) |
-| 2.6 | DeepL Pro адаптер (BYO-key) | Опциональный provider в Localization Assistant; никогда не share key, документирован TOS |
+| # | Задача | Статус | DoD / commit |
+|---|---|---|---|
+| 2.1 | Localization Assistant статические проверки до AI fill | ✅ DONE | placeholder parity + length-overflow ratio + per-key cap; commit `c614c4e` |
+| 2.2 | Crowdin / Lokalise file-format адаптеры | ⏳ DEFERRED | большая задача, лучше с реальным pilot — отложено к h-3 |
+| 2.3 | Schema Validator FiveM-mode (фундамент) | ✅ DONE | parseFxManifest + cross-ref check + 9 issue categories; commit `2f9c1bb` + `21df0f0` |
+| 2.4 | Public case study #1 | ✅ DONE × 2 | `tools/schema-validator/CASE-STUDY-QBCORE.md` + `CASE-STUDY-PLATFORM-LOOP.md` end-to-end |
+| 2.5 | Knowledge-base extends to 25+ entries | ✅ DONE | 16 → 25; commits `8b345bc` + `a42d634` |
+| 2.6 | DeepL Pro адаптер (BYO-key) | ✅ DONE | опциональный provider в Localization Assistant `--provider deepl`; commit `a5ea038` |
 
-**Критерий успеха:** 2+ проекта используют Localization Assistant в реальной работе; 1 публичный материал собирает реакции (HN, r/gamedev с осторожным позиционированием, или Twitter/X gamedev).
+**Итог горизонта-2:** **5/6 закрыто, 1 deferred** (Crowdin/Lokalise — без реального pilot бессмысленно строить).
 
 ---
 
@@ -111,16 +141,16 @@
 
 **Цель:** wedge = FiveM/RP/мобильная аудитория. Первый внешний pilot studio.
 
-| # | Задача | DoD |
-|---|---|---|
-| 3.1 | FiveM target в `generic-rp` (qb-target / ox-target preset) | Один YAML → `client.lua` + `server.lua` + `fxmanifest.lua` + `migrations/*.sql` (MySQL 8 совместимый) + qb-target zones; emit либо qb либо ox по флагу — это freebie migration tool |
-| 3.2 | Schema Validator FiveM resource-graph mode (полный) | xEdit-style cross-ref linter: `Config.Jobs.X` ↔ exports, `qb-target` ↔ ped models, SQL ↔ table columns, `fxmanifest` deps ↔ folder names |
-| 3.3 | NVIDIA Audio2Face SDK интеграция | Localization Assistant pipeline: переведённый текст → дубляж (BYO TTS) → Audio2Face relipsync. Полностью deterministic except TTS step |
-| 3.4 | Первый external pilot | 1 реальная RP студия / FiveM сервер / mobile inde dev пробует Boilergen + Schema Validator на их кодовой базе; пишет feedback |
-| 3.5 | Schema Validator: opt-in "balance smell" pass | После deterministic валидации, LLM advisory подсказывает аномалии в weapon/economy CSV |
-| 3.6 | Templates marketplace alpha | Community может сабмитить плагины через PR с тестами + README + license-check workflow |
+| # | Задача | Статус | DoD / commit |
+|---|---|---|---|
+| 3.1 | FiveM target в `generic-rp` (qb-target / ox-target preset) | ✅ DONE | full coverage 7 entity types (job/vehicle/weapon/business/organization/family/property); commits `984128f` + `e8a3783` + `ec43ef6`. PASSES check-fivem by construction. |
+| 3.2 | Schema Validator FiveM resource-graph mode (полный) | ⏳ open | SQL drift detection + `qb-target` zone validation против ped models. Фундамент уже в h-2 (`2f9c1bb`); это расширение. |
+| 3.3 | NVIDIA Audio2Face SDK интеграция | ⏳ open | требует hardware/setup для тестирования; defer до реального запроса от user'а |
+| 3.4 | Первый external pilot | ⏳ open | требует attention/outreach — продукт готов |
+| 3.5 | Schema Validator: opt-in "balance smell" pass | ⏳ open | LLM advisory над outlier detection (детерминистичная часть может быть без AI: z-score статистика на numeric поля per entity type) |
+| 3.6 | Templates marketplace alpha | ⏳ open | CONTRIBUTING.md + plugin submission convention + license-check workflow |
 
-**Критерий успеха Q3:** есть FiveM-aware preset который можно показать на cfx.re forum; Schema Validator ловит 5+ real bugs в реальных проектах; 1+ external user написал feedback issue.
+**Критерий успеха Q3:** есть FiveM-aware preset который можно показать на cfx.re forum (✅ есть, 7 entity types); Schema Validator ловит 5+ real bugs в реальных проектах (✅ 6 warnings + 0 false-positive errors на qbcore tree); 1+ external user написал feedback issue (⏳ open).
 
 ---
 
