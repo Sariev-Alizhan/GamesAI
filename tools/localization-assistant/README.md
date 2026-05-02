@@ -1,8 +1,8 @@
 # Localization Assistant
 
-> AI-powered locale file filler for game development. Reads your source-language JSON, finds missing keys in target locales, fills them with Claude-generated translations using game-specific context.
+> Localization linter + AI-powered fill for game development. Static checks (placeholder parity, length overflow, per-key caps) run **before** any AI; AI translates only what passes lint.
 
-**Module 2 in the [GamesAI platform](../../VISION.md).** Pairs naturally with Boilergen — Boilergen generates i18n stubs with `TODO` placeholders, Localization Assistant fills them with real translations.
+**Module 2 in the [GamesAI platform](../../VISION.md).** Two commands: `lint` (deterministic, no API key needed) and `fill` (AI-powered). Pairs naturally with Boilergen — Boilergen generates i18n stubs with `TODO` placeholders, `lint` validates the source, `fill` translates with real translations.
 
 ## What it does
 
@@ -35,6 +35,57 @@ npm run build
 
 ## Use
 
+### `lint` — deterministic checks (no AI, no API key)
+
+```bash
+# Catch placeholder drops, length overflow, per-key cap violations
+npx localization-assistant lint --source en.json --target ru.json kk.json
+
+# With custom rules (per-locale ratios + per-key caps)
+npx localization-assistant lint \
+  --source en.json \
+  --target ru.json kk.json de.json \
+  --rules locale-rules.json
+
+# Treat warnings as errors for strict CI
+npx localization-assistant lint --source en.json --target ru.json --warnings-as-errors
+```
+
+Exit code: `0` if clean, `1` if any errors. Suitable for CI gates.
+
+**What it catches:**
+
+| Issue | Example | Severity |
+|---|---|---|
+| `missing-placeholder` | `source: "Hello, {playerName}!"` → `target: "Привет!"` (dropped `{playerName}`) | error |
+| `extra-placeholder` | `target: "Привет, {whoIsThis}!"` (no such var in source — likely typo) | warning |
+| `length-overflow` | `source: "OK" (2 chars)` → `target: "Bestätigen" (10 chars, 5x)` exceeds default 1.5x ratio | warning |
+| `length-cap-exceeded` | `source: "OK"` → `target: "Подтвердить" (11 chars)` exceeds hard cap of 8 chars on `ui.btn.confirm` | error |
+
+**Rules file (JSON, optional):**
+
+```json
+{
+  "maxLengthRatio": {
+    "default": 1.5,
+    "ru": 1.5,
+    "de": 1.4,
+    "ja": 0.7,
+    "ko": 0.8
+  },
+  "maxLengthByKey": {
+    "ui.button.confirm": 12,
+    "ui.button.cancel": 12,
+    "ui.toast.title": 24
+  },
+  "severity": {
+    "extra-placeholder": "error"
+  }
+}
+```
+
+### `fill` — AI translation of missing/stub keys
+
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 
@@ -50,6 +101,8 @@ npx localization-assistant fill \
 # Dry run — see what would be translated without calling AI or writing files
 npx localization-assistant fill --source en.json --target ru.json --dry-run
 ```
+
+**Recommended workflow:** `lint` → human review of any errors → `fill` for the missing keys → `lint` again to verify the AI's output passes the same checks.
 
 ## Supported layouts
 
@@ -117,13 +170,15 @@ This is the value of multi-module platform: separate concerns, but the workflows
 
 ## Status
 
-**v0.1.0 — MVP.** Single command (`fill`), single use case (translate missing keys via AI). Tested core (extractor, writer, glossary path).
+**v0.2.0 — linter + AI fill.** Two commands: `lint` (deterministic checks, no API key, runs in milliseconds), `fill` (AI translation of missing keys). 51 tests covering core (extractor, writer, linter).
 
 Roadmap:
-- v0.2 — `--glossary` file loading
 - v0.3 — `extract` command (find translation keys directly in source code, not JSON)
-- v0.4 — Web UI integrated with Boilergen playground
-- v0.5 — Translation memory (cache common phrases per project)
+- v0.4 — Crowdin / Lokalise file-format adapters (XLIFF, PO push-back via API)
+- v0.5 — DeepL Pro adapter (BYO-key, opt-in alternative to Claude)
+- v0.6 — Glyph coverage check (verify target text fits in a specified font's codepoint set)
+- v0.7 — Web UI integrated with Boilergen playground
+- v0.8 — Translation memory (cache common phrases per project)
 
 ## License
 

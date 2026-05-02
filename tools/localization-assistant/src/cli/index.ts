@@ -1,13 +1,31 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { fillCommand } from './commands/fill.js';
+import { lintCommand } from './commands/lint.js';
 
 const program = new Command();
 
 program
   .name('localization-assistant')
-  .description('AI-powered locale file filler for game development. Reads source-language JSON, finds missing keys in target locales, generates translations via Claude.')
-  .version('0.1.0');
+  .description('Localization linter + AI-powered fill for game development. Static checks (placeholder parity, length overflow) run before any AI; AI translates only what passes.')
+  .version('0.2.0');
+
+program
+  .command('lint')
+  .description('Deterministic checks on existing translations: placeholder parity, length overflow, per-key caps. No AI, no API key required.')
+  .requiredOption('-s, --source <file>', 'Source locale file (e.g. en.json)')
+  .requiredOption('-t, --target <file...>', 'One or more target locale files (e.g. ru.json kk.json)')
+  .option('-r, --rules <file>', 'Path to a JSON rules file (maxLengthRatio, maxLengthByKey, severity overrides)')
+  .option('--warnings-as-errors', 'Exit non-zero on warnings as well as errors')
+  .action(async (options: { source: string; target: string[]; rules?: string; warningsAsErrors?: boolean }) => {
+    try {
+      const code = await lintCommand(options);
+      process.exit(code);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      process.exit(1);
+    }
+  });
 
 program
   .command('fill')

@@ -1,7 +1,7 @@
 {
   "name": "localization-assistant",
-  "version": "0.1.0",
-  "description": "AI-powered locale file filler for game development. Reads source-language JSON, finds missing keys in target locales, generates translations via Claude with game context.",
+  "version": "0.2.0",
+  "description": "Localization linter + AI fill for game development. Static checks (placeholder parity, length overflow, per-key caps) run before any AI; AI translates only what passes.",
   "type": "module",
   "main": "./dist/cli/index.js",
   "bin": {
