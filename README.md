@@ -5,7 +5,7 @@
 [![Modules](https://img.shields.io/badge/modules-3-success)](#what-is-gamesai)
 [![Live demo](https://img.shields.io/badge/live-boilergen--eight.vercel.app-orange)](https://boilergen-eight.vercel.app)
 
-> Open-source AI platform for game development. Tools that eliminate the rote work in every department of a game studio so the team can focus on what's actually engineering, design, and creative work.
+> **Ship a richer feature in 1 day instead of 1 week.** Open-source toolkit that eliminates the rote work — boilerplate, validation, localization — across every department of a game studio. Deterministic core, optional AI, owned by the developer.
 
 🌐 **Live demo:** https://boilergen-eight.vercel.app
 📦 **Source:** https://github.com/Sariev-Alizhan/GamesAI
@@ -18,11 +18,24 @@ A growing collection of tools, each focused on one boring-but-time-consuming par
 | Module | What it does | Status |
 |---|---|---|
 | **[boilergen/](./boilergen/)** | YAML entity → boilerplate code across the stack (C++ / Node / Flutter / Godot / Unity / i18n) | v1.x — production-ready |
-| **[tools/localization-assistant/](./tools/localization-assistant/)** | AI fills missing translations in your locale JSON files | v0.1 — MVP |
+| **[tools/localization-assistant/](./tools/localization-assistant/)** | Static checks (missing keys, length overflow, glyph coverage) + opt-in AI fill of locale JSON | v0.1 — MVP |
 | **[tools/schema-validator/](./tools/schema-validator/)** | Catches broken cross-references (loot pointing at a deleted item, level pool with a typo'd enemy id) before runtime | v0.1 — MVP |
 | _More modules coming_ | Balance simulator, QA tooling, LiveOps anomaly detection, AI code reviewer... | Phased per [VISION.md](./VISION.md) |
 
 Every module follows the same architecture: **deterministic core + AI as opt-in layer + open-source forever**.
+
+## How we're different
+
+| | GamesAI | modl.ai (closest neighbour) | Inworld / Charisma | Layer / Promethean | Copilot / Cursor |
+|---|---|---|---|---|---|
+| **Bucket** | Engine-aware codegen + cross-ref validation + localization | AI QA bots | Generative NPC dialogue | Generative final art | General AI coding |
+| **Source** | Open-source (MIT) | Closed-SaaS | Closed-SaaS | Closed-SaaS | Closed |
+| **AI posture** | Deterministic core, AI is opt-in | AI-first by design | AI is the product | AI is the product | AI-first |
+| **Game-domain knowledge** | Yes (FiveM / altV / Unity / RP-server schemas) | Some (QA-flavored) | Some (narrative) | Yes (art) | None |
+| **Self-hostable** | Yes | No | No | No | No |
+| **Lock-in** | None — fork it | Vendor SaaS | Vendor SaaS | Vendor SaaS | Vendor SaaS |
+
+Nothing in this table is a swipe at those products — they live in different buckets. **The bucket "deterministic engine-aware codegen + cross-ref validation + localization, OSS, for RP/multiplayer studios" is empty, and that's what GamesAI fills.**
 
 ## Why this exists
 
@@ -40,9 +53,9 @@ See [VISION.md](./VISION.md) for the long-term direction and [knowledge-base/sou
 GamesAI/
 ├── boilergen/                       Module 1: code generator
 │   ├── src/{core,cli,web,mcp,ai}/   Engine + four interfaces (CLI, web, MCP, AI Describe)
-│   ├── plugins/                     Per-engine plugins (gm1, generic-rp, godot-2d-platformer, unity-rpg)
+│   ├── plugins/                     Per-engine plugins (gm1, generic-rp, godot-2d-platformer, unity-rpg, unity-mobile-shooter)
 │   ├── schemas/                     YAML examples per plugin
-│   └── tests/                       ~200 Vitest tests
+│   └── tests/                       221 Vitest tests
 │
 ├── tools/
 │   ├── localization-assistant/      Module 2: AI-powered locale filler
@@ -102,6 +115,8 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md). Highest-value contributions:
 ## License
 
 [MIT](./LICENSE) — fork it, ship it, sell it. Just keep the notice.
+
+For third-party licenses, AI model posture (what we use, what we refuse, why), and the policy for adding new dependencies, see [NOTICE.md](./NOTICE.md).
 
 ---
 
