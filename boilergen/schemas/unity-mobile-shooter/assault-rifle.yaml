@@ -1,0 +1,23 @@
+# Reverse-derived from Flump repo: Assets/_Project/ScriptableObjects/AssaultRifle_Data.asset
+id: assault_rifle
+type: weapon
+name: Assault Rifle
+data:
+  assetName: AssaultRifle_Data
+  scriptGuid: f40b3035ee44f5c4ba404f6d0405ef9d
+  baseDamage: 20
+  range: 100
+  fireRate: 0.1
+  isAutomatic: true
+  magazineSize: 30
+  reserveAmmo: 90
+  reloadTime: 2
+  recoilAmount: 1
+  recoilPattern:
+    x: 0.3
+    y: 0.8
+  recoilRecoverySpeed: 5
+  baseSpread: 0.01
+  maxSpread: 0.1
+  spreadIncreasePerShot: 0.01
+  spreadDecreaseSpeed: 5

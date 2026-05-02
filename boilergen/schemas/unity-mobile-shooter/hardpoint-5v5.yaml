@@ -1,0 +1,16 @@
+# Reverse-derived from: Assets/_Project/ScriptableObjects/GameModes/GameMode_Hardpoint5v5.asset
+id: hardpoint_5v5
+type: gamemode
+name: Hardpoint 5v5
+data:
+  assetName: GameMode_Hardpoint5v5
+  scriptGuid: 92c75332275f2204b877c89f7b1ea038
+  description: Capture and hold the zone to reach 150 points!
+  modeType: 3          # Hardpoint5v5
+  playersPerTeam: 5
+  scoreLimit: 150
+  matchDurationSeconds: 600
+  enableOvertime: true
+  gameSceneName: Game
+  showInMenu: true
+  sortOrder: 3

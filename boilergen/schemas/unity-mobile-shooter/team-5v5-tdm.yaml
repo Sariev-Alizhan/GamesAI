@@ -1,0 +1,16 @@
+# Reverse-derived from: Assets/_Project/ScriptableObjects/GameModes/GameMode_Team5v5TDM.asset
+id: team_5v5_tdm
+type: gamemode
+name: Team Deathmatch 5v5
+data:
+  assetName: GameMode_Team5v5TDM
+  scriptGuid: 92c75332275f2204b877c89f7b1ea038
+  description: Classic 5v5 battle. First team to 50 kills!
+  modeType: 2          # Team5v5TDM
+  playersPerTeam: 5
+  scoreLimit: 50
+  matchDurationSeconds: 600
+  enableOvertime: true
+  gameSceneName: Game
+  showInMenu: true
+  sortOrder: 2

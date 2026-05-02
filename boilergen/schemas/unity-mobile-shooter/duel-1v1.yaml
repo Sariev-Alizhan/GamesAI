@@ -1,0 +1,16 @@
+# Reverse-derived from: Assets/_Project/ScriptableObjects/GameModes/GameMode_Duel1v1.asset
+id: duel_1v1
+type: gamemode
+name: Duel 1v1
+data:
+  assetName: GameMode_Duel1v1
+  scriptGuid: 92c75332275f2204b877c89f7b1ea038
+  description: 1v1 battle. First to 5 kills wins!
+  modeType: 0          # Duel1v1
+  playersPerTeam: 1
+  scoreLimit: 5
+  matchDurationSeconds: 180
+  enableOvertime: true
+  gameSceneName: Game
+  showInMenu: true
+  sortOrder: 0

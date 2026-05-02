@@ -1,0 +1,16 @@
+# Reverse-derived from: Assets/_Project/ScriptableObjects/GameModes/GameMode_Practice.asset
+id: practice
+type: gamemode
+name: Practice vs Bots
+data:
+  assetName: GameMode_Practice
+  scriptGuid: 92c75332275f2204b877c89f7b1ea038
+  description: Train your skills against AI bots
+  modeType: 4          # Practice
+  playersPerTeam: 1
+  scoreLimit: 999
+  matchDurationSeconds: 999
+  enableOvertime: false
+  gameSceneName: Game
+  showInMenu: true
+  sortOrder: 4

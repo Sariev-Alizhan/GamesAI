@@ -1,0 +1,16 @@
+# Reverse-derived from: Assets/_Project/ScriptableObjects/GameModes/GameMode_Team3v3TDM.asset
+id: team_3v3_tdm
+type: gamemode
+name: Team3v3
+data:
+  assetName: GameMode_Team3v3TDM
+  scriptGuid: 92c75332275f2204b877c89f7b1ea038
+  description: 3v3 team battle. Reach 40 kills to win!
+  modeType: 1          # Team3v3TDM
+  playersPerTeam: 3
+  scoreLimit: 40
+  matchDurationSeconds: 420
+  enableOvertime: true
+  gameSceneName: Game
+  showInMenu: true
+  sortOrder: 1
