@@ -64,17 +64,38 @@ Use them as starting points.
 
 ## Output structure
 
-Generates code into four targets:
+Generates code into five targets (job has all five, others have four):
 
 ```
 <output>/
-├── cpp-server/        # game-server-side: classes for Job / Vehicle / Weapon
-├── node-api/          # admin REST API endpoints for editing/listing
-├── flutter-admin/     # admin form widget
-└── shared/            # locale JSON (ru/en/kk placeholders)
+├── cpp-server/                  # game-server-side: classes for Job / Vehicle / Weapon / etc.
+├── node-api/                    # admin REST API endpoints for editing/listing
+├── flutter-admin/               # admin form widget
+├── shared/                      # locale JSON (ru/en/kk placeholders)
+└── fivem-qb/                    # FiveM/QBCore drop-in resource per job (job entity only, v1)
+    └── jobs/<id>/
+        ├── fxmanifest.lua       # cerulean, dependencies { 'qb-core' }
+        ├── config.lua           # Config.Job table with grades
+        ├── server/main.lua      # QBCore.Functions.AddJob registration + payroll stub
+        ├── client/main.lua      # OnJobUpdate handler + /toggleduty<Job> command
+        └── migrations/001_seed.sql  # optional INSERT, commented by default
 ```
 
 If you fork this plugin into a different stack (e.g. Unity C# server + Vue admin), just swap the templates inside each `targets/<layer>/<entity-type>/` folder. The schema stays the same.
+
+## FiveM/QBCore output (job entity)
+
+The `fivem-qb` target produces a complete drop-in resource — a server owner can copy `<output>/fivem-qb/jobs/<id>/` into their `resources/` folder and `ensure <id>` it.
+
+The generated manifest is structured to **pass `schema-validator check-fivem` by construction** (see `tools/schema-validator/`):
+
+- `fx_version 'cerulean'` and `game 'gta5'` are always present
+- Every `@<resource>/...` reference is reflected in `dependencies { ... }` (we use the modern exports-based pattern, so there are no `@qb-core/...` shared_scripts at all — just `dependencies { 'qb-core' }`)
+- `lua54 'yes'` is set so modern Lua features compile
+
+Generated `client/main.lua` exposes `/toggleduty<PascalJob>` for QA — strip it before shipping if you don't want player-facing duty toggles. Generated `server/main.lua` includes a stub event `<job>:server:paycheck` you can hook your custom payout logic into; QBCore's default paycheck system already pays based on `Player.PlayerData.job.grade.payment` so the stub is opt-in.
+
+v1 covers job only. Vehicle / weapon / business / organization / family / property FiveM targets are tracked for v2 (each maps to its own QBCore convention — `qb-vehicleshop`, `qb-shops`, `qb-gangs`, etc.).
 
 ## Open questions
 

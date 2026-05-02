@@ -1,0 +1,32 @@
+-- {{name}} — server-side QBCore registration
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+
+local QBCore = exports['qb-core']:GetCoreObject()
+
+-- Register the job with QBCore on resource start. AddJob is idempotent —
+-- safe to call again on /restart.
+CreateThread(function()
+    QBCore.Functions.AddJob(Config.Job.name, {
+        label       = Config.Job.label,
+        defaultDuty = Config.Job.defaultDuty,
+        offDutyPay  = Config.Job.offDutyPay,
+        grades      = Config.Job.grades,
+    })
+    print(('[{{kebabCase id}}] Registered job "%s" with %d grade(s).'):format(
+        Config.Job.label,
+        #Config.Job.grades
+    ))
+end)
+
+-- Stub: payroll handler. QBCore's default paycheck system pays based on
+-- Player.PlayerData.job.grade.payment automatically. Override here if
+-- this job needs a custom payout (e.g. per-trip taxi fares).
+
+RegisterNetEvent('{{kebabCase id}}:server:paycheck', function()
+    local Player = QBCore.Functions.GetPlayer(source)
+    if not Player or Player.PlayerData.job.name ~= Config.Job.name then return end
+    local payment = Player.PlayerData.job.grade.payment or 0
+    if payment > 0 then
+        Player.Functions.AddMoney('bank', payment, '{{kebabCase id}}-paycheck')
+    end
+end)

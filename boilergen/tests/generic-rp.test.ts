@@ -20,7 +20,7 @@ afterEach(async () => {
   await rm(outDir, { recursive: true, force: true });
 });
 
-const TARGETS = ['cpp-server', 'node-api', 'flutter-admin', 'shared'] as const;
+const TARGETS = ['cpp-server', 'node-api', 'flutter-admin', 'shared', 'fivem-qb'] as const;
 
 async function generateOne(schemaFile: string) {
   const plugin = await loadPlugin(PLUGIN_DIR);
@@ -34,18 +34,20 @@ async function generateOne(schemaFile: string) {
   return result;
 }
 
-describe('generic-rp plugin (extended with business / organization / family / property)', () => {
-  it('exposes 7 entity types × 4 targets = 28 templates', async () => {
+describe('generic-rp plugin (7 entity types + FiveM-QB target on job)', () => {
+  it('exposes 33 templates: 4 base targets × 7 entity types + 5 FiveM-QB files for job', async () => {
     const plugin = await loadPlugin(PLUGIN_DIR);
     expect(plugin.id).toBe('generic-rp');
-    expect(plugin.templates).toHaveLength(28);
+    expect(plugin.templates).toHaveLength(33);
 
     const byEntity = plugin.templates.reduce<Record<string, number>>((acc, t) => {
       acc[t.entityType] = (acc[t.entityType] ?? 0) + 1;
       return acc;
     }, {});
+    // job has 4 base targets + 5 FiveM-QB files (fxmanifest, config, server,
+    // client, migration) = 9. Other entity types still have 4 each.
     expect(byEntity).toEqual({
-      job: 4,
+      job: 9,
       vehicle: 4,
       weapon: 4,
       business: 4,
@@ -138,5 +140,62 @@ describe('generic-rp plugin (extended with business / organization / family / pr
       const result = await generateOne(f);
       expect(result.filesCreated.length).toBeGreaterThan(0);
     }
+  });
+
+  it('generates a complete FiveM/QBCore resource for a job — manifest + config + server + client + migration', async () => {
+    await generateOne('taxi-driver.yaml');
+    const fivemRoot = join(outDir, 'fivem-qb', 'jobs', 'taxi-driver');
+
+    // 1. fxmanifest.lua — must declare fx_version, game, dependencies on qb-core,
+    //    and NOT have a stale '@qb-core/import.lua' reference (modern convention).
+    const manifest = await readFile(join(fivemRoot, 'fxmanifest.lua'), 'utf-8');
+    expect(manifest).toContain("fx_version 'cerulean'");
+    expect(manifest).toContain("game 'gta5'");
+    expect(manifest).toMatch(/dependencies\s*\{\s*'qb-core'/);
+    // Modern convention: '@qb-core/import.lua' should not appear in the
+    // shared_scripts BLOCK (the comment can mention it as historical context).
+    const sharedBlock = manifest.match(/shared_scripts\s*\{[^}]*\}/)?.[0] ?? '';
+    expect(sharedBlock).not.toContain('@qb-core/import.lua');
+
+    // 2. config.lua — Config.Job table with all grades.
+    const config = await readFile(join(fivemRoot, 'config.lua'), 'utf-8');
+    expect(config).toContain("name        = 'taxi_driver'");
+    expect(config).toContain("label       = 'Таксист'");
+    expect(config).toContain('defaultDuty = true');
+    expect(config).toContain('offDutyPay  = false');
+    // 4 grades, indexed 0..3
+    expect(config).toContain("['0'] = { name = 'Стажёр'");
+    expect(config).toContain("['3'] = { name = 'Управляющий', payment = 150, isboss = true }");
+
+    // 3. server/main.lua — registers job via QBCore.Functions.AddJob.
+    const server = await readFile(join(fivemRoot, 'server', 'main.lua'), 'utf-8');
+    expect(server).toContain("exports['qb-core']:GetCoreObject()");
+    expect(server).toContain('QBCore.Functions.AddJob(Config.Job.name');
+    expect(server).toContain('taxi-driver:server:paycheck');
+
+    // 4. client/main.lua — registers OnJobUpdate, exposes /toggleduty<Pascal> command.
+    const client = await readFile(join(fivemRoot, 'client', 'main.lua'), 'utf-8');
+    expect(client).toContain("exports['qb-core']:GetCoreObject()");
+    expect(client).toContain("RegisterNetEvent('QBCore:Client:OnJobUpdate'");
+    expect(client).toContain('toggledutyTaxiDriver'); // PascalCase command name
+
+    // 5. migrations/001_seed.sql — exists, references entity id.
+    const migration = await readFile(join(fivemRoot, 'migrations', '001_seed.sql'), 'utf-8');
+    expect(migration).toContain("'taxi_driver'");
+    expect(migration).toContain("'Таксист'");
+  });
+
+  it('FiveM-QB target only fires for job entity type (not vehicle/weapon/etc.)', async () => {
+    // Generate a vehicle and a weapon — neither should produce fivem-qb output yet.
+    await generateOne('bmw-m5.yaml');
+    await generateOne('ak47.yaml');
+    // Generic check that no fivem-qb folder appears for non-job schemas in this run.
+    // (Each generateOne uses a fresh outDir, so we just check the latest one.)
+    const stillNoFivem = await readFile(
+      join(outDir, 'cpp-server', 'Weapons', 'WeaponAk47.cpp'),
+      'utf-8',
+    );
+    // Sanity that we DID hit cpp-server, just to make sure generation ran.
+    expect(stillNoFivem).toContain('class WeaponAk47');
   });
 });

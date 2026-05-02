@@ -1,0 +1,18 @@
+-- Optional: persist a row for {{name}} in your `jobs` table.
+-- QBCore by default manages jobs in-memory via QBCore.Functions.AddJob, so this
+-- migration is OFF by default (commented). Run only if your server uses a
+-- jobs-table-backed setup (some forks do).
+--
+-- Compatible with MySQL 8.0+ (escape names with backticks, no reserved words).
+
+-- INSERT INTO `jobs` (`name`, `label`, `default_duty`, `off_duty_pay`)
+-- VALUES (
+--     '{{id}}',
+--     '{{name}}',
+--     {{#if data.defaultDuty}}1{{else}}0{{/if}},
+--     {{#if data.offDutyPay}}1{{else}}0{{/if}}
+-- )
+-- ON DUPLICATE KEY UPDATE
+--     `label` = VALUES(`label`),
+--     `default_duty` = VALUES(`default_duty`),
+--     `off_duty_pay` = VALUES(`off_duty_pay`);

@@ -1,0 +1,33 @@
+-- Auto-generated FiveM/QBCore resource for {{name}}
+-- Source: schemas/generic-rp/{{kebabCase id}}.yaml
+-- Regenerate via: boilergen generate <schema> --plugin generic-rp
+-- Manifest is structured to PASS `schema-validator check-fivem` by construction.
+
+fx_version 'cerulean'
+game 'gta5'
+
+author 'Boilergen'
+description '{{name}} — auto-generated QBCore job'
+version '0.1.0'
+
+-- Modern QBCore convention: no @qb-core/import.lua shared_script.
+-- Access the framework at runtime via exports['qb-core']:GetCoreObject().
+-- The dependencies block ensures qb-core loads first.
+
+shared_scripts {
+    'config.lua',
+}
+
+server_scripts {
+    'server/main.lua',
+}
+
+client_scripts {
+    'client/main.lua',
+}
+
+dependencies {
+    'qb-core',
+}
+
+lua54 'yes'

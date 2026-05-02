@@ -1,0 +1,21 @@
+-- {{name}} — job config
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+-- Edit values here; regenerate from YAML if you want a clean reset.
+
+Config = Config or {}
+
+Config.Job = {
+    name        = '{{id}}',
+    label       = '{{name}}',
+    description = '{{data.description}}',
+    category    = '{{data.category}}',
+    defaultDuty = {{data.defaultDuty}},
+    offDutyPay  = {{data.offDutyPay}},
+
+    -- Grades — in QBCore the grade dictionary is keyed by string-int.
+    -- Order matters; index 0 is the lowest grade. isboss controls hire/fire
+    -- permissions and access to business funds.
+    grades = {
+{{#each data.grades}}        ['{{@index}}'] = { name = '{{this.name}}', payment = {{this.payment}}, isboss = {{this.isBoss}} },
+{{/each}}    },
+}

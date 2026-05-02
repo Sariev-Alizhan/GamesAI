@@ -1,0 +1,36 @@
+-- {{name}} — client-side QBCore integration
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+
+local QBCore = exports['qb-core']:GetCoreObject()
+
+-- Track local copy of the player's job so we can react to job changes
+-- without polling.
+local PlayerJob = {}
+
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+    local PlayerData = QBCore.Functions.GetPlayerData()
+    PlayerJob = PlayerData.job
+end)
+
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(job)
+    PlayerJob = job
+    if job.name == Config.Job.name then
+        QBCore.Functions.Notify(
+            ('You are now on duty as {{name}} (%s).'):format(job.grade.name),
+            'success'
+        )
+    end
+end)
+
+-- Quick command for QA / testing — toggles duty status on /toggleduty{{pascalCase id}}.
+-- Remove or hide behind admin check before shipping.
+RegisterCommand('toggleduty{{pascalCase id}}', function()
+    if PlayerJob.name ~= Config.Job.name then
+        QBCore.Functions.Notify(
+            ('You are not employed as {{name}}.'),
+            'error'
+        )
+        return
+    end
+    TriggerServerEvent('QBCore:ToggleDuty')
+end, false)
