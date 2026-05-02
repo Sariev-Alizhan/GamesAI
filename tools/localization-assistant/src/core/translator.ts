@@ -1,8 +1,12 @@
-// AI translation layer using Claude. Prompt caching on the system block
-// since it's stable across requests.
+// AI translation layer. Dispatches to one of:
+//   - Anthropic Claude API (default)  — game-specific tone, placeholder-aware
+//   - DeepL Pro API                    — high quality plain text, BYO key
+// Glossary entries short-circuit translation for known franchise terms before
+// any provider call.
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { MissingKey, TranslateOptions, Translation } from './types.js';
+import { translateBatchDeepL } from './translator-deepl.js';
 
 const SYSTEM_PROMPT_BASE = `You are a translator specialized in **video game localization**.
 
@@ -74,6 +78,15 @@ export async function translateBatch(
   }
 
   if (remaining.length === 0) return fromGlossary;
+
+  // Route to provider. DeepL handles its own batching/networking; Anthropic
+  // path follows below.
+  const provider = opts.provider ?? 'anthropic';
+  if (provider === 'deepl') {
+    const deeplOpts = opts.apiKey !== undefined ? { apiKey: opts.apiKey } : {};
+    const deeplResults = await translateBatchDeepL(remaining, sourceLanguage, deeplOpts);
+    return [...fromGlossary, ...deeplResults];
+  }
 
   // Group by target language so we can do one batch per language with cache.
   const byLanguage = new Map<string, MissingKey[]>();

@@ -25,9 +25,15 @@ GamesAI's principle is **deterministic core + opt-in AI**. Every module works wi
 ### Currently used
 
 - **Anthropic Claude API** (`@anthropic-ai/sdk`)
-  - Used by: boilergen (AI Describe), localization-assistant (translation fill)
+  - Used by: boilergen (AI Describe), localization-assistant (translation fill, default provider)
   - License posture: SOC 2 Type II; **does not train on customer data** (Anthropic ToS); commercial use OK.
   - User must provide `ANTHROPIC_API_KEY`. No baked-in keys, no shared inference.
+
+- **DeepL Pro API** (no SDK — direct fetch to api.deepl.com)
+  - Used by: localization-assistant (`fill --provider deepl`, opt-in alternative)
+  - License posture: commercial use OK on paid tier; we explicitly do NOT support DeepL Free (TOS forbids "creating similar product...based on machine learning, including translations").
+  - User must provide `DEEPL_API_KEY` for the Pro tier. They pay DeepL per character directly. No baked-in keys.
+  - Limitation: DeepL doesn't support Kazakh, Uzbek, Thai, etc. — for those, use the Anthropic provider.
 
 ### On the roadmap (horizon 2-3, see ROADMAP.md)
 
@@ -35,7 +41,6 @@ GamesAI's principle is **deterministic core + opt-in AI**. Every module works wi
 - **Groq Cloud** free tier — secondary fallback; commercial use OK; **does not train on prompts** ([source](https://awesomeagents.ai/tools/free-ai-inference-providers-2026/)).
 - **Cerebras** free tier — tertiary fallback; same posture as Groq.
 - **OPUS-MT (Helsinki-NLP)** — CC-BY 4.0 (commercial OK with attribution); recommended **default offline translation engine** for localization-assistant; lower per-call quality than Claude but legally clean and zero-cost.
-- **DeepL Pro API** — opt-in adapter, BYO-key; commercial use OK on paid tier; user must provide their own key.
 - **Crowdin / Lokalise APIs** — file-format adapters; OSS-friendly; native open APIs.
 - **NVIDIA Audio2Face SDK** — MIT (plugins) + Apache 2.0 (Python); shipping in F1 25, Alien: Rogue Incursion. Pairs with localization-assistant for "translate dialog → dub → relipsync."
 

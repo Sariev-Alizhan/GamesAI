@@ -86,13 +86,18 @@ Exit code: `0` if clean, `1` if any errors. Suitable for CI gates.
 
 ### `fill` — AI translation of missing/stub keys
 
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...
+Two providers — pick by `--provider`:
 
-# Basic fill — auto-detects source as 'en' from filename
+```bash
+# Default: Anthropic Claude (game-specific tone, placeholder-aware)
+export ANTHROPIC_API_KEY=sk-ant-...
 npx localization-assistant fill --source en.json --target ru.json kk.json
 
-# With game context — improves translation tone
+# DeepL Pro (high-quality plain-text MT, BYO key)
+export DEEPL_API_KEY=...
+npx localization-assistant fill --source en.json --target ru.json de.json --provider deepl
+
+# With game context (Anthropic only — DeepL ignores it)
 npx localization-assistant fill \
   --source en.json \
   --target ru.json kk.json \
@@ -101,6 +106,19 @@ npx localization-assistant fill \
 # Dry run — see what would be translated without calling AI or writing files
 npx localization-assistant fill --source en.json --target ru.json --dry-run
 ```
+
+**Provider tradeoffs:**
+
+| | Anthropic Claude | DeepL Pro |
+|---|---|---|
+| Game tone (`--context`) | ✅ system prompt | ❌ ignored |
+| Placeholder preservation | ✅ instructed | ⚠️ unreliable — run `lint` after |
+| Cost | per token + cached system prompt (~$0.50 / 500 keys × 3 langs) | per character (BYO billing with DeepL) |
+| Languages | any | major European + Asian (no Kazakh, Uzbek, Thai, etc.) |
+| Throughput | batched JSON, one call per language | one HTTP request per language |
+| Where to get key | https://console.anthropic.com/settings/keys | https://www.deepl.com/pro-api |
+
+DeepL Free is **not** supported — its TOS forbids "creating similar product...whose primary purpose is to provide services based on machine learning, including translations." Pro tier is fine: you bring your own key, you pay DeepL directly per character.
 
 **Recommended workflow:** `lint` → human review of any errors → `fill` for the missing keys → `lint` again to verify the AI's output passes the same checks.
 
@@ -170,15 +188,15 @@ This is the value of multi-module platform: separate concerns, but the workflows
 
 ## Status
 
-**v0.2.0 — linter + AI fill.** Two commands: `lint` (deterministic checks, no API key, runs in milliseconds), `fill` (AI translation of missing keys). 51 tests covering core (extractor, writer, linter).
+**v0.2.0 — linter + AI fill (Anthropic + DeepL).** Two commands (`lint`, `fill`), two providers. 64 tests covering core (extractor, writer, linter, DeepL provider).
 
 Roadmap:
 - v0.3 — `extract` command (find translation keys directly in source code, not JSON)
 - v0.4 — Crowdin / Lokalise file-format adapters (XLIFF, PO push-back via API)
-- v0.5 — DeepL Pro adapter (BYO-key, opt-in alternative to Claude)
-- v0.6 — Glyph coverage check (verify target text fits in a specified font's codepoint set)
-- v0.7 — Web UI integrated with Boilergen playground
-- v0.8 — Translation memory (cache common phrases per project)
+- v0.5 — Glyph coverage check (verify target text fits in a specified font's codepoint set)
+- v0.6 — Web UI integrated with Boilergen playground
+- v0.7 — Translation memory (cache common phrases per project)
+- v0.8 — Auto-fallback chain: DeepL for supported langs → Claude for the rest in one fill
 
 ## License
 

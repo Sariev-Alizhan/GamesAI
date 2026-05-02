@@ -32,12 +32,21 @@ program
   .description('Fill missing keys in target locales using AI translation')
   .requiredOption('-s, --source <file>', 'Source locale file (e.g. en.json)')
   .requiredOption('-t, --target <file...>', 'One or more target locale files (e.g. ru.json kk.json)')
-  .option('-c, --context <text>', 'Game context to improve translation quality (e.g. "fantasy RPG with medieval tone")')
+  .option('-c, --context <text>', 'Game context to improve translation quality (e.g. "fantasy RPG with medieval tone"). Anthropic only.')
   .option('-g, --glossary <file>', 'Path to a glossary JSON for consistent terminology (future)')
+  .option('-p, --provider <name>', 'Translation provider: "anthropic" (default) or "deepl" (Pro key required)', 'anthropic')
   .option('--dry-run', 'Show what would be translated without calling AI or writing files')
-  .action(async (options: { source: string; target: string[]; context?: string; glossary?: string; dryRun?: boolean }) => {
+  .action(async (options: {
+    source: string;
+    target: string[];
+    context?: string;
+    glossary?: string;
+    provider?: string;
+    dryRun?: boolean;
+  }) => {
     try {
-      await fillCommand(options);
+      const provider = options.provider === 'deepl' ? 'deepl' : 'anthropic';
+      await fillCommand({ ...options, provider });
     } catch (err) {
       console.error(err instanceof Error ? err.message : err);
       process.exit(1);

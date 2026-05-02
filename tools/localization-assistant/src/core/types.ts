@@ -40,18 +40,30 @@ export interface Translation {
   rationale?: string;
 }
 
+export type TranslationProvider = 'anthropic' | 'deepl';
+
 export interface TranslateOptions {
   apiKey?: string;
   /**
+   * Which translation provider to use.
+   *   'anthropic' (default) — Claude API. Best for game-specific tone, glossary,
+   *      and placeholder preservation. Supports any language pair.
+   *   'deepl'             — DeepL Pro API. Higher per-call quality on plain text
+   *      for European/major Asian languages, but doesn't preserve {placeholder}
+   *      tokens reliably (run `lint` after fill to catch drops). Pro only —
+   *      Free tier TOS forbids wrapping.
+   */
+  provider?: TranslationProvider;
+  /**
    * Optional context to inject into the system prompt — e.g. "this is a
    * fantasy RPG game with medieval tone". Improves translation quality
-   * for genre-specific terminology.
+   * for genre-specific terminology. Anthropic-only.
    */
   gameContext?: string;
   /**
    * Glossary of terms that must translate consistently — e.g.
    * { "Fireball": { "ru": "Огненный шар", "kk": "От шары" } }
-   * Glossary entries take precedence over AI translation.
+   * Glossary entries take precedence over any AI translation. Provider-agnostic.
    */
   glossary?: Record<string, Record<string, string>>;
 }
