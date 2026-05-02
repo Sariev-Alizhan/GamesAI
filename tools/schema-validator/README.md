@@ -1,8 +1,10 @@
 # Schema Validator
 
-> Cross-reference validator for game data schemas. Catches broken references — loot table pointing at a non-existent item, level pool pointing at a deleted enemy, quest reward pointing at a typo'd item id — **before runtime**.
+> Cross-reference validator for game data + a FiveM resource graph linter. Catches broken references — loot table pointing at a non-existent item, level pool pointing at a deleted enemy, FiveM dependency name mismatched against folder case — **before runtime**.
 
-**Module 3 in the [GamesAI platform](../../VISION.md).** Pairs naturally with Boilergen — Boilergen generates entities, Schema Validator confirms their cross-references resolve.
+**Module 3 in the [GamesAI platform](../../VISION.md).** Two modes:
+- **`check`** — YAML/JSON game-data schemas. Pairs with Boilergen output.
+- **`check-fivem`** — FiveM resources directory. Parses `fxmanifest.lua`, validates dependencies / script files / cross-resource refs.
 
 ## What it does
 
@@ -115,15 +117,50 @@ schema-validator check ./schemas --config ./validator.config.yaml
 
 If validation fails, the PR doesn't merge. Typos caught before they reach production.
 
+## FiveM mode (`check-fivem`)
+
+Validates a directory of FiveM resources. Each subfolder containing `fxmanifest.lua` (or legacy `__resource.lua`) is treated as a resource; categorisation folders (`[qb]`, `[standalone]`) are walked through transparently.
+
+```bash
+# Validate a FiveM resources directory
+npx schema-validator check-fivem ./resources
+
+# Treat warnings as errors for strict CI
+npx schema-validator check-fivem ./resources --strict
+
+# JSON output
+npx schema-validator check-fivem ./resources --json | jq '.stats'
+```
+
+**What it catches:**
+
+| Category | Severity | Example |
+|---|---|---|
+| `missing-manifest` | error | Folder looks like a resource but has no `fxmanifest.lua` |
+| `manifest-parse-error` | warning | Unterminated string, broken Lua syntax |
+| `missing-required-field` | error | `fx_version` or `game` not declared |
+| `unknown-game` | warning | `game 'fivenights'` (allowed: gta5, rdr3, common) |
+| `dependency-not-found` | error | `dependencies { 'qb-core' }` but no `qb-core/` folder in tree |
+| `dependency-case-mismatch` | error | Folder is `qb-core`, manifest declares `QB-Core` — Linux runners fail this |
+| `missing-script-file` | error | `client_scripts { 'client/main.lua' }` but file doesn't exist |
+| `cross-resource-no-dep` | warning | `shared_scripts { '@ox_lib/init.lua' }` but `ox_lib` not in `dependencies` |
+| `duplicate-resource` | error | Two folders with the same name in the tree |
+
+**Why this exists:** xEdit/TES5Edit-style cross-reference validation has existed for Bethesda mods for 15+ years. There is no equivalent OSS tool for FiveM/altV/RAGE-MP — every server owner runs into the same Linux case-sensitivity, missing-script-file, and broken-dependency footguns alone. This linter is the missing static-type-check for Lua resources.
+
+The Lua parser in `src/fivem/parser.ts` covers the narrow subset fxmanifests actually use — single-string fields, array literals, single-line + block comments, long-bracket `[[...]]` strings. Real Lua control flow (if/for/functions) is silently ignored without crashing — those resources just don't get validated.
+
 ## Status
 
-**v0.1.0 — MVP.** Single command (`check`), works on YAML schemas with `id/type/name/data` shape (the Boilergen convention).
+**v0.2.0 — YAML game-data + FiveM resource graph.** Two commands (`check`, `check-fivem`). 70 tests covering loader, reference-finder, validator, namespaces, FiveM parser, FiveM validator.
 
 Roadmap:
-- v0.2 — Pre-commit hook integration (`schema-validator install-hook`)
-- v0.3 — Watch mode for live validation during editing
-- v0.4 — Web UI showing the entity graph with broken edges highlighted
-- v0.5 — Format support beyond YAML (JSON, TOML)
+- v0.3 — Pre-commit hook integration (`schema-validator install-hook`)
+- v0.4 — Watch mode for live validation during editing
+- v0.5 — Web UI showing the entity graph with broken edges highlighted
+- v0.6 — Format support beyond YAML (JSON, TOML)
+- v0.7 — FiveM mode: SQL migration drift detection (column references in Lua vs schema)
+- v0.8 — FiveM mode: qb-target zone validation against ped models
 
 ## License
 

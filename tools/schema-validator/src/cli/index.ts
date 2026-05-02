@@ -6,6 +6,8 @@ import chalk from 'chalk';
 import yaml from 'js-yaml';
 import { validateDirectory } from '../core/validator.js';
 import type { Issue, ValidatorConfig } from '../core/types.js';
+import { validateFiveMResources } from '../fivem/validator.js';
+import type { FxIssue, FxValidationResult } from '../fivem/types.js';
 
 const program = new Command();
 
@@ -43,7 +45,71 @@ program
     }
   });
 
+program
+  .command('check-fivem')
+  .description('Validate a FiveM resources directory: parse fxmanifest.lua, check deps match folder names case-sensitively, verify referenced script files exist, flag cross-resource refs without declared deps.')
+  .argument('<dir>', 'Resources directory (e.g. resources/)')
+  .option('--strict', 'Treat warnings as errors')
+  .option('--json', 'Emit JSON output instead of human-readable')
+  .action(async (dir: string, options: { strict?: boolean; json?: boolean }) => {
+    try {
+      const result = await validateFiveMResources(resolve(dir));
+      if (options.json) {
+        console.log(JSON.stringify({ ...result, resources: result.resources.map(({ manifest, ...r }) => r) }, null, 2));
+      } else {
+        printFiveMReport(result);
+      }
+      const failed = result.stats.errors > 0 || (options.strict && result.stats.warnings > 0);
+      process.exit(failed ? 1 : 0);
+    } catch (err) {
+      console.error(chalk.red('✗ ' + (err instanceof Error ? err.message : String(err))));
+      process.exit(2);
+    }
+  });
+
 program.parse();
+
+function printFiveMReport(result: FxValidationResult): void {
+  console.log(chalk.bold('schema-validator (FiveM mode)'));
+  console.log();
+  console.log(chalk.dim(
+    `Found ${result.stats.totalResources} resource(s), ` +
+    `${result.stats.totalDependencies} declared deps, ` +
+    `${result.stats.totalScriptReferences} script references.`,
+  ));
+  console.log();
+
+  if (result.issues.length === 0) {
+    console.log(chalk.green('✓ All resources valid. No issues found.'));
+    return;
+  }
+
+  // Group by resource for readability
+  const byResource = new Map<string, FxIssue[]>();
+  for (const i of result.issues) {
+    const list = byResource.get(i.resource) ?? [];
+    list.push(i);
+    byResource.set(i.resource, list);
+  }
+
+  for (const [resource, list] of byResource) {
+    console.log(chalk.bold(resource || '(tree-wide)') + chalk.dim(` — ${list.length} issue(s)`));
+    for (const issue of list) {
+      const prefix = issue.severity === 'error' ? chalk.red('  ✗') : chalk.yellow('  ⚠');
+      const cat = chalk.dim(`[${issue.category}]`);
+      console.log(`${prefix} ${cat} ${issue.message}`);
+      if (issue.path) console.log(chalk.dim(`     at ${issue.path}`));
+    }
+    console.log();
+  }
+
+  const summary = `${result.stats.errors} error(s), ${result.stats.warnings} warning(s)`;
+  if (result.stats.errors > 0) {
+    console.log(chalk.bold.red(`✗ ${summary}`));
+  } else {
+    console.log(chalk.bold.yellow(`⚠ ${summary}`));
+  }
+}
 
 async function loadConfig(path: string | undefined): Promise<ValidatorConfig> {
   if (!path) return {};

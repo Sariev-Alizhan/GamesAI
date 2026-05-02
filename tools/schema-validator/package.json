@@ -1,7 +1,7 @@
 {
   "name": "schema-validator",
-  "version": "0.1.0",
-  "description": "Cross-reference validator for game data schemas. Catches broken references (loot pointing to a non-existent item, level pool pointing to a deleted enemy) before runtime.",
+  "version": "0.2.0",
+  "description": "Cross-reference validator for game data schemas (YAML/JSON) + FiveM resource graph linter (fxmanifest.lua, dependency case-mismatch, missing script files, cross-resource refs).",
   "type": "module",
   "main": "./dist/cli/index.js",
   "bin": {
