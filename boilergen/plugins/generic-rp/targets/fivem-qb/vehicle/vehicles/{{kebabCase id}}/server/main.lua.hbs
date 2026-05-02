@@ -1,0 +1,28 @@
+-- {{name}} — server-side QBCore vehicle registration
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+
+local QBCore = exports['qb-core']:GetCoreObject()
+
+-- Register the vehicle into QBCore.Shared.Vehicles on resource start.
+-- This is the QBCore convention: the vehicles dealer / shop reads from
+-- QBCore.Shared.Vehicles[name] at runtime.
+CreateThread(function()
+    if not QBCore.Shared.Vehicles then
+        QBCore.Shared.Vehicles = {}
+    end
+    QBCore.Shared.Vehicles[Config.Vehicle.name] = {
+        name      = Config.Vehicle.label,
+        brand     = Config.Vehicle.dealer,
+        model     = Config.Vehicle.model,
+        price     = Config.Vehicle.price,
+        category  = Config.Vehicle.category,
+        hash      = GetHashKey(Config.Vehicle.model),
+        shop      = Config.Vehicle.dealer,
+        tradeable = Config.Vehicle.tradeable,
+    }
+    print(('[{{kebabCase id}}] Registered vehicle "%s" (model=%s, price=%d).'):format(
+        Config.Vehicle.label,
+        Config.Vehicle.model,
+        Config.Vehicle.price
+    ))
+end)

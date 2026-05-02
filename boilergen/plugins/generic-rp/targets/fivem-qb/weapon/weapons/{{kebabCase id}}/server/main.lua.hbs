@@ -1,0 +1,32 @@
+-- {{name}} — server-side QBCore weapon registration
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+
+local QBCore = exports['qb-core']:GetCoreObject()
+
+-- Register the weapon into QBCore.Shared.Weapons on resource start.
+-- The weapon shop / qb-weapons integration reads from this table at runtime.
+CreateThread(function()
+    if not QBCore.Shared.Weapons then
+        QBCore.Shared.Weapons = {}
+    end
+    local hash = GetHashKey(Config.Weapon.weaponHash)
+    QBCore.Shared.Weapons[hash] = {
+        name             = Config.Weapon.weaponHash,
+        label            = Config.Weapon.label,
+        weapontype       = Config.Weapon.category,
+        ammotype         = ('AMMO_%s'):format(Config.Weapon.category:upper()),
+        damagereason     = ('Killed by %s'):format(Config.Weapon.label),
+        damage           = Config.Weapon.damage,
+        firerate         = Config.Weapon.fireRate,
+        magazinesize     = Config.Weapon.magazineSize,
+        range            = Config.Weapon.range,
+        price            = Config.Weapon.price,
+        vendor           = Config.Weapon.vendor,
+        requiredLicense  = Config.Weapon.requiredLicense,
+    }
+    print(('[{{kebabCase id}}] Registered weapon "%s" (hash=%s, damage=%d).'):format(
+        Config.Weapon.label,
+        Config.Weapon.weaponHash,
+        Config.Weapon.damage
+    ))
+end)

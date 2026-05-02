@@ -1,0 +1,21 @@
+-- {{name}} — QBCore weapon config
+-- Auto-generated from schemas/generic-rp/{{kebabCase id}}.yaml
+-- Edit values; regenerate from YAML for clean reset.
+
+Config = Config or {}
+
+Config.Weapon = {
+    name          = '{{id}}',
+    label         = '{{name}}',
+    -- Combat layer — bound to game-engine ballistics.
+    weaponHash    = '{{constantCase id}}',         -- typical FiveM convention: WEAPON_<NAME>
+    category      = '{{data.combat.category}}',
+    damage        = {{data.combat.damage}},
+    fireRate      = {{data.combat.fireRate}},
+    magazineSize  = {{data.combat.magazineSize}},
+    range         = {{data.combat.range}},
+    -- Economy layer — pure RP.
+    price         = {{data.economy.price}},
+    vendor        = '{{data.economy.vendor}}',
+    requiredLicense = '{{data.economy.license}}',
+}

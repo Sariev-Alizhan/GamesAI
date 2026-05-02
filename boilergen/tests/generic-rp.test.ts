@@ -34,22 +34,24 @@ async function generateOne(schemaFile: string) {
   return result;
 }
 
-describe('generic-rp plugin (7 entity types + FiveM-QB target on job)', () => {
-  it('exposes 33 templates: 4 base targets × 7 entity types + 5 FiveM-QB files for job', async () => {
+describe('generic-rp plugin (7 entity types + FiveM-QB target on job/vehicle/weapon)', () => {
+  it('exposes 39 templates: 4 base targets × 7 entity types + FiveM-QB on job/vehicle/weapon', async () => {
     const plugin = await loadPlugin(PLUGIN_DIR);
     expect(plugin.id).toBe('generic-rp');
-    expect(plugin.templates).toHaveLength(33);
+    expect(plugin.templates).toHaveLength(39);
 
     const byEntity = plugin.templates.reduce<Record<string, number>>((acc, t) => {
       acc[t.entityType] = (acc[t.entityType] ?? 0) + 1;
       return acc;
     }, {});
-    // job has 4 base targets + 5 FiveM-QB files (fxmanifest, config, server,
-    // client, migration) = 9. Other entity types still have 4 each.
+    // FiveM-QB target adds:
+    //   - job: 5 files (fxmanifest, config, server, client, migration)
+    //   - vehicle: 3 files (fxmanifest, config, server) — no client logic for static config
+    //   - weapon: 3 files (fxmanifest, config, server)
     expect(byEntity).toEqual({
-      job: 9,
-      vehicle: 4,
-      weapon: 4,
+      job: 9,         // 4 base + 5 fivem-qb
+      vehicle: 7,     // 4 base + 3 fivem-qb
+      weapon: 7,      // 4 base + 3 fivem-qb
       business: 4,
       organization: 4,
       family: 4,
@@ -185,17 +187,40 @@ describe('generic-rp plugin (7 entity types + FiveM-QB target on job)', () => {
     expect(migration).toContain("'Таксист'");
   });
 
-  it('FiveM-QB target only fires for job entity type (not vehicle/weapon/etc.)', async () => {
-    // Generate a vehicle and a weapon — neither should produce fivem-qb output yet.
+  it('generates FiveM-QB vehicle resource — registers into QBCore.Shared.Vehicles', async () => {
     await generateOne('bmw-m5.yaml');
+    const root = join(outDir, 'fivem-qb', 'vehicles', 'bmw-m5');
+
+    const manifest = await readFile(join(root, 'fxmanifest.lua'), 'utf-8');
+    expect(manifest).toContain("fx_version 'cerulean'");
+    expect(manifest).toMatch(/dependencies\s*\{\s*'qb-core'/);
+
+    const config = await readFile(join(root, 'config.lua'), 'utf-8');
+    expect(config).toContain("name      = 'bmw_m5'");
+    expect(config).toContain("model     = 'bmw_m5_competition_2024'");
+    expect(config).toContain("category  = 'super'");
+    expect(config).toContain('price     = 950000');
+    expect(config).toContain('tradeable = true');
+
+    const server = await readFile(join(root, 'server', 'main.lua'), 'utf-8');
+    expect(server).toContain("exports['qb-core']:GetCoreObject()");
+    expect(server).toContain('QBCore.Shared.Vehicles[Config.Vehicle.name]');
+    expect(server).toContain('GetHashKey(Config.Vehicle.model)');
+  });
+
+  it('generates FiveM-QB weapon resource — registers into QBCore.Shared.Weapons', async () => {
     await generateOne('ak47.yaml');
-    // Generic check that no fivem-qb folder appears for non-job schemas in this run.
-    // (Each generateOne uses a fresh outDir, so we just check the latest one.)
-    const stillNoFivem = await readFile(
-      join(outDir, 'cpp-server', 'Weapons', 'WeaponAk47.cpp'),
-      'utf-8',
-    );
-    // Sanity that we DID hit cpp-server, just to make sure generation ran.
-    expect(stillNoFivem).toContain('class WeaponAk47');
+    const root = join(outDir, 'fivem-qb', 'weapons', 'ak47');
+
+    const config = await readFile(join(root, 'config.lua'), 'utf-8');
+    expect(config).toContain("name          = 'ak47'");
+    expect(config).toContain("weaponHash    = 'AK47'"); // CONSTANT_CASE
+    expect(config).toContain('damage        = 45');
+    expect(config).toContain('magazineSize  = 30');
+    expect(config).toContain("requiredLicense = 'rifle_class_a'");
+
+    const server = await readFile(join(root, 'server', 'main.lua'), 'utf-8');
+    expect(server).toContain('QBCore.Shared.Weapons[hash]');
+    expect(server).toContain('GetHashKey(Config.Weapon.weaponHash)');
   });
 });
