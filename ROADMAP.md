@@ -1,201 +1,279 @@
-# Roadmap — Boilergen и AI в gamedev
+# Roadmap — GamesAI Platform
 
-> Стратегический документ. Где мы сейчас, куда движемся, и почему **сейчас открыто окно построить первый AI-native инструментарий для gamedev** на постсоветском рынке (а потом и шире).
-
----
-
-## Vision — двойная миссия
-
-**Boilergen — open-source инструмент, который ускоряет разработку любой игры на 2–5×.**
-
-Внутри Grand Games он — wedge. Снимает рутину с команды, даёт AI прямо в IDE, освобождает программистов для творческой работы.
-
-Вне Grand Games — он становится **первым серьёзным AI-codegen для gamedev в регионе**, открытым для других студий и разработчиков-одиночек.
-
-Эти две миссии **не конкурируют**. Реальное использование внутри GG ↔ доказанные паттерны для open-source. Open-source комьюнити ↔ обратная связь и contributors которых внутри одной студии не наберёшь.
+> Tactical 6–12 month plan. Дополняет [`VISION.md`](./VISION.md) (стратегия 2-3 года). Эта версия (v3.0, 2026-05-02) перерасчитана **после глубокого research-цикла**: pain points (FiveM/altV/RAGE), конкурентный анализ (modl.ai / Inworld / Layer.ai / Convai / Charisma / Codegen.com), open-source building blocks (OPUS-MT vs NLLB licensing, Audio2Face, Crowdin/Lokalise APIs), AI tools по ролям gamedev (Google Cloud Aug 2025: 90% adoption, top areas localization 45% / codegen 44% / playtest 47%), Unity mobile MP shooter SOTA (Photon Quantum / FishNet / Edgegap), и аудит реальных downstream-проектов (Grand Mobile + Flump).
 
 ---
 
-## Где мы сейчас (точка отсчёта — май 2026)
+## Что изменилось с v2.0 (2026-05-01)
+
+| Изменение | Источник |
+|---|---|
+| **3 модуля шипнуты**, не 1 | tools/localization-assistant + tools/schema-validator + boilergen |
+| **5 engine plugins**, не 1 | gm1, generic-rp, godot-2d-platformer, unity-rpg, **unity-mobile-shooter** (новый) |
+| **CI зелёный** + Vercel auto-deploy | GitHub Actions (787b642) |
+| **Конкуренты идентифицированы** — никто не строит exactly наш bucket | research 2026-05-02 |
+| **License hygiene** теперь критична — несколько ловушек найдены | OPUS-MT vs NLLB, Mistral Experiment TOS, Cfx.re Jan 12 2026 |
+| **2 реальных downstream-юзера** | Grand Mobile (employer) + Flump (личный Unity shooter) |
+| **Dogfood loop** становится главной feedback-петлёй | unity-mobile-shooter plugin reverse-derived из Flump |
+| **Pitch меняется** | "save boilerplate" → "ship richer X in 1 day instead of 1 week" |
+
+---
+
+## Где мы сейчас (точка отсчёта — 2 мая 2026)
 
 | Что | Статус |
 |---|---|
-| Boilergen MVP (CLI + Web + MCP + VS Code extension) | ✅ Готов |
-| AI Describe (natural language → YAML через Claude API) | ✅ Готов |
-| 183 теста, защита от path-traversal/ReDoS/опечаток | ✅ |
-| Production deploy (Vercel, public URL) | ✅ |
-| GitHub репо публичный | ✅ |
-| **`generic-rp/` плагин** — universal RP templates с tiered grades | ✅ Только что добавлен |
-| **Knowledge base** — 15 entries о паттернах в реальных играх | ✅ |
-| Реальные шаблоны GM1 (специфика стека Grand Games) | ⏳ Когда Игорь даст контекст |
-| Adoption внутри GG-команды | ⏳ После реальных шаблонов |
-| Adoption вне GG (другие студии / разработчики) | ⏳ Phase 2 |
+| **Boilergen** — CLI + Web + MCP + VS Code extension + AI Describe + RAG | ✅ v1.x production |
+| **Localization Assistant** — AI-fill missing translations | ✅ v0.1 MVP, 32 теста |
+| **Schema Validator** — namespace-aware cross-ref checker | ✅ v0.1 MVP, 44 теста, namespace mode |
+| 5 engine plugins | ✅ gm1, generic-rp, godot-2d-platformer, unity-rpg, unity-mobile-shooter |
+| GitHub Actions CI (3 джоба) | ✅ зелёный |
+| Vercel auto-deploy на push | ✅ live: boilergen-eight.vercel.app |
+| Knowledge-base + RAG в AI Describe | ✅ 16 entries (games / engines / patterns / research-notes) |
+| Тесты: 215 (boilergen) + 32 (localization) + 44 (schema-validator) | ✅ |
+| **Реальный adoption внутри Grand Games** | ⏳ Игорь не дал контекст GM1 |
+| **Реальный adoption на Flump (личный Unity shooter)** | 🟡 plugin готов, осталось wire в проект |
+| **External pilot studios** | ⏳ 0, целимся на 1-3 в Q3-Q4 |
 
-Главное изменение: **мы не блокированы Игорем.** Generic-rp плагин делает Boilergen полезным любой RP-студии прямо сейчас. GG-специфика — это бонус, не предусловие.
-
----
-
-## Roadmap по фазам
-
-### 🔴 Фаза 1 — Универсальный продукт готов к показу (СЕЙЧАС, 1–2 недели)
-
-**Цель:** Boilergen полезен любому разработчику игр out-of-the-box, без специфики одной студии.
-
-**Что делаем:**
-1. ✅ `generic-rp/` плагин с правильной структурой (jobs с grades, vehicle/weapon split engine/economy)
-2. ✅ Knowledge base с 15 entries как референс
-3. 🔜 RAG-интеграция knowledge-base в AI Describe — AI ссылается на реальные паттерны
-4. 🔜 Generic plugins для популярных движков (Unity / Godot / FiveM templates)
-5. 🔜 Опубликовать пост / тред / видео — "вот инструмент, можно пользоваться"
-
-**Критерий успеха:**
-- Любой разработчик может зайти на boilergen-eight.vercel.app, описать сущность → получить генерацию
-- Любой разработчик может склонировать репо и сделать свой плагин под свой стек за час
-- Хотя бы 5 внешних разработчиков попробовали (можно через прямой outreach)
-
-### 🟡 Фаза 2 — Grand Games adoption (параллельно с Фазой 1, 3–4 недели)
-
-**Цель:** Boilergen используется командой Игоря на реальных задачах GM1.
-
-**Что делаем когда Игорь готов отвечать:**
-1. Адаптировать `gm1/` плагин под реальные GM1-конвенции
-2. Замер baseline (сколько сейчас занимает добавление сущности руками)
-3. Один разработчик GG делает 2-3 сущности через инструмент
-4. Замер эффекта, демо директору со слайдами "до/после"
-
-**Не блокирует Фазу 1.** Если Игорь молчит неделю — Фаза 1 продолжается без него.
-
-**Критерий успеха:**
-- Замеренное сокращение времени **минимум в 5×** на boilerplate-слое
-- Зелёный свет от директора на Фазу 3
-- GG становится reference-кейсом для других студий
-
-### 🟢 Фаза 3 — AI-фичи которые делают Boilergen уникальным (4–6 недель)
-
-**Цель:** не просто codegen, а AI-native gamedev tool.
-
-**Что делаем:**
-
-#### RAG в AI Describe
-**Сейчас:** AI знает только generic schema.
-**Будет:** AI ищет релевантные entries в knowledge-base, ссылается на реальные паттерны: *"это похоже на FiveM jobs — рекомендую добавить grades, как в QBCore"*.
-- **Срок:** 1 неделя (knowledge-base уже есть)
-
-#### Visual schema editor
-**Сейчас:** редактируем YAML в textarea.
-**Будет:** drag-drop форма, понятная геймдизайнеру без знания YAML.
-- **Срок:** 2 недели
-
-#### Schema-from-existing-code
-**Сейчас:** пишем YAML с нуля.
-**Будет:** "вот существующий контроллер C++, выведи schema из него обратно" → AI делает reverse engineering. Полезно когда мигрируешь legacy-проект на Boilergen.
-- **Срок:** 2 недели
-
-#### AI Code Reviewer (плагин-уровень)
-**Зачем:** автоматический ревью PR на сгенерированный код — не нарушены ли конвенции, не сломан ли баланс.
-- **Срок:** 3 недели
-
-### 🔵 Фаза 4 — Boilergen Hub (2–3 месяца)
-
-**Цель:** templates marketplace + community.
-
-- Templates Pack под популярные движки (Unity / Unreal / Godot / Bevy)
-- Сообщество может contributing свои плагины
-- Personal cloud sync — твои схемы доступны на всех машинах
-- Team collaboration — несколько разработчиков на одном проекте
-
-### 🟣 Фаза 5 — Boilergen Pro / SaaS (6–12 месяцев)
-
-**Цель:** revenue stream если Phase 1-4 наберут traction.
-
-- Hosted генерация для команд
-- Private template registries
-- Audit logs / compliance
-- Premium шаблоны (полный RP-stack, MMO server, etc.)
-- Цена: $19/чел/мес или $99/студия/мес
-
-**Не делаем без traction.** Если за 6 месяцев репо не набирает 100+ stars и 10+ contributors — переоцениваем.
+**Главное за прошлую неделю:** платформа выросла с 1 до 3 модулей, с 1 до 5 плагинов, появилась реальная dogfood-возможность (Flump). Игорь больше не на критическом пути — Flump его заменяет как primary feedback channel.
 
 ---
 
-## Почему мы будем первыми
+## Стратегические анкеры (от VISION.md, не торгуются)
 
-### Региональный контекст
-
-- В Казахстане/России **gamedev** — относительно молодой и небольшой
-- Подавляющее большинство команд **не используют AI системно**
-- Crisis-driven adoption AI ожидается в индустрии **в 2026–2027**
-- Кто **сейчас** перестроится — будет на год-два впереди
-
-### Конкурентная фора
-
-- Большие западные студии (EA, Ubisoft, Riot) уже строят свои AI-стэки — но **закрытые, не open-source**
-- Маленькие инди-студии **застряли** в копипасте — нет ресурсов на собственный tooling
-- **Окно для open-source AI-codegen для gamedev открыто прямо сейчас** — Plop/Hygen существуют, но они general-purpose, не gamedev-specific
-
-### Стратегическое преимущество
-
-- Knowledge base + AI Describe = **defensible moat**. Plop/Hygen скопируют — но они не построят базу gamedev-паттернов и не интегрируют с AI
-- Двойная миссия = **низкий риск**. Если open-source не взлетит — Grand Games всё равно получает internal tool. Если взлетит — у GG есть marketing-актив
+1. **Core + Adapters + Plugins** на каждом модуле.
+2. **AI как опциональный слой**, не критический путь.
+3. **Open-source forever** (MIT). Closed-source AI без offline fallback = community trigger.
+4. **Department-aware**, не engine-aware first.
+5. **One module per sprint** — реальный gap между модулями для observation/feedback.
+6. **Каждое расширение** проходит community-sentiment filter (`knowledge-base/sources/community-sentiment-ai-gamedev.md`).
 
 ---
 
-## Ключевые риски
+## Что мы узнали из research (key findings)
 
-### 1. **Open-source не взлетит**
-**Митигация:** двойная миссия. GG получает ценность даже без adoption вне.
+**Конкуренция.** Никто не строит deterministic engine-aware codegen + cross-ref validation для gamedev. Бакет пустой. modl.ai (closed-SaaS QA, $10M raised) — closest neighbour, но другой бакет. Inworld / Layer / Convai / Charisma / Promethean — все в generative-content, которое мы не делаем.
 
-### 2. **GG-команда не примет AI**
-**Митигация:** не форсируем. Один-два пилотных разработчика, метрики, постепенное расширение.
+**Юридическая граница.** Cfx.re в Jan 12 2026 версии Creator Platform License **запрещает** использовать их Creator Services для обучения / promotion генеративных AI. Мы deterministic — соответствуем. Позиционируемся как "deterministic tooling с опциональным AI", не "AI for FiveM".
 
-### 3. **AI-инструменты дороже чем экономия**
-**Митигация:** считать ROI на каждом шаге. Anthropic API на AI Describe — копейки за запрос. Cursor $20/мес — окупается за 1 час экономии.
+**License hygiene** (must-have в OSS):
+- ✅ OPUS-MT (CC-BY 4.0 commercial OK), tree-sitter (MIT), ts-morph (MIT), Audio2Face SDK (MIT/Apache от Sept 2025)
+- ✅ Free LLM fallback chain: local Ollama → Groq → Cerebras (не тренируются на промптах)
+- ❌ NLLB-200 (CC-BY-NC, non-commercial)
+- ❌ Mistral Experiment / Gemini free (тренируются на промптах + TOS forbids production)
+- ❌ DeepL Free tier ("creating similar product" forbidden); DeepL Pro OK с BYO-key
+- ❌ Liquibase 5.0 (FSL license)
+- ❌ Suno / Udio / ElevenLabs voice cloning (red zone + лицензионные иски)
 
-### 4. **Утечка данных через AI-сервисы**
-**Митигация:** Anthropic API имеет SOC 2, нет training на customer data. Knowledge base публичный, никаких секретов GG туда не попадает.
+**Adopt-rate calibration** (Google Cloud Aug 2025, 615 devs): localization 45%, codegen 44%, playtest/balance 47%. Мы уже в первых двух. Остальное (animation Audio2Face, LiveOps анализ) — namespace-расширения существующих модулей, не новые модули.
 
-### 5. **Перегрузка scope-у**
-**Митигация:** один sprint, один фокус. Сейчас фокус — Фаза 1 (универсальность). Фаза 3-5 не трогаем пока 1+2 не закрыты.
+**xEdit / TES5Edit existing 15+ лет** validates Schema Validator's thesis. Gap = engine-neutral OSS-версия для современных движков.
 
 ---
 
-## KPI на 3 месяца
+## Roadmap по горизонтам
 
-К августу 2026 хочу видеть:
+### Горизонт 1 — 2 weeks (immediate, до 2026-05-16)
+
+**Цель:** закрыть dogfood loop с Flump, расширить generic-rp под Grand Mobile реальные системы.
+
+| # | Задача | DoD |
+|---|---|---|
+| 1.1 | Wire `unity-mobile-shooter` в Flump | YAML → `.asset` файлы лягут в `Assets/_Project/ScriptableObjects/`; 5 game modes уже сгенерированы; добавлены 2-3 новых weapons через YAML вместо ручного inspector |
+| 1.2 | Schema Validator rules для `unity-mobile-shooter` | `gameSceneName` есть в Build Profiles; `playersPerTeam*2 ≤ NetworkManager.maxConnections`; weapon `iconPath` resolves; rules в `boilergen/schemas/validator.config.yaml` |
+| 1.3 | Localization Assistant bootstrap на Flump | Harvest hard-coded strings из `Assets/_Project/Scripts/UI/*.cs` → `en.json`; AI fill `ru.json` + `kk.json`; report missing keys |
+| 1.4 | Расширить `generic-rp` на 4 entity types | `business`, `organization`, `family`, `property` — паттерн job/vehicle/weapon × 4 targets + i18n; reference YAMLs grounded в Grand Mobile системы (support.grnd.gg) |
+| 1.5 | README / landing pitch update | Главный pitch меняется на "ship richer X in 1 day instead of 1 week"; добавлен раздел "Differs from modl.ai / Inworld / Layer" |
+| 1.6 | License hygiene audit | Проверить что NLLB не используется нигде; Localization Assistant default = OPUS-MT; LLM provider chain документирован |
+
+**Критерий успеха горизонта:** Flump имеет 5+ weapon SO сгенерированных через Boilergen; локализация Flump полная en/ru; Grand Mobile entity types покрыты в generic-rp; landing объясняет позиционирование.
+
+---
+
+### Горизонт 2 — 1 month (до 2026-06-02)
+
+**Цель:** Localization Assistant production-ready на 2+ реальных проектах; первая публичная демонстрация платформы.
+
+| # | Задача | DoD |
+|---|---|---|
+| 2.1 | Localization Assistant добавляет статические проверки до AI fill | Length-overflow detection (en vs ru/de/ja max_chars); plural/gender placeholder warnings; font glyph coverage check |
+| 2.2 | Crowdin / Lokalise file-format адаптеры | Loader для XLIFF / PO / Crowdin JSON; push-back через API когда задан токен |
+| 2.3 | Schema Validator FiveM-mode (фундамент) | Парсер `fxmanifest.lua`; правила: deps ↔ folder names case-sensitive (Linux footgun); cross-resource exports |
+| 2.4 | Public case study #1 | Blog/Twitter тред: "Boilergen + Localization Assistant on a real Unity 6 mobile shooter — 30 minutes to localize 200 strings" — материалы из dogfood loop с Flump |
+| 2.5 | Knowledge-base extends to 25+ entries | Добавлены 5+ entries про реальные RP-проекты (Grand Mobile patterns, FiveM resource patterns, NGO multiplayer patterns) |
+| 2.6 | DeepL Pro адаптер (BYO-key) | Опциональный provider в Localization Assistant; никогда не share key, документирован TOS |
+
+**Критерий успеха:** 2+ проекта используют Localization Assistant в реальной работе; 1 публичный материал собирает реакции (HN, r/gamedev с осторожным позиционированием, или Twitter/X gamedev).
+
+---
+
+### Горизонт 3 — Q3 2026 (3 месяца, до 2026-08-02)
+
+**Цель:** wedge = FiveM/RP/мобильная аудитория. Первый внешний pilot studio.
+
+| # | Задача | DoD |
+|---|---|---|
+| 3.1 | FiveM target в `generic-rp` (qb-target / ox-target preset) | Один YAML → `client.lua` + `server.lua` + `fxmanifest.lua` + `migrations/*.sql` (MySQL 8 совместимый) + qb-target zones; emit либо qb либо ox по флагу — это freebie migration tool |
+| 3.2 | Schema Validator FiveM resource-graph mode (полный) | xEdit-style cross-ref linter: `Config.Jobs.X` ↔ exports, `qb-target` ↔ ped models, SQL ↔ table columns, `fxmanifest` deps ↔ folder names |
+| 3.3 | NVIDIA Audio2Face SDK интеграция | Localization Assistant pipeline: переведённый текст → дубляж (BYO TTS) → Audio2Face relipsync. Полностью deterministic except TTS step |
+| 3.4 | Первый external pilot | 1 реальная RP студия / FiveM сервер / mobile inde dev пробует Boilergen + Schema Validator на их кодовой базе; пишет feedback |
+| 3.5 | Schema Validator: opt-in "balance smell" pass | После deterministic валидации, LLM advisory подсказывает аномалии в weapon/economy CSV |
+| 3.6 | Templates marketplace alpha | Community может сабмитить плагины через PR с тестами + README + license-check workflow |
+
+**Критерий успеха Q3:** есть FiveM-aware preset который можно показать на cfx.re forum; Schema Validator ловит 5+ real bugs в реальных проектах; 1+ external user написал feedback issue.
+
+---
+
+### Горизонт 4 — Q4 2026 (6 месяцев, до 2026-11-02)
+
+**Цель:** 4-й модуль (если RP traction validated) + community traction.
+
+| # | Задача | DoD |
+|---|---|---|
+| 4.1 | 4-й модуль: FiveM Discord bug-triage bot | Парсит Lua tracebacks, fxmanifest mismatches, `ox_lib` version errors; группирует duplicates; opt-in LLM clarifier; deployable как Discord bot для одного RP-сервера |
+| 4.2 | 3 external pilot studios | 3 разных studios используют ≥1 модуль в production, дают named-customer signal |
+| 4.3 | Knowledge-base 50+ entries | Добавлены кейсы реальных RP игр (изучаем чужие репозитории — отложенный приоритет из 2026-05-02 разговора) |
+| 4.4 | Public reference customer page | "Used at Grand Games / [Studio 2] / [Studio 3]" в README |
+| 4.5 | GDC / podcast / blog mention | 1+ external mention в gamedev media |
+| 4.6 | Bot schema in unity-mobile-shooter | Когда `BotData` SO появится в Flump, добавляем третий entity type |
+
+**Критерий успеха Q4:** 3+ studios pilot, 200+ GitHub stars (если real adoption, не маркетинг), 10+ external contributors с merged PRs.
+
+---
+
+### Горизонт 5 — 2027 (12 месяцев)
+
+**Условный.** Активируется только если горизонты 1-4 validated.
+
+- **VISION.md Phase 4** (Game Design tooling — Balance Simulator) — переход в спец-домен после того как RP wedge проверен.
+- **Decision point:** SaaS layer (revenue-generating hosted версия) / acquisition conversation / continue OSS-only.
+- **VISION.md Phase 5** (QA tooling — bug triage, test case generator) — если RP Discord-бот доказал что "AI-augmented QA" работает.
+
+---
+
+## KPI realistic (не vanity)
+
+Anti-pattern: "100k stars в год". Real signal: реальное использование.
+
+### 3 месяца (до 2026-08-02)
 
 | Метрика | Сейчас | Цель |
 |---|---|---|
-| Время на добавление сущности (boilerplate) | ~4 часа manual | <2 минуты через Boilergen |
-| Production-ready плагины (под разные стеки) | 1 (gm1, dummy) + 1 (generic-rp) | 4+ (Unity, Godot, FiveM, generic-rp) |
-| Внешние пользователи попробовавшие на проде | 0 | 50+ |
-| GitHub stars | <10 | 100+ |
-| Custom AI-фичи (помимо AI Describe) | 1 | 3+ |
-| GG-разработчиков ежедневно использующих | 0 | 50%+ команды |
-| Sources в knowledge-base | 15 | 30+ |
+| Дней между новыми weapons во Flump (proxy для Boilergen ROI) | N/A | <1 (vs ручной inspector прямо сейчас) |
+| Реальных проектов на Localization Assistant | 0 | 2 (Flump + Grand Mobile или внешний) |
+| Real bugs которые поймал Schema Validator | 0 | 5+ |
+| External contributors с merged PR | 0 | 1+ |
+| Mention в gamedev media | 0 | 1+ (HN top 100 / r/gamedev / Twitter тред 100+ likes) |
+| GitHub stars | <10 | 50+ только-если-real-usage |
+
+### 6 месяцев (до 2026-11-02)
+
+| Метрика | Цель |
+|---|---|
+| External pilot studios | 3+ |
+| Named reference customers | 3+ |
+| GitHub stars | 200+ |
+| External contributors | 10+ |
+| Knowledge-base entries | 50+ |
+
+### 12 месяцев (2027 май)
+
+| Метрика | Цель |
+|---|---|
+| VISION.md Phase 3 (Localization production) | 100% complete |
+| VISION.md Phase 4 (Schema Validator + Balance Simulator) | 70% complete |
+| Studios using ≥1 модуль в production | 5+ |
+| Decision point | SaaS / Acquisition / Continue OSS-only — informed решение |
+
+**Revenue не цель в первый год.** Proof-of-value first. SaaS layer обсуждается только после Q4 traction.
 
 ---
 
-## Что прошу от руководства GG
+## Что НЕ делаем (research-confirmed)
 
-Не сейчас, а как фундаментальный support по мере роста:
+Расширенный red-zone лист после research:
 
-1. **Бюджет на лицензии готовых тулзов** (Cursor для команды) — $300–500/мес.
-2. **Время команды Игоря** — 30-60 мин ревью раз в 1-2 недели когда GG-плагин начнёт реально использоваться.
-3. **Полномочия** делать пилоты на 1-2 разработчиках. Без принуждения остальных.
-4. **Понимание что репо публичный.** Я хочу чтобы Boilergen был open-source — это даёт GG marketing-актив без затрат.
+- ❌ Generative final art / music / narrative (VISION + community sentiment)
+- ❌ AI-balanced game numbers без human review (VISION)
+- ❌ NFT / blockchain (VISION + community trigger)
+- ❌ Closed-source AI без offline fallback (VISION + Cfx.re Jan 12 2026 license)
+- ❌ Wrap **Suno / Udio** (red zone + active label lawsuits)
+- ❌ Wrap **ElevenLabs voice cloning final VO** (consent + red zone)
+- ❌ Wrap **Inworld / Charisma runtime NPC dialogue** (narrative red zone)
+- ❌ Use **NLLB-200** (CC-BY-NC — non-commercial)
+- ❌ Default to **Mistral Experiment / Gemini free** (train on prompts)
+- ❌ Wrap **DeepL Free tier** (TOS forbids "similar product")
+- ❌ Bundle **Liquibase 5.0** (FSL license)
+- ❌ Bundle **LM Studio** (closed-source app)
+- ❌ Forced consulting / agency / custom-development for revenue (VISION distraction warning)
+
+---
+
+## Decision points (когда переоцениваем)
+
+| Когда | Сигнал | Что решаем |
+|---|---|---|
+| **2 weeks** | Если dogfood loop с Flump не работает (Boilergen не подходит на свой Unity) | Fundamental product flaw — переоценить архитектуру плагинов |
+| **1 month** | Если Localization Assistant не сходит на 2+ проектах | Module-3 не готова к public — отложить outreach |
+| **3 months** | Если кроме меня и Grand Mobile никто не пробует | Distribution problem — фокус на community / outreach перед новыми фичами |
+| **6 months** | Если 3 studios pilot достигнут | Зелёный свет: 4-й модуль + templates marketplace |
+| **6 months** | Если 0-1 external pilot | Wedge не работает — переоценить позиционирование, возможно переключиться с RP на другой gamedev сегмент |
+| **12 months** | Если общая traction есть | Decision: SaaS layer / acquisition conversation / continue |
+
+---
+
+## Что НЕ блокирует прогресс
+
+Список explicit для self-discipline:
+
+- **Игорь молчит** → продолжаем dogfood на Flump + generic-rp с Grand Mobile public systems (support.grnd.gg)
+- **Внешние studios не появляются Q1-Q2** → Grand Mobile + Flump = 2 реальных канала; продукт всё равно растёт
+- **GitHub stars медленно растут** → не паника, real adoption важнее vanity metric
+- **Конкурент строит похожее** → у нас 1+ year head start + OSS moat. Не реагируем pivot'ом, ускоряем shipping
+- **AI provider rate limits / pricing меняются** → fallback chain (local Ollama → Groq → Cerebras) защищает от этого
+
+---
+
+## Ключевая мысль
+
+**Dogfood loop = эпицентр развития.** Если я (Alizhan) активно использую все 3 модуля на Flump — найду friction, починю friction, продукт станет хорошим. Без dogfood, roadmap = фантазия. Каждые 2 недели должны быть commits в Flump через Boilergen + локализация через Localization Assistant + валидация через Schema Validator.
+
+Если dogfood loop ломается — это причина остановиться и пересмотреть, а не причина искать новых features.
 
 ---
 
 ## Что прошу от себя
 
-1. **Не ждать никого.** Ни Игоря, ни директора. Двигать продукт каждую неделю.
-2. **Измерять.** Каждая инициатива — чёткие "до/после" цифры.
-3. **Слушать пользователей.** Если кто-то попробует и скажет "не работает" — приоритет N°1 пофиксить, не игнорировать.
-4. **Документировать.** Этот файл, knowledge base, READMEs — чтобы любой новый человек за 10 минут понимал что и зачем.
-5. **Не хайпить.** Это набор практичных инструментов экономящих время. Не "AI революция".
+1. **Не делать всё сразу.** Один horizon — один фокус. Горизонт 1 не закроется → горизонт 2 не начинается.
+2. **Каждое расширение через community sentiment filter** + research-backed red zones.
+3. **Документировать.** Этот файл, VISION.md, knowledge-base, READMEs — обновляем при каждом sprint.
+4. **Слушать пользователей.** Если кто-то пробует и говорит "не работает" — приоритет N°1, не игнорировать.
+5. **Не хайпить.** Это набор практичных инструментов. Не "AI революция". Не "10x productivity".
+6. **Auto-commit + auto-push после verify** — durable instruction 2026-05-02.
+7. **Dogfood каждые 2 недели.** Если за 2 недели не было активной работы на Flump через Boilergen — что-то пошло не так.
 
 ---
 
-> *"Мы строим инструмент которым хочется пользоваться. Сначала — внутри Grand Games. Потом — везде где есть gamedev."*
+## Что прошу от руководства Grand Games
 
-> Контакты: [Алижан] · GitHub: https://github.com/Sariev-Alizhan/GamesAI · Live: https://boilergen-eight.vercel.app · Версия документа: 2.0 (2026-05-01, post-pivot)
+(По мере роста, не сейчас.)
+
+1. **Согласие что платформа open-source.** Внутреннее использование GG бесплатно навсегда; внешний SaaS-revenue (когда появится) — обсуждается.
+2. **Бюджет на Anthropic API + хостинг** — порядка $500–2000/мес по мере роста.
+3. **Право платформе развиваться независимо от GG-приоритетов.** Если GG закрывает GM1 завтра — платформа продолжает.
+4. **Готовность стать reference-кейсом.** Когда платформа выходит за пределы GG — GG появляется в "we use this" страничке как первая студия.
+
+---
+
+## Соотношение с другими документами
+
+- **`VISION.md`** — strategic 2-3 года, принципы, phased build через 2028.
+- **`ROADMAP.md`** (этот файл) — tactical 6-12 месяцев, конкретные задачи с DoD.
+- **`knowledge-base/sources/community-sentiment-ai-gamedev.md`** — guardrails community.
+- **`handoff/03-ROADMAP.md`** — версия для Игоря, фокус на Boilergen Phase 1-2.
+
+---
+
+> *"Мы строим инструмент которым хочется пользоваться. Сначала — Flump и Grand Mobile. Потом — везде где есть gamedev."*
+
+> Версия: 3.0 (2026-05-02, post-research) · GitHub: https://github.com/Sariev-Alizhan/GamesAI · Live: https://boilergen-eight.vercel.app · Maintainer: Alizhan
