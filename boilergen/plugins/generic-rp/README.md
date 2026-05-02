@@ -72,30 +72,43 @@ Generates code into five targets (job has all five, others have four):
 ├── node-api/                    # admin REST API endpoints for editing/listing
 ├── flutter-admin/               # admin form widget
 ├── shared/                      # locale JSON (ru/en/kk placeholders)
-└── fivem-qb/                    # FiveM/QBCore drop-in resource per job (job entity only, v1)
-    └── jobs/<id>/
-        ├── fxmanifest.lua       # cerulean, dependencies { 'qb-core' }
-        ├── config.lua           # Config.Job table with grades
-        ├── server/main.lua      # QBCore.Functions.AddJob registration + payroll stub
-        ├── client/main.lua      # OnJobUpdate handler + /toggleduty<Job> command
-        └── migrations/001_seed.sql  # optional INSERT, commented by default
+└── fivem-qb/                    # FiveM/QBCore drop-in resources — one folder per entity
+    ├── jobs/<id>/                  job (5 files): fxmanifest, config, server, client, migration
+    ├── vehicles/<id>/              vehicle (3 files): fxmanifest, config, server
+    ├── weapons/<id>/               weapon (3 files): fxmanifest, config, server
+    ├── businesses/<id>/            business (3 files): fxmanifest, config, server
+    ├── organizations/<id>/         organization (3 files): fxmanifest, config, server
+    ├── families/<id>/              family (3 files): fxmanifest, config, server
+    └── properties/<id>/            property (3 files): fxmanifest, config, server
 ```
 
 If you fork this plugin into a different stack (e.g. Unity C# server + Vue admin), just swap the templates inside each `targets/<layer>/<entity-type>/` folder. The schema stays the same.
 
-## FiveM/QBCore output (job entity)
+## FiveM/QBCore output — full coverage (all 7 entity types)
 
-The `fivem-qb` target produces a complete drop-in resource — a server owner can copy `<output>/fivem-qb/jobs/<id>/` into their `resources/` folder and `ensure <id>` it.
+The `fivem-qb` target produces a complete drop-in resource per entity. A server owner can copy any `<output>/fivem-qb/<plural>/<id>/` folder into their `resources/` and `ensure <id>` it.
 
-The generated manifest is structured to **pass `schema-validator check-fivem` by construction** (see `tools/schema-validator/`):
+Every generated manifest is structured to **pass `schema-validator check-fivem` by construction** (see [`tools/schema-validator/CASE-STUDY-PLATFORM-LOOP.md`](../../../CASE-STUDY-PLATFORM-LOOP.md) for end-to-end demo):
 
 - `fx_version 'cerulean'` and `game 'gta5'` are always present
-- Every `@<resource>/...` reference is reflected in `dependencies { ... }` (we use the modern exports-based pattern, so there are no `@qb-core/...` shared_scripts at all — just `dependencies { 'qb-core' }`)
+- `dependencies { 'qb-core' }` declared (modern exports-based pattern; no `@qb-core/...` shared_scripts)
 - `lua54 'yes'` is set so modern Lua features compile
 
-Generated `client/main.lua` exposes `/toggleduty<PascalJob>` for QA — strip it before shipping if you don't want player-facing duty toggles. Generated `server/main.lua` includes a stub event `<job>:server:paycheck` you can hook your custom payout logic into; QBCore's default paycheck system already pays based on `Player.PlayerData.job.grade.payment` so the stub is opt-in.
+### Entity-by-entity behaviour
 
-v1 covers job only. Vehicle / weapon / business / organization / family / property FiveM targets are tracked for v2 (each maps to its own QBCore convention — `qb-vehicleshop`, `qb-shops`, `qb-gangs`, etc.).
+| Entity | Registers into | Extra runtime |
+|---|---|---|
+| `job` | `QBCore.Functions.AddJob(name, ...)` | `<id>:server:paycheck` event stub; client `/toggleduty<Pascal>` command for QA |
+| `vehicle` | `QBCore.Shared.Vehicles[name]` | `GetHashKey(model)` filled in automatically |
+| `weapon` | `QBCore.Shared.Weapons[hash]` | `ammotype`/`damagereason` derived from category + label |
+| `business` | `_G.BoilergenBusinesses` + `exports('GetBusinessConfig')` | framework-neutral surface (qb-shops / qb-businesses / qbx_management can read) |
+| `organization` | `QBCore.Shared.Gangs[name]` for category=gang/mafia; `_G.BoilergenOrganizations` otherwise | conditional registration based on category |
+| `family` | `_G.BoilergenFamilies` + `exports('GetFamilyConfig')` | custom convention (no QBCore canonical family system) |
+| `property` | `_G.BoilergenProperties` + `exports('GetPropertyConfig')` | maps loosely onto qb-houses / qb-apartments |
+
+For the rationale on why these conventions matter (Shared.* registries vs `_G` fallback, dependency declaration, lua54 directive), see [`knowledge-base/engines/qbcore-conventions.md`](../../../knowledge-base/engines/qbcore-conventions.md).
+
+For why `job.grades`, `business.grades`, `organization.ranks`, and `family.roles` all share the same shape (and why that's intentional), see [`knowledge-base/patterns/role-grade-hierarchy.md`](../../../knowledge-base/patterns/role-grade-hierarchy.md).
 
 ## Open questions
 
