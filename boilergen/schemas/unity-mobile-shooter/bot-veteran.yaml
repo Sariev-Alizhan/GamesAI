@@ -1,0 +1,21 @@
+# Veteran bot — fills mid-skill matchmaking; provides credible challenge
+# without sniping every player at maximum range.
+id: bot_veteran
+type: bot-personality
+name: Veteran
+data:
+  assetName: BotPersonality_Veteran
+  scriptGuid: __BOT_PERSONALITY_SCRIPT_GUID__
+  difficulty: 4
+  aggression: 0.65
+  accuracy: 0.78
+  reactionTimeMs: 220
+  preferredEngagementRange: 35
+  burstFireDiscipline: 0.70
+  fleeHpThreshold: 0.30
+  reloadAggressiveness: 0.65
+  preferredWeaponCategory: rifle
+  preferredLoadoutId: balanced
+  movementStyle: balanced
+  campTendency: 0.45
+  teamPlayWeight: 0.60

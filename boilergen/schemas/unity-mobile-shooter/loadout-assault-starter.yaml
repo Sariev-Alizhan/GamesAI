@@ -1,0 +1,17 @@
+# Assault Starter — default unlock loadout for the Assault class.
+# Versatile rifle + pistol sidearm + melee. No perks at unlock level 0.
+id: assault_starter
+type: loadout
+name: Assault Starter
+data:
+  assetName: Loadout_AssaultStarter
+  scriptGuid: __LOADOUT_DATA_SCRIPT_GUID__
+  primaryWeaponId: assault_rifle    # references schemas/unity-mobile-shooter/assault-rifle.yaml
+  secondaryWeaponId: glock_19       # references glock-19.yaml
+  meleeWeaponId: combat_knife
+  startingArmor: 0                  # class default
+  perks: []                         # no perks at starter level
+  unlockLevel: 0
+  isFreeForAll: true                # available in every mode
+  isStarter: true
+  sortOrder: 0

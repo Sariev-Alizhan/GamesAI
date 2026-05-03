@@ -1,0 +1,28 @@
+# Warehouse — small CQB-focused industrial map. Best for Duel1v1 and TDM3v3.
+# Two storeys, central catwalk, single hardpoint zone in the loading bay.
+id: warehouse
+type: map
+name: Warehouse
+data:
+  assetName: Map_Warehouse
+  scriptGuid: __MAP_DATA_SCRIPT_GUID__
+  sceneName: Map_Warehouse        # must exist in Build Settings → Scenes In Build
+  maxPlayers: 6                   # leaves 1 buffer slot for 3v3
+  recommendedTeamSize: 3
+  supportedModeIds:
+    - duel_1v1
+    - team_3v3_tdm
+    - hardpoint_5v5             # tighter than the design-target but playable
+  spawnZoneTeamA: SpawnZone_TeamA  # GameObject name in scene
+  spawnZoneTeamB: SpawnZone_TeamB
+  hardpointZoneIds:
+    - HP_LoadingBay
+  killVolumeY: -10              # players falling below y=-10 die instantly
+  ambientLightColor:
+    r: 0.55
+    g: 0.55
+    b: 0.62                     # cool industrial tone
+  fogEnabled: true
+  fogDensity: 0.015             # subtle haze — adds CQB feel
+  showInRotation: true
+  sortOrder: 10

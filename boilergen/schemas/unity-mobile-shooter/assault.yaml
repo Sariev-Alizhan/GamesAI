@@ -1,0 +1,24 @@
+# Assault — balanced default class. Average HP, average mobility, no slide.
+# Suits Team*TDM modes — viable at every range.
+id: assault
+type: player
+name: Assault
+data:
+  assetName: AssaultClass_Data
+  scriptGuid: __PLAYER_DATA_SCRIPT_GUID__   # set after first import: paste PlayerData.cs.meta GUID
+  maxHealth: 100
+  maxArmor: 50
+  walkSpeed: 5.0                # m/s
+  sprintMultiplier: 1.6         # 8.0 m/s while sprinting
+  crouchMultiplier: 0.5
+  adsMoveMultiplier: 0.45       # 2.25 m/s while ADS — slower
+  jumpHeight: 1.2               # meters
+  airControl: 0.6               # 0..1 multiplier on input while airborne
+  slideEnabled: false
+  slideCooldown: 0
+  slideDuration: 0
+  staminaMax: 100
+  staminaSprintCost: 12         # per second
+  staminaRegenPerSec: 18        # regenerates faster than spent → soft sprint cap
+  damageResistance: 0.0         # 0..1 multiplier reduction on incoming damage
+  spawnGearLoadoutId: assault_starter

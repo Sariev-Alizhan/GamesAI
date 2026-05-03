@@ -1,0 +1,19 @@
+# Sniper — long-range loadout. Bolt-action primary + SMG fallback for CQB.
+# Unlocks at level 5; rewards careful positioning.
+id: loadout_sniper
+type: loadout
+name: Sniper
+data:
+  assetName: Loadout_Sniper
+  scriptGuid: __LOADOUT_DATA_SCRIPT_GUID__
+  primaryWeaponId: awm_338
+  secondaryWeaponId: ump_45
+  meleeWeaponId: combat_knife
+  startingArmor: 25
+  perks:
+    - hold_breath_steady          # stub IDs — your perk system resolves these
+    - quick_scope
+  unlockLevel: 5
+  isFreeForAll: false             # not in Duel1v1 (cheesy)
+  isStarter: false
+  sortOrder: 30

@@ -41,14 +41,42 @@ PvP match configuration. Matches `FlumpGame.Data.GameModeData`:
 - `3` — Hardpoint5v5
 - `4` — Practice
 
-## Schema examples
+## Entity types — full MVP coverage
 
-See [`schemas/unity-mobile-shooter/`](../../schemas/unity-mobile-shooter/) — six reference schemas reverse-derived from the Flump game repo:
+| Type | What it generates | Example schemas |
+|---|---|---|
+| `weapon` | `WeaponData.asset` SO with mag/range/recoil/spread/audio refs | assault-rifle.yaml + 5 new (glock-19, spas-12, awm-338, ump-45, combat-knife) |
+| `gamemode` | `GameModeData.asset` SO with mode type / team size / score limit | duel-1v1, team-3v3-tdm, team-5v5-tdm, hardpoint-5v5, practice |
+| `player` | `PlayerData.asset` SO — class profile (HP / armor / mobility / stamina / spawn loadout) | assault, scout, heavy |
+| `bot-personality` | `BotPersonality.asset` SO — AI profile (difficulty / aggression / accuracy / reaction time / movement style / preferred range) | bot-rookie, bot-veteran |
+| `map` | `MapData.asset` SO — scene reference, supported modes, spawn zones, hardpoint zones, kill volume, ambient lighting | map-warehouse |
+| `loadout` | `LoadoutData.asset` SO — primary + secondary + melee weapon refs, perks, unlock level | loadout-assault-starter, loadout-sniper |
+| `project-init` | `LocaleManager.cs` (~148 LOC, JSON-backed i18n, no Newtonsoft dep) + `Resources/Locales/en.json` (18 stock UI strings) | project-init |
 
-- `assault-rifle.yaml` — automatic rifle (the one currently committed)
-- `duel-1v1.yaml`, `team-3v3-tdm.yaml`, `team-5v5-tdm.yaml`, `hardpoint-5v5.yaml`, `practice.yaml` — all five game modes
+Each entity also generates an `i18n/<entity>/<id>.locale.json` stub keyed by ID with EN-seeded names + `TODO: …` placeholders for ru/kk that Localization Assistant fills via one Anthropic call.
 
-Use them as starting points; copy and edit per new weapon / mode.
+## End-to-end MVP bootstrap (15 minutes)
+
+A complete mobile shooter MVP from a clean Unity project:
+
+```bash
+# One-shot project init: drops LocaleManager.cs + en.json
+boilergen generate schemas/unity-mobile-shooter/project-init.yaml \
+  --plugin plugins/unity-mobile-shooter \
+  --output ~/MyShooter/Assets/_Project
+
+# Generate 6 weapons, 3 player classes, 2 bot personalities,
+# 1 map, 2 loadouts, 5 game modes — in 1 watch session
+boilergen watch schemas/unity-mobile-shooter/ \
+  --plugin plugins/unity-mobile-shooter \
+  --output ~/MyShooter/Assets/_Project
+# (edit any YAML — Unity Editor picks up the .asset changes automatically)
+
+# Translate UI to ru + kk in one Anthropic call (~$0.05)
+localization-assistant fill --source en.json --target ru.json --target kk.json
+```
+
+Result: 30+ ScriptableObject assets + LocaleManager.cs + 3 locales — all referencing each other by ID (loadout.primaryWeaponId → weapon.id, player.spawnGearLoadoutId → loadout.id, map.supportedModeIds → gamemode.id) so a Schema Validator pass catches broken refs at build time.
 
 ## Required Unity setup
 

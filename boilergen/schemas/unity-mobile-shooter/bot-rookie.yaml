@@ -1,0 +1,21 @@
+# Rookie bot — for new-player matchmaking and warm-up rounds.
+# Easiest difficulty: low aggression, high reaction time, average accuracy.
+id: bot_rookie
+type: bot-personality
+name: Rookie
+data:
+  assetName: BotPersonality_Rookie
+  scriptGuid: __BOT_PERSONALITY_SCRIPT_GUID__
+  difficulty: 1                 # 1..5 scale (used by matchmaker for fair team builds)
+  aggression: 0.30              # 0..1; 0 = passive, 1 = full-rush
+  accuracy: 0.45                # 0..1; multiplier on weapon spread cone
+  reactionTimeMs: 480           # ms from enemy-spotted to first shot
+  preferredEngagementRange: 18  # meters — engages closer than mid-range
+  burstFireDiscipline: 0.30     # 0..1; how often it stops firing to control recoil
+  fleeHpThreshold: 0.55         # flees below 55% HP
+  reloadAggressiveness: 0.40    # 0..1; how eagerly it reloads at any opportunity
+  preferredWeaponCategory: rifle
+  preferredLoadoutId: assault_starter
+  movementStyle: cautious       # one of: cautious | balanced | aggressive | hit_and_run
+  campTendency: 0.20            # 0..1; 0 = roams, 1 = holds position
+  teamPlayWeight: 0.30          # 0..1; how much it considers team objectives vs personal kills

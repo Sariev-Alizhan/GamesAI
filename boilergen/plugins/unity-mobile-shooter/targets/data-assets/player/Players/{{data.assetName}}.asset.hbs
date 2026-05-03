@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: {{#if data.scriptGuid}}{{data.scriptGuid}}{{else}}__PLAYER_DATA_SCRIPT_GUID__{{/if}}, type: 3}
+  m_Name: {{data.assetName}}
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerData
+  classId: {{id}}
+  displayName: {{name}}
+  classIcon: {fileID: 0}
+  maxHealth: {{data.maxHealth}}
+  maxArmor: {{data.maxArmor}}
+  walkSpeed: {{data.walkSpeed}}
+  sprintMultiplier: {{data.sprintMultiplier}}
+  crouchMultiplier: {{data.crouchMultiplier}}
+  adsMoveMultiplier: {{data.adsMoveMultiplier}}
+  jumpHeight: {{data.jumpHeight}}
+  airControl: {{data.airControl}}
+  slideEnabled: {{#if data.slideEnabled}}1{{else}}0{{/if}}
+  slideCooldown: {{data.slideCooldown}}
+  slideDuration: {{data.slideDuration}}
+  staminaMax: {{data.staminaMax}}
+  staminaSprintCost: {{data.staminaSprintCost}}
+  staminaRegenPerSec: {{data.staminaRegenPerSec}}
+  damageResistance: {{data.damageResistance}}
+  spawnGearLoadoutId: {{data.spawnGearLoadoutId}}

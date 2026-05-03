@@ -1,0 +1,24 @@
+# Scout — fast/fragile flank class. Lower HP, faster sprint, slide enabled.
+# Counter to camping, vulnerable to head-on engagements.
+id: scout
+type: player
+name: Scout
+data:
+  assetName: ScoutClass_Data
+  scriptGuid: __PLAYER_DATA_SCRIPT_GUID__
+  maxHealth: 80
+  maxArmor: 25
+  walkSpeed: 5.5
+  sprintMultiplier: 1.85        # 10.18 m/s sprint — fastest class
+  crouchMultiplier: 0.5
+  adsMoveMultiplier: 0.50
+  jumpHeight: 1.4
+  airControl: 0.75
+  slideEnabled: true
+  slideCooldown: 4.0
+  slideDuration: 0.8
+  staminaMax: 130
+  staminaSprintCost: 10
+  staminaRegenPerSec: 22
+  damageResistance: 0.0
+  spawnGearLoadoutId: scout_starter

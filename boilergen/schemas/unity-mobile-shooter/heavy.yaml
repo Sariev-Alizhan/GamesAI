@@ -1,0 +1,24 @@
+# Heavy — tank class. High HP + armor, slow movement, no slide, high resistance.
+# Anchors Hardpoint zones, vulnerable to flanks.
+id: heavy
+type: player
+name: Heavy
+data:
+  assetName: HeavyClass_Data
+  scriptGuid: __PLAYER_DATA_SCRIPT_GUID__
+  maxHealth: 150
+  maxArmor: 100
+  walkSpeed: 3.8
+  sprintMultiplier: 1.35
+  crouchMultiplier: 0.45
+  adsMoveMultiplier: 0.40
+  jumpHeight: 1.0
+  airControl: 0.45
+  slideEnabled: false
+  slideCooldown: 0
+  slideDuration: 0
+  staminaMax: 80
+  staminaSprintCost: 18
+  staminaRegenPerSec: 12
+  damageResistance: 0.15        # 15% incoming damage reduction
+  spawnGearLoadoutId: heavy_starter
