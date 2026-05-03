@@ -669,6 +669,97 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
   content: '✓'; color: var(--red-400); flex-shrink: 0; font-weight: 700; font-size: 11px; margin-top: 1px;
 }
 
+/* ===== MCP expanded card — visible JSON config + step instructions ===== */
+.dl-card.mcp-expanded { grid-column: span 2; }
+@media (max-width: 768px) { .dl-card.mcp-expanded { grid-column: span 1; } }
+
+.mcp-steps {
+  display: grid; gap: 10px;
+  margin-bottom: 14px;
+}
+.mcp-step {
+  display: flex; gap: 12px; align-items: flex-start;
+  font-size: 13px; line-height: 1.55; color: var(--text);
+}
+.mcp-step .num {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--red-600), var(--red-500));
+  color: white; font-weight: 700; font-size: 11px;
+  font-family: var(--mono);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+.mcp-step .hint {
+  display: inline-block;
+  font-size: 12px; color: var(--text-muted); margin-top: 3px;
+  font-family: var(--mono);
+}
+.mcp-step code {
+  font-family: var(--mono); font-size: 12px;
+  background: rgba(220, 38, 38, 0.10);
+  padding: 1px 6px; border-radius: 3px;
+  color: var(--red-300);
+}
+.mcp-config-block {
+  position: relative;
+  background: rgba(7, 8, 11, 0.85);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-bright);
+  border-radius: 6px;
+  padding: 14px 16px 14px 18px;
+  margin: 8px 0 10px;
+  overflow: hidden;
+}
+.mcp-config-pre {
+  font-family: var(--mono); font-size: 12px;
+  color: #fca5a5;
+  margin: 0;
+  white-space: pre;
+  overflow-x: auto;
+  line-height: 1.55;
+  user-select: all; -webkit-user-select: all;
+}
+.mcp-copy-btn {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: rgba(13, 15, 20, 0.95);
+  border: 1px solid var(--border-red);
+  color: var(--red-400);
+  padding: 5px 12px;
+  border-radius: 5px;
+  font-family: var(--mono); font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 160ms ease;
+  backdrop-filter: blur(8px);
+}
+.mcp-copy-btn:hover {
+  background: rgba(220, 38, 38, 0.18);
+  color: white;
+  border-color: var(--red-400);
+}
+.mcp-copy-btn.copied {
+  color: var(--green);
+  border-color: rgba(63, 185, 80, 0.55);
+  background: rgba(63, 185, 80, 0.10);
+}
+.mcp-replace-hint {
+  font-size: 11.5px; color: var(--orange); margin: 0 0 14px;
+  padding: 6px 10px;
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.20);
+  border-radius: 5px;
+}
+.mcp-replace-hint code {
+  font-family: var(--mono); font-size: 11px;
+  background: rgba(245, 158, 11, 0.12);
+  padding: 1px 5px; border-radius: 3px;
+  color: var(--orange);
+}
+
 /* Reverse alternation */
 .ribbon.reverse { grid-template-columns: 1fr 1.1fr; }
 .ribbon.reverse .visual { order: -1; }
@@ -1519,25 +1610,72 @@ body.cursor-hover .cursor-ring { width: 60px; height: 60px; margin: -30px 0 0 -3
       <a href="https://github.com/Sariev-Alizhan/GamesAI#getting-started" target="_blank" class="dl-link">Read the install docs →</a>
     </div>
 
-    <!-- MCP Server -->
-    <div class="dl-card reveal-zoom delay-3" data-tilt>
+    <!-- MCP Server — expanded card with visible JSON config -->
+    <div class="dl-card mcp-expanded reveal-zoom delay-3" data-tilt>
       <div class="dl-head">
         <div class="dl-icon">⚡</div>
         <span class="dl-status ready">✓ Available · 8 tools</span>
       </div>
-      <h3>MCP Server (Claude / Cursor)</h3>
-      <p class="dl-desc">Expose Boilergen to Claude Code / Cursor / Windsurf / Continue / any MCP-compatible AI agent. Vibe-code: describe an entity in chat, AI calls these tools, files appear in your project.</p>
+      <h3>MCP Server (Claude / Cursor / Windsurf)</h3>
+      <p class="dl-desc">Vibe-code your game: describe an entity in chat, AI calls these tools via Model Context Protocol, files appear in your project. Stdio JSON-RPC — same shape as Anthropic's reference.</p>
       <ul class="dl-features">
-        <li>list_plugins · list_entity_types · list_schemas (20 examples)</li>
+        <li>list_plugins · list_entity_types · list_schemas (22 examples)</li>
         <li>preview · generate (dry-run + write)</li>
-        <li>list_kb · read_kb · search_kb (over 59 grounded entries)</li>
-        <li>Stdio JSON-RPC — same shape as Anthropic's reference</li>
+        <li>list_kb · read_kb · search_kb (over 59 RAG-grounded entries)</li>
       </ul>
-      <div class="dl-cmd">
-        <span><span class="cmd-prompt">$ </span>cat .mcp.json   <span style="color:var(--text-dim);"># copy block into ~/.claude/mcp.json</span></span>
-        <button class="dl-cmd-copy" data-copy='{ "mcpServers": { "boilergen": { "command": "node", "args": ["./boilergen/dist/mcp/server.js"], "env": { "BOILERGEN_PLUGINS_DIR": "./boilergen/plugins", "BOILERGEN_SCHEMAS_DIR": "./boilergen/schemas", "BOILERGEN_KB_DIR": "./knowledge-base" } } } }'>Copy config</button>
+
+      <div class="mcp-steps">
+        <div class="mcp-step">
+          <span class="num">1</span>
+          <div>Clone &amp; build once<br><span class="hint">git clone github.com/Sariev-Alizhan/GamesAI &amp;&amp; cd GamesAI/boilergen &amp;&amp; npm install &amp;&amp; npm run build</span></div>
+        </div>
+        <div class="mcp-step">
+          <span class="num">2</span>
+          <div>Copy this config &amp; paste into your IDE's MCP settings:<br><span class="hint">Claude Code: <code>~/.claude/mcp.json</code> · Cursor: Settings → MCP · Windsurf: Cascade → MCP</span></div>
+        </div>
       </div>
-      <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/handoff/06-FLUMP-NIGHT-SESSION.md" target="_blank" class="dl-link">Full setup guide (Claude Code / Cursor / Windsurf) →</a>
+
+      <div class="mcp-config-block">
+        <pre class="mcp-config-pre" id="mcp-config-pre">{
+  "mcpServers": {
+    "boilergen": {
+      "command": "node",
+      "args": [
+        "/PATH/TO/GamesAI/boilergen/dist/mcp/server.js"
+      ],
+      "env": {
+        "BOILERGEN_PLUGINS_DIR": "/PATH/TO/GamesAI/boilergen/plugins",
+        "BOILERGEN_SCHEMAS_DIR": "/PATH/TO/GamesAI/boilergen/schemas",
+        "BOILERGEN_KB_DIR":      "/PATH/TO/GamesAI/knowledge-base"
+      }
+    }
+  }
+}</pre>
+        <button class="mcp-copy-btn" id="mcp-copy-config-btn" data-copy='{
+  "mcpServers": {
+    "boilergen": {
+      "command": "node",
+      "args": [
+        "/PATH/TO/GamesAI/boilergen/dist/mcp/server.js"
+      ],
+      "env": {
+        "BOILERGEN_PLUGINS_DIR": "/PATH/TO/GamesAI/boilergen/plugins",
+        "BOILERGEN_SCHEMAS_DIR": "/PATH/TO/GamesAI/boilergen/schemas",
+        "BOILERGEN_KB_DIR": "/PATH/TO/GamesAI/knowledge-base"
+      }
+    }
+  }
+}'>📋 Copy config</button>
+      </div>
+
+      <p class="mcp-replace-hint">⚠ Replace <code>/PATH/TO/GamesAI</code> with your actual clone location (e.g. <code>/Users/you/dev/GamesAI</code>)</p>
+
+      <div class="mcp-step">
+        <span class="num">3</span>
+        <div>Restart your IDE → run <code>/mcp</code> in chat → confirm <code>boilergen</code> connected (8 tools)</div>
+      </div>
+
+      <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/handoff/06-FLUMP-NIGHT-SESSION.md" target="_blank" class="dl-link">Full step-by-step guide →</a>
     </div>
 
     <!-- VS Code Extension -->
@@ -2153,9 +2291,10 @@ window.addEventListener('load', () => {
 })();
 
 // ============================================================
-//  DOWNLOADS — copy-cmd buttons
+//  DOWNLOADS — copy-cmd buttons (works for both inline cmd Copy
+//  buttons and the expanded MCP-config copy button)
 // ============================================================
-document.querySelectorAll('.dl-cmd-copy').forEach(btn => {
+document.querySelectorAll('.dl-cmd-copy, .mcp-copy-btn').forEach(btn => {
   btn.addEventListener('click', async (e) => {
     e.preventDefault();
     const cmd = btn.getAttribute('data-copy') || '';
@@ -2163,12 +2302,12 @@ document.querySelectorAll('.dl-cmd-copy').forEach(btn => {
     try {
       await navigator.clipboard.writeText(cmd);
       const orig = btn.textContent;
-      btn.textContent = '✓';
+      btn.textContent = '✓ Copied!';
       btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1400);
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1800);
     } catch {
-      btn.textContent = '✗';
-      setTimeout(() => { btn.textContent = 'Copy'; }, 1400);
+      btn.textContent = '✗ Failed';
+      setTimeout(() => { btn.textContent = '📋 Copy config'; }, 1800);
     }
   });
 });
