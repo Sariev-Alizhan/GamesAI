@@ -79,19 +79,17 @@ body {
   display: block;
   pointer-events: none;
 }
-/* Ambient red glow that follows scroll */
+/* Ambient red glow that follows scroll — softer, single source */
 .ambient-glow {
   position: fixed; inset: 0; pointer-events: none; z-index: 1;
   background:
-    radial-gradient(ellipse 1400px 700px at 50% var(--glow-y, -10%), rgba(220, 38, 38, 0.16), transparent 60%),
-    radial-gradient(ellipse 800px 500px at 10% 80%, rgba(220, 38, 38, 0.05), transparent 60%),
-    radial-gradient(ellipse 800px 500px at 90% 20%, rgba(220, 38, 38, 0.04), transparent 60%);
+    radial-gradient(ellipse 1600px 800px at 50% var(--glow-y, -20%), rgba(220, 38, 38, 0.10), transparent 60%);
 }
 /* Vignette around content for legibility */
 .vignette {
   position: fixed; inset: 0; pointer-events: none; z-index: 1;
   background:
-    radial-gradient(ellipse 90% 60% at 50% 50%, transparent 40%, rgba(6, 7, 10, 0.55) 100%);
+    radial-gradient(ellipse 90% 60% at 50% 50%, transparent 50%, rgba(6, 7, 10, 0.45) 100%);
 }
 /* All content sits above the canvas */
 header, main, footer, section, .stat-strip, .final-cta-wrap, .scroll-progress { position: relative; z-index: 5; }
@@ -168,9 +166,9 @@ nav a:hover { color: var(--text); }
 section { padding: 140px 32px; max-width: 1200px; margin: 0 auto; }
 @media (max-width: 768px) { section { padding: 80px 16px; } }
 
-h1, h2, h3 { letter-spacing: -0.025em; line-height: 1.12; }
-h1 { font-size: clamp(40px, 6.5vw, 78px); font-weight: 700; }
-h2 { font-size: clamp(32px, 4.2vw, 48px); font-weight: 700; margin-bottom: 18px; }
+h1, h2, h3 { letter-spacing: -0.03em; line-height: 1.08; }
+h1 { font-size: clamp(36px, 5vw, 64px); font-weight: 700; }
+h2 { font-size: clamp(30px, 3.6vw, 44px); font-weight: 700; margin-bottom: 18px; line-height: 1.1; }
 h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
 
 .section-eyebrow {
@@ -220,23 +218,25 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
 .hero-content {
   text-align: center;
   padding: 0 32px;
-  max-width: 1000px;
+  max-width: 880px;
   pointer-events: none;
   transition: opacity 240ms linear, transform 240ms linear;
   will-change: opacity, transform;
 }
 .hero-content > * { pointer-events: auto; }
 .hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 12px; letter-spacing: 0.10em;
-  padding: 6px 14px;
-  background: rgba(220, 38, 38, 0.12);
-  border: 1px solid var(--border-red);
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  background: rgba(220, 38, 38, 0.06);
+  border: 1px solid rgba(220, 38, 38, 0.18);
   border-radius: 100px;
-  color: var(--red-400);
-  margin-bottom: 28px;
+  color: var(--red-300);
+  margin-bottom: 36px;
   backdrop-filter: blur(8px);
 }
+.hero-eyebrow .sep { color: rgba(255, 255, 255, 0.15); }
 .hero-eyebrow .pulse {
   width: 8px; height: 8px; border-radius: 50%; background: var(--red-500);
   box-shadow: 0 0 0 0 var(--accent-glow);
@@ -247,26 +247,27 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
   70%  { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
   100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
 }
-.hero-content h1 { margin-bottom: 24px; }
+.hero-content h1 { margin-bottom: 28px; }
 .hero-content h1 .accent {
   background: linear-gradient(180deg, var(--red-400) 0%, var(--red-600) 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 32px rgba(220, 38, 38, 0.45));
+  filter: drop-shadow(0 0 24px rgba(220, 38, 38, 0.35));
 }
 .hero-content p.lead {
-  font-size: clamp(17px, 2vw, 21px);
+  font-size: clamp(15px, 1.4vw, 17px);
   color: var(--text-muted);
-  max-width: 720px;
+  max-width: 540px;
   margin: 0 auto 40px;
-  line-height: 1.55;
+  line-height: 1.6;
 }
 .cta-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
 .btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 13px 24px;
-  border-radius: var(--radius);
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 24px;
+  border-radius: 10px;
   font-weight: 500; font-size: 15px;
+  letter-spacing: -0.005em;
   border: 1px solid transparent;
   transition: all var(--transition);
   cursor: pointer;
@@ -298,25 +299,26 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
 .btn-secondary:hover { background: var(--bg-3); color: var(--text) !important; border-color: var(--border-red); }
 
 .hero-badges {
-  margin-top: 56px;
-  display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
-  font-size: 13px; color: var(--text-dim);
+  margin-top: 64px;
+  display: flex; justify-content: center; gap: 28px; flex-wrap: wrap;
+  font-size: 12px; color: var(--text-dim);
+  letter-spacing: 0.02em;
 }
-.hero-badges .badge { display: flex; align-items: center; gap: 6px; }
-.hero-badges .badge .check { color: var(--red-400); }
+.hero-badges .badge { display: flex; align-items: center; gap: 8px; }
+.hero-badges .badge .check { color: var(--red-400); font-size: 10px; }
 
 .scroll-cue {
-  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
-  color: var(--text-dim); text-transform: uppercase;
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0;
   z-index: 4;
+  opacity: 0.6;
 }
 .scroll-cue .line {
-  width: 1px; height: 36px;
-  background: linear-gradient(to bottom, transparent, var(--red-500));
+  width: 1px; height: 44px;
+  background: linear-gradient(to bottom, transparent, var(--red-400));
   animation: scroll-pulse 2.4s infinite;
 }
+.scroll-cue span:not(.line) { display: none; }
 @keyframes scroll-pulse {
   0%, 100% { opacity: 0.3; transform: scaleY(0.6); }
   50% { opacity: 1; transform: scaleY(1); }
@@ -692,14 +694,7 @@ body.cursor-hover .cursor-ring { width: 60px; height: 60px; margin: -30px 0 0 -3
 /* ========== MAGNETIC ========== */
 .magnetic { will-change: transform; transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1); }
 
-/* ========== HERO WORD REVEAL ========== */
-.word-reveal { display: inline-block; overflow: hidden; vertical-align: bottom; }
-.word-reveal > .word-inner {
-  display: inline-block; transform: translateY(110%);
-  transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-.word-reveal.in > .word-inner { transform: translateY(0); }
-.word-reveal + .word-reveal { margin-left: 0.25em; }
+/* (word-reveal removed — broke kerning on multi-line H1) */
 
 /* ========== MARQUEE ========== */
 .marquee {
@@ -866,10 +861,20 @@ body.cursor-hover .cursor-ring { width: 60px; height: 60px; margin: -30px 0 0 -3
 <div class="hero-stage" id="hero-stage">
   <div class="hero-sticky">
     <div class="hero-content" id="hero-content">
-      <span class="hero-eyebrow"><span class="pulse"></span>v0.2.0 · 3 modules · 5 engine plugins · 365 tests</span>
-      <h1 id="hero-title" data-word-reveal>Open-source AI toolkit that <span class="accent">eliminates the rote work</span> in game development.</h1>
+      <span class="hero-eyebrow">
+        <span class="pulse"></span>
+        v0.2.0
+        <span class="sep">/</span> 3 modules
+        <span class="sep">/</span> 5 engines
+        <span class="sep">/</span> 365 tests
+      </span>
+      <h1 id="hero-title">
+        Open-source AI toolkit that<br>
+        <span class="accent">eliminates the rote work</span><br>
+        in game development.
+      </h1>
       <p class="lead">
-        Three composable tools — <strong>Boilergen</strong> for codegen, <strong>Schema Validator</strong> for cross-reference + FiveM linting, <strong>Localization Assistant</strong> for static checks + AI translation. Replace boring boilerplate-and-validation work across your stack so the team can focus on what's actually engineering.
+        Three composable tools — Boilergen, Schema Validator, Localization Assistant — replace boilerplate, validation, and i18n drudgery across your stack.
       </p>
       <div class="cta-row">
         <a href="/" class="btn btn-primary magnetic">
@@ -1751,49 +1756,6 @@ window.addEventListener('load', () => {
   // small delay so the brand mark + 3D have a chance to materialize
   setTimeout(() => loader && loader.classList.add('gone'), 400);
 });
-
-// ============================================================
-//  WORD REVEAL  on  [data-word-reveal]
-// ============================================================
-(function initWordReveal() {
-  const targets = document.querySelectorAll('[data-word-reveal]');
-  targets.forEach(el => {
-    // walk children, splitting only TEXT nodes into <span class="word-reveal"><span class="word-inner">word</span></span>
-    const frag = document.createDocumentFragment();
-    el.childNodes.forEach(node => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        node.textContent.split(/(\s+)/).forEach(part => {
-          if (!part) return;
-          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
-          const wrap  = document.createElement('span');
-          wrap.className = 'word-reveal';
-          const inner = document.createElement('span');
-          inner.className = 'word-inner';
-          inner.textContent = part;
-          wrap.appendChild(inner);
-          frag.appendChild(wrap);
-        });
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        // wrap whole element (e.g. .accent <span>) as a single word group
-        const wrap = document.createElement('span');
-        wrap.className = 'word-reveal';
-        const inner = document.createElement('span');
-        inner.className = 'word-inner';
-        // move children of <span class="accent"> into inner; preserve original tag class via outer wrap
-        inner.appendChild(node.cloneNode(true));
-        wrap.appendChild(inner);
-        frag.appendChild(wrap);
-      }
-    });
-    el.innerHTML = '';
-    el.appendChild(frag);
-    // reveal staggered
-    const words = el.querySelectorAll('.word-reveal');
-    words.forEach((w, i) => {
-      setTimeout(() => w.classList.add('in'), 200 + i * 70);
-    });
-  });
-})();
 
 // ============================================================
 //  CUSTOM CURSOR  +  MAGNETIC CTAs  (single RAF loop)
