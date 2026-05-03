@@ -712,6 +712,23 @@ main {
 .tab-btn.download:disabled {
   opacity: 0.6; cursor: progress;
 }
+.tab-btn.share {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+.tab-btn.share:hover {
+  color: var(--accent-bright);
+  border-color: rgba(220, 38, 38, 0.45);
+  background: rgba(220, 38, 38, 0.06);
+}
+.tab-btn.share.shared {
+  color: var(--green);
+  border-color: rgba(63, 185, 80, 0.5);
+  background: rgba(63, 185, 80, 0.08);
+}
 
 #file-body {
   flex: 1;
@@ -1399,6 +1416,7 @@ body.cursor-hover .cursor-ring { width: 56px; height: 56px; margin: -28px 0 0 -2
           <button class="tab-btn" id="tab-source">.hbs</button>
           <button class="tab-btn copy" id="copy-btn">Copy</button>
           <button class="tab-btn download" id="download-zip" title="Download all generated files as .zip">⤓ .zip</button>
+          <button class="tab-btn share" id="share-snapshot" title="Copy a URL that restores this YAML + plugin">↗ Share</button>
         </div>
         <div id="file-body">
           <div class="empty-state">
@@ -2164,6 +2182,115 @@ bootstrap();
     } catch {}
     return res;
   };
+
+  // ---------- Share-snapshot URL ----------
+  // Encode {yaml, plugin} into URL hash; restore on load. base64url so the
+  // hash survives Discord/Slack/Telegram unfurlers without escaping.
+  const SHARE_KEY = 'boilergen.share.dismissed';
+
+  function b64url_encode(str) {
+    return btoa(unescape(encodeURIComponent(str)))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function b64url_decode(str) {
+    str = str.replace(/-/g, '+').replace(/_/g, '/');
+    while (str.length % 4) str += '=';
+    return decodeURIComponent(escape(atob(str)));
+  }
+  function packSnapshot() {
+    const text = yaml.value || '';
+    const plugin = (window.state && window.state.currentPluginId) || '';
+    const payload = JSON.stringify({ v: 1, p: plugin, y: text });
+    return b64url_encode(payload);
+  }
+  function unpackSnapshot(encoded) {
+    try {
+      const obj = JSON.parse(b64url_decode(encoded));
+      if (obj && obj.v === 1) return obj;
+    } catch {}
+    return null;
+  }
+
+  // expose state to window so DX layer can read currentPluginId
+  // (the legacy script's `state` is a plain global, but TypeScript-style
+  // bundlers can hoist it; reading via window.state is the safe path).
+  if (typeof state !== 'undefined' && !window.state) window.state = state;
+
+  const shareBtn = document.getElementById('share-snapshot');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      const text = yaml.value || '';
+      if (!text.trim()) { toast('Nothing to share — write some YAML first', 'info'); return; }
+      const encoded = packSnapshot();
+      const url = `${window.location.origin}${window.location.pathname}#s=${encoded}`;
+      if (url.length > 8000) {
+        toast('Snapshot too large for URL — use ⤓ .zip + send manually', 'error');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(url);
+        shareBtn.classList.add('shared');
+        const orig = shareBtn.textContent;
+        shareBtn.textContent = '✓ URL copied';
+        // also update the address bar so the user can see the snapshot URL
+        history.replaceState(null, '', `#s=${encoded}`);
+        toast(`Share URL copied (${url.length} chars)`, 'success');
+        setTimeout(() => {
+          shareBtn.classList.remove('shared');
+          shareBtn.textContent = orig;
+        }, 1800);
+      } catch {
+        toast('Could not access clipboard — copy URL from address bar', 'error');
+        history.replaceState(null, '', `#s=${encoded}`);
+      }
+    });
+  }
+
+  // Restore on initial load if the URL has a snapshot hash.
+  // Race: the legacy plugin loader auto-populates yaml.value with the
+  // first example ~600-1200ms after page load. We must overwrite AFTER
+  // that. Strategy: capture the snapshot now, schedule re-apply at 1500ms,
+  // and additionally guard with a one-shot watcher that re-applies if
+  // the textarea diverges from our snapshot in the next 3s.
+  (function restoreFromHash() {
+    const m = (window.location.hash || '').match(/^#s=([\w-]+)/);
+    if (!m) return;
+    const snap = unpackSnapshot(m[1]);
+    if (!snap) {
+      toast('Share URL is corrupted or out of date', 'error');
+      return;
+    }
+    const target = snap.y || '';
+
+    function applySnapshot() {
+      if (yaml.value === target) return;
+      yaml.value = target;
+      yaml.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    // First apply: immediate (in case legacy hasn't run yet)
+    applySnapshot();
+    // Second apply: after the legacy plugin-example loader probably ran
+    setTimeout(applySnapshot, 1500);
+    // Third apply: belt-and-suspenders for slow connections
+    setTimeout(applySnapshot, 3000);
+
+    // Plugin switch (only after plugins finished loading)
+    setTimeout(() => {
+      try {
+        if (snap.p && window.state && snap.p !== window.state.currentPluginId) {
+          const tab = document.querySelector(`.plugin-tab[data-plugin-id="${snap.p}"]`);
+          if (tab) tab.click();
+          // Re-apply YAML one more time after plugin click, since the
+          // plugin tab handler also resets the textarea to its example.
+          setTimeout(applySnapshot, 800);
+        }
+      } catch {}
+    }, 1800);
+
+    toast('Loaded shared snapshot', 'success', { ttl: 3500 });
+    history.replaceState(null, '', window.location.pathname);
+  })();
 
   // ---------- One-time hint ----------
   try {
