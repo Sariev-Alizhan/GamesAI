@@ -1,0 +1,24 @@
+# Sniper — long-range one-shot to the chest, painful TTK if you miss.
+# Used in Team5v5TDM and Hardpoint mid-line.
+id: awm_338
+type: weapon
+name: AWM .338
+data:
+  assetName: AWM338_Data
+  scriptGuid: f40b3035ee44f5c4ba404f6d0405ef9d
+  baseDamage: 120                   # one-shot to chest at full health
+  range: 200
+  fireRate: 1.4                     # bolt-action — slow
+  isAutomatic: false
+  magazineSize: 5
+  reserveAmmo: 20
+  reloadTime: 3.2
+  recoilAmount: 2.5                 # camera kick is dramatic; encourages re-aim
+  recoilPattern:
+    x: 0.4
+    y: 2.2
+  recoilRecoverySpeed: 2.5
+  baseSpread: 0.001                 # near-zero ADS spread
+  maxSpread: 0.15                   # but punishing if you spam from the hip
+  spreadIncreasePerShot: 0.05
+  spreadDecreaseSpeed: 3

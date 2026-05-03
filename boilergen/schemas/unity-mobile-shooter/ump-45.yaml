@@ -1,0 +1,24 @@
+# SMG — close-mid range automatic, high mag capacity, manageable recoil.
+# Fills the gap between AssaultRifle (versatile) and SPAS-12 (point-blank).
+id: ump_45
+type: weapon
+name: UMP-45
+data:
+  assetName: UMP45_Data
+  scriptGuid: f40b3035ee44f5c4ba404f6d0405ef9d
+  baseDamage: 16                    # lower per-shot than AR; compensated by fire rate
+  range: 45
+  fireRate: 0.075                   # 800 rpm — fast
+  isAutomatic: true
+  magazineSize: 25
+  reserveAmmo: 100
+  reloadTime: 2.1
+  recoilAmount: 0.6
+  recoilPattern:
+    x: 0.2
+    y: 0.5
+  recoilRecoverySpeed: 7
+  baseSpread: 0.012
+  maxSpread: 0.08
+  spreadIncreasePerShot: 0.008
+  spreadDecreaseSpeed: 6

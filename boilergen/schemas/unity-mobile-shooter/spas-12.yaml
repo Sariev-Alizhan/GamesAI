@@ -1,0 +1,24 @@
+# Shotgun — close-range one-shot kill, slow fire rate, severe spread.
+# Designed for the Hardpoint5v5 chokepoint meta.
+id: spas_12
+type: weapon
+name: SPAS-12
+data:
+  assetName: SPAS12_Data
+  scriptGuid: f40b3035ee44f5c4ba404f6d0405ef9d
+  baseDamage: 90                    # one-shot @ point-blank with multi-pellet sim on the projectile side
+  range: 12                         # mobile-tuned: feels like 8m effective
+  fireRate: 0.85                    # ~70 rpm
+  isAutomatic: false
+  magazineSize: 6
+  reserveAmmo: 24
+  reloadTime: 0.6                   # per-shell; the runtime decides total reload via shells*time
+  recoilAmount: 1.8
+  recoilPattern:
+    x: 0.6
+    y: 1.4
+  recoilRecoverySpeed: 4
+  baseSpread: 0.04
+  maxSpread: 0.10                   # spread cap is high — shotguns are spread
+  spreadIncreasePerShot: 0.02
+  spreadDecreaseSpeed: 6

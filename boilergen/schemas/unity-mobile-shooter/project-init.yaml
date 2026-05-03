@@ -1,0 +1,19 @@
+# One-shot project bootstrap for a Unity Mobile Shooter project.
+# Run ONCE per project to scaffold:
+#   - Assets/_Project/Scripts/Localization/LocaleManager.cs (~140 LOC, JSON-backed)
+#   - Assets/_Project/Resources/Locales/en.json (16 stock UI strings, EN-seeded)
+#
+# After running, use Localization Assistant to fill ru.json + kk.json:
+#   localization-assistant fill --source en.json --target ru.json --target kk.json
+#
+# Usage:
+#   boilergen generate schemas/unity-mobile-shooter/project-init.yaml \
+#     --plugin plugins/unity-mobile-shooter \
+#     --output ./Assets/_Project
+id: project_init
+type: project-init
+name: Unity Mobile Shooter — Project Init
+data:
+  # No fields needed — templates are static. Reserved for future
+  # parameterization (default locale, namespace, etc.)
+  reserved: true

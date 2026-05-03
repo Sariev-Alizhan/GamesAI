@@ -1,0 +1,24 @@
+# Melee — one-hit kill from behind, two-hit from front. No ammo.
+# Universal sidearm for movement-meta loadouts.
+id: combat_knife
+type: weapon
+name: Combat Knife
+data:
+  assetName: CombatKnife_Data
+  scriptGuid: f40b3035ee44f5c4ba404f6d0405ef9d
+  baseDamage: 55                    # 2-hit chest, 1-hit back (back-stab handled in NetworkWeapon, not here)
+  range: 1.8                        # melee-reach
+  fireRate: 0.45                    # swing speed
+  isAutomatic: false
+  magazineSize: 0                   # convention used in WeaponData for "no-mag" weapons
+  reserveAmmo: 0
+  reloadTime: 0
+  recoilAmount: 0
+  recoilPattern:
+    x: 0
+    y: 0
+  recoilRecoverySpeed: 0
+  baseSpread: 0
+  maxSpread: 0
+  spreadIncreasePerShot: 0
+  spreadDecreaseSpeed: 0

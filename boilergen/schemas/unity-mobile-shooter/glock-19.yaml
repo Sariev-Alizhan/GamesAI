@@ -1,0 +1,25 @@
+# Pistol — secondary sidearm. Low TTK at close range, fast draw.
+# Authored for Flump (NovaStudios) per FLUMP-AUDIT.md §1: matches the
+# WeaponData ScriptableObject shape from AssaultRifle_Data.asset 1-to-1.
+id: glock_19
+type: weapon
+name: Glock 19
+data:
+  assetName: Glock19_Data
+  scriptGuid: f40b3035ee44f5c4ba404f6d0405ef9d   # Flump's WeaponData.cs.meta GUID
+  baseDamage: 18
+  range: 35
+  fireRate: 0.18                    # 333 rpm — semi-auto
+  isAutomatic: false
+  magazineSize: 15
+  reserveAmmo: 60
+  reloadTime: 1.6
+  recoilAmount: 0.4
+  recoilPattern:
+    x: 0.15
+    y: 0.35
+  recoilRecoverySpeed: 8            # snappier than rifle
+  baseSpread: 0.005
+  maxSpread: 0.04
+  spreadIncreasePerShot: 0.006
+  spreadDecreaseSpeed: 9
