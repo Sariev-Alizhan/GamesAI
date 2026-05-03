@@ -1,0 +1,19 @@
+# Heavy Starter — SPAS-12 shotgun for chokepoint defense + Glock backup +
+# knife. Pairs the Heavy class's slow-but-tanky kit with a CQB primary
+# that punishes anyone who tries to get close.
+id: heavy_starter
+type: loadout
+name: Heavy Starter
+data:
+  assetName: Loadout_HeavyStarter
+  scriptGuid: __LOADOUT_DATA_SCRIPT_GUID__
+  primaryWeaponId: spas_12
+  secondaryWeaponId: glock_19
+  meleeWeaponId: combat_knife
+  startingArmor: 25                # already armored from the class profile
+  perks:
+    - last_stand
+  unlockLevel: 0
+  isFreeForAll: true
+  isStarter: true
+  sortOrder: 2

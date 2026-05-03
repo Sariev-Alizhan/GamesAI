@@ -23,6 +23,7 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { resolve, basename, join, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawn } from 'node:child_process';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
@@ -52,6 +53,13 @@ async function findKbDir(): Promise<string | null> {
     } catch { /* keep trying */ }
   }
   return null;
+}
+
+async function firstExisting(paths: string[]): Promise<string> {
+  for (const p of paths) {
+    try { await stat(p); return p; } catch { /* keep trying */ }
+  }
+  return paths[0] ?? '';
 }
 
 const server = new McpServer({
@@ -228,6 +236,75 @@ server.registerTool(
     return {
       content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
     };
+  },
+);
+
+// ---- Tool: validate (cross-reference + orphan checks via schema-validator) ----
+server.registerTool(
+  'boilergen_validate',
+  {
+    title: 'Validate schemas — broken cross-refs, orphans, type mismatches',
+    description:
+      'Run the Schema Validator over a directory of YAML schemas. Catches broken cross-references (loadout.primaryWeaponId points at a deleted weapon, etc.), orphans (entities nobody references), and type mismatches when a referenceFields config is supplied. Returns structured JSON: { stats: {entities, errors, warnings}, issues: [...] }. Use this BEFORE boilergen_generate or _bootstrap to catch data drift at YAML-time instead of at Unity-runtime.',
+    inputSchema: {
+      schemasDir: z.string().describe('Directory of YAML schemas (recursive)'),
+      configPath: z.string().optional().describe('Optional path to validator config YAML (defines referenceFields, knownEnums, etc.). For the unity-mobile-shooter plugin, use schemas/unity-mobile-shooter/validator.config.yaml.'),
+      ignoreOrphans: z.boolean().optional().describe('Suppress orphan-entity warnings (default false — orphans flagged as warnings)'),
+    },
+  },
+  async ({ schemasDir, configPath, ignoreOrphans }) => {
+    // dev: dist/mcp/server.js → ../../../tools/schema-validator/dist/cli/index.js
+    // pkg: dist/mcp/server.js → ../../tools/schema-validator/dist/cli/index.js
+    const validatorBin = process.env.BOILERGEN_VALIDATOR_BIN
+      ?? await firstExisting([
+        resolve(__dirname, '..', '..', '..', 'tools', 'schema-validator', 'dist', 'cli', 'index.js'),
+        resolve(__dirname, '..', '..', 'tools', 'schema-validator', 'dist', 'cli', 'index.js'),
+      ]);
+    if (!validatorBin) {
+      return { content: [{ type: 'text', text: JSON.stringify({
+        error: 'schema-validator binary not found',
+        hint: 'Set BOILERGEN_VALIDATOR_BIN env var, or run `cd tools/schema-validator && npm install && npm run build`'
+      }) }] };
+    }
+    let exists = false;
+    try { await stat(validatorBin); exists = true; } catch { /* not found */ }
+    if (!exists) {
+      return { content: [{ type: 'text', text: JSON.stringify({
+        error: `schema-validator binary not found at ${validatorBin}`,
+        hint: 'Set BOILERGEN_VALIDATOR_BIN env var, or run `cd tools/schema-validator && npm install && npm run build`'
+      }) }] };
+    }
+    const args = ['check', resolve(schemasDir), '--json'];
+    if (configPath) args.push('--config', resolve(configPath));
+    if (ignoreOrphans) args.push('--ignore-orphans');
+    return await new Promise((res) => {
+      const proc = spawn('node', [validatorBin, ...args]);
+      let out = '', err = '';
+      proc.stdout.on('data', d => { out += d.toString(); });
+      proc.stderr.on('data', d => { err += d.toString(); });
+      proc.on('close', (code) => {
+        // exit code 1 = errors found (still valid output), exit code 2 = crash
+        if (code === 2) {
+          res({ content: [{ type: 'text', text: JSON.stringify({ error: err || 'validator crashed', exitCode: code }) }] });
+          return;
+        }
+        try {
+          const parsed = JSON.parse(out);
+          res({ content: [{ type: 'text', text: JSON.stringify({
+            exitCode: code,
+            stats: parsed.stats,
+            issues: parsed.issues,
+          }, null, 2) }] });
+        } catch (parseErr) {
+          res({ content: [{ type: 'text', text: JSON.stringify({
+            error: 'failed to parse validator output',
+            stdout: out.slice(0, 1000),
+            stderr: err.slice(0, 1000),
+            exitCode: code,
+          }) }] });
+        }
+      });
+    });
   },
 );
 
@@ -463,6 +540,6 @@ function parseFrontmatter(md: string): Record<string, string | string[]> {
 const transport = new StdioServerTransport();
 await server.connect(transport);
 process.stderr.write(`[boilergen-mcp] ready · plugins=${DEFAULT_PLUGINS_DIR} · schemas=${DEFAULT_SCHEMAS_DIR}\n`);
-process.stderr.write(`[boilergen-mcp] tools (9): list_plugins, list_entity_types, preview, generate, bootstrap, list_schemas, list_kb, read_kb, search_kb\n`);
+process.stderr.write(`[boilergen-mcp] tools (10): list_plugins, list_entity_types, preview, generate, validate, bootstrap, list_schemas, list_kb, read_kb, search_kb\n`);
 
 void basename;

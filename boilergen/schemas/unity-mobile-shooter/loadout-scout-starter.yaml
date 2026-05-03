@@ -1,0 +1,17 @@
+# Scout Starter — UMP-45 SMG + Glock pistol + knife. Fast loadout for the
+# Scout class that complements its sprint multiplier and slide.
+id: scout_starter
+type: loadout
+name: Scout Starter
+data:
+  assetName: Loadout_ScoutStarter
+  scriptGuid: __LOADOUT_DATA_SCRIPT_GUID__
+  primaryWeaponId: ump_45
+  secondaryWeaponId: glock_19
+  meleeWeaponId: combat_knife
+  startingArmor: 0
+  perks: []
+  unlockLevel: 0
+  isFreeForAll: true
+  isStarter: true
+  sortOrder: 1

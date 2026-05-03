@@ -5,7 +5,7 @@
 #
 # All anchors in screen-space pixels. The runtime UI auto-creates RectTransforms
 # at these positions if you don't drag your own into the Inspector.
-id: default
+id: default_input
 type: touch-input
 name: Default Mobile Twin-Stick
 data:

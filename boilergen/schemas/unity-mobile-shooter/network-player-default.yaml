@@ -4,7 +4,7 @@
 # Overrides at runtime via [SerializeField] — the schema fields above are
 # baked into private const defaults inside the generated class so it works
 # in tests / when SOs aren't wired yet.
-id: default
+id: default_player
 type: network-player
 name: Default Network Player
 data:
