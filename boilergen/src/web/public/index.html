@@ -286,6 +286,53 @@ main {
 }
 #yaml-input::placeholder { color: var(--text-dim); }
 
+/* When CodeMirror takes over, hide the textarea but keep it in the DOM
+   as the source-of-truth for legacy code (generate(), drag-drop, etc.). */
+#yaml-input.cm-hidden { display: none !important; }
+#yaml-editor {
+  flex: 1;
+  display: flex; flex-direction: column;
+  min-height: 0;
+  background: var(--bg-1);
+  position: relative;
+}
+#yaml-editor .cm-editor {
+  flex: 1; min-height: 0;
+  background: transparent !important;
+  font-family: var(--mono); font-size: 13px;
+}
+#yaml-editor .cm-editor.cm-focused { outline: none; }
+#yaml-editor .cm-scroller {
+  font-family: var(--mono) !important;
+  font-size: 13px !important;
+  line-height: 1.7 !important;
+  padding: 14px 0;
+}
+#yaml-editor .cm-content { padding: 0; }
+#yaml-editor .cm-gutters {
+  background: rgba(7, 8, 11, 0.55) !important;
+  border-right: 1px solid var(--border) !important;
+  color: var(--text-dim) !important;
+  padding: 0 4px;
+}
+#yaml-editor .cm-activeLineGutter,
+#yaml-editor .cm-activeLine {
+  background: rgba(220, 38, 38, 0.06) !important;
+}
+#yaml-editor .cm-lineNumbers .cm-gutterElement { padding: 0 8px; min-width: 22px; }
+#yaml-editor .cm-cursor { border-left-color: var(--accent-bright); border-left-width: 2px; }
+#yaml-editor .cm-selectionBackground,
+#yaml-editor.cm-focused .cm-selectionBackground {
+  background: rgba(220, 38, 38, 0.20) !important;
+}
+#yaml-editor .cm-placeholder { color: var(--text-dim); font-style: normal; }
+/* Subtle scan glow on the gutter when something just got loaded */
+@keyframes editor-flash {
+  from { background: rgba(220, 38, 38, 0.20); }
+  to   { background: transparent; }
+}
+#yaml-editor.flash .cm-content { animation: editor-flash 600ms ease-out; }
+
 .actions {
   display: flex;
   align-items: center;
@@ -2128,6 +2175,93 @@ bootstrap();
     }
   } catch {}
 })();
+</script>
+
+<!-- ============================================================
+     CODEMIRROR 6 — premium YAML editor with syntax highlighting,
+     line numbers, dark theme. Mounts over the existing textarea
+     and stays in two-way sync so the legacy generate() / drag-drop
+     / autosave keep working.
+     ============================================================ -->
+<script type="module">
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const small  = window.matchMedia('(max-width: 900px)').matches;
+if (small) { /* mobile-block overlay covers the editor — skip CM */ }
+else {
+  try {
+    const [{ EditorView, basicSetup }, { yaml }, { oneDark }, { keymap }, { indentWithTab }, { placeholder }] = await Promise.all([
+      import('https://esm.sh/codemirror@6.0.1'),
+      import('https://esm.sh/@codemirror/lang-yaml@6.1.2'),
+      import('https://esm.sh/@codemirror/theme-one-dark@6.1.2'),
+      import('https://esm.sh/@codemirror/view@6.34.1'),
+      import('https://esm.sh/@codemirror/commands@6.7.1'),
+      import('https://esm.sh/@codemirror/view@6.34.1'),
+    ]);
+
+    const ta = document.getElementById('yaml-input');
+    if (!ta) throw new Error('no textarea');
+
+    // Mount point next to (visually replacing) the textarea
+    const mount = document.createElement('div');
+    mount.id = 'yaml-editor';
+    ta.parentNode.insertBefore(mount, ta);
+    ta.classList.add('cm-hidden');
+
+    let isSyncing = false;
+
+    const view = new EditorView({
+      doc: ta.value || '',
+      extensions: [
+        basicSetup,
+        yaml(),
+        oneDark,
+        keymap.of([indentWithTab]),
+        placeholder('Paste or write entity YAML here…\nDrop a .yaml file anywhere on this panel.'),
+        EditorView.theme({
+          '&': { height: '100%' },
+          '.cm-scroller': { overflow: 'auto' },
+        }),
+        EditorView.updateListener.of((update) => {
+          if (!update.docChanged || isSyncing) return;
+          isSyncing = true;
+          ta.value = update.state.doc.toString();
+          ta.dispatchEvent(new Event('input', { bubbles: true }));
+          isSyncing = false;
+        }),
+      ],
+      parent: mount,
+    });
+
+    // External writes to textarea.value (drag-drop, restore, clear) reach
+    // us through the input event the DX layer dispatches — sync into CM.
+    ta.addEventListener('input', () => {
+      if (isSyncing) return;
+      const cur = view.state.doc.toString();
+      if (cur === ta.value) return;
+      isSyncing = true;
+      view.dispatch({ changes: { from: 0, to: cur.length, insert: ta.value } });
+      isSyncing = false;
+      if (!reduce) {
+        mount.classList.add('flash');
+        setTimeout(() => mount.classList.remove('flash'), 650);
+      }
+    });
+
+    // ⌘↵ inside the editor must still trigger Generate — re-route to
+    // the legacy button click since CodeMirror swallows key events.
+    view.dom.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('generate-btn')?.click();
+      }
+    });
+
+    window.__cm = view; // for future hooks
+  } catch (e) {
+    // CDN failed or browser blocks ESM — leave the textarea visible.
+    console.warn('CodeMirror failed to load, falling back to textarea:', e);
+  }
+}
 </script>
 
 <!-- ============================================================
