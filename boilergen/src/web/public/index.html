@@ -729,6 +729,153 @@ main {
   border-color: rgba(63, 185, 80, 0.5);
   background: rgba(63, 185, 80, 0.08);
 }
+/* History button styled as a ghost btn in the input-panel actions row */
+#history-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+#history-btn.open {
+  color: var(--accent-bright);
+  border-color: rgba(220, 38, 38, 0.45);
+  background: rgba(220, 38, 38, 0.06);
+}
+#history-btn .hist-count {
+  display: inline-block;
+  padding: 1px 6px;
+  margin-left: 2px;
+  border-radius: 100px;
+  background: rgba(220, 38, 38, 0.18);
+  color: var(--accent-bright);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--mono);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  line-height: 1.3;
+}
+
+/* History popover */
+#history-pop {
+  position: fixed;
+  z-index: 200;
+  width: 380px;
+  max-height: 480px;
+  background: rgba(13, 15, 20, 0.96);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(220, 38, 38, 0.10);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  animation: pop-in 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+#history-pop.open { display: flex; }
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+#history-pop .pop-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7, 8, 11, 0.5);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--text-dim);
+}
+#history-pop .pop-head .clear-all {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+#history-pop .pop-head .clear-all:hover {
+  color: var(--accent-bright);
+  border-color: rgba(220, 38, 38, 0.4);
+  background: rgba(220, 38, 38, 0.08);
+}
+#history-pop .pop-list {
+  overflow-y: auto;
+  padding: 8px;
+  flex: 1;
+}
+#history-pop .pop-empty {
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+#history-pop .hist-item {
+  display: flex; align-items: stretch;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background: rgba(22, 26, 34, 0.5);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 160ms ease;
+  position: relative;
+}
+#history-pop .hist-item:last-child { margin-bottom: 0; }
+#history-pop .hist-item:hover {
+  background: rgba(22, 26, 34, 0.85);
+  border-color: rgba(220, 38, 38, 0.35);
+  transform: translateX(2px);
+}
+#history-pop .hist-item .hist-meta {
+  flex: 1; display: flex; flex-direction: column; gap: 2px;
+  min-width: 0;
+}
+#history-pop .hist-item .hist-row1 {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text); font-weight: 500;
+}
+#history-pop .hist-item .hist-plugin {
+  font-family: var(--mono); font-size: 10.5px;
+  color: var(--accent-bright);
+  padding: 1px 6px;
+  background: rgba(220, 38, 38, 0.10);
+  border: 1px solid rgba(220, 38, 38, 0.20);
+  border-radius: 3px;
+}
+#history-pop .hist-item .hist-files {
+  font-family: var(--mono); font-size: 10.5px; color: var(--text-dim);
+}
+#history-pop .hist-item .hist-row2 {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px; color: var(--text-muted);
+  margin-top: 2px;
+}
+#history-pop .hist-item .hist-preview {
+  font-family: var(--mono); font-size: 10.5px; color: var(--text-dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+}
+#history-pop .hist-item .hist-del {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  padding: 4px 6px;
+  margin-left: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 160ms ease;
+}
+#history-pop .hist-item:hover .hist-del { opacity: 1; }
+#history-pop .hist-item .hist-del:hover {
+  color: var(--accent-bright);
+  background: rgba(220, 38, 38, 0.10);
+}
 
 #file-body {
   flex: 1;
@@ -1397,6 +1544,7 @@ body.cursor-hover .cursor-ring { width: 56px; height: 56px; margin: -28px 0 0 -2
         ✨ AI Describe
       </button>
       <button class="btn ghost" id="clear-btn">Clear</button>
+      <button class="btn ghost" id="history-btn" title="Last generations">⏱ History <span class="hist-count" id="hist-count" style="display:none;">0</span></button>
     </div>
   </section>
 
@@ -1459,6 +1607,15 @@ body.cursor-hover .cursor-ring { width: 56px; height: 56px; margin: -28px 0 0 -2
 </div>
 
 <div id="toast-host" aria-live="polite"></div>
+<div id="history-pop" role="dialog" aria-label="Generation history">
+  <div class="pop-head">
+    <span>Last generations</span>
+    <button class="clear-all" id="hist-clear" title="Clear all history">Clear all</button>
+  </div>
+  <div class="pop-list" id="hist-list">
+    <div class="pop-empty">No history yet — Generate something to start collecting.</div>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
@@ -2291,6 +2448,196 @@ bootstrap();
     toast('Loaded shared snapshot', 'success', { ttl: 3500 });
     history.replaceState(null, '', window.location.pathname);
   })();
+
+  // ---------- History dropdown ----------
+  // Stack of last N successful generations in localStorage. Push from inside
+  // the existing fetch monkey-patch (`window.fetch` patched above for zip).
+  // Item shape: { ts, plugin, yaml, fileCount, firstFile, schemaId }
+  const HIST_KEY = 'boilergen.history.v1';
+  const HIST_MAX = 10;
+
+  function readHistory() {
+    try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); }
+    catch { return []; }
+  }
+  function writeHistory(arr) {
+    try { localStorage.setItem(HIST_KEY, JSON.stringify(arr.slice(0, HIST_MAX))); }
+    catch {}
+  }
+  function pushHistory(entry) {
+    const arr = readHistory();
+    // de-dupe: if last entry matches yaml+plugin, replace instead of append
+    if (arr.length && arr[0].yaml === entry.yaml && arr[0].plugin === entry.plugin) {
+      arr[0] = entry;
+    } else {
+      arr.unshift(entry);
+    }
+    writeHistory(arr);
+    refreshHistoryBadge();
+  }
+
+  function refreshHistoryBadge() {
+    const arr = readHistory();
+    const badge = document.getElementById('hist-count');
+    if (!badge) return;
+    if (arr.length === 0) { badge.style.display = 'none'; return; }
+    badge.style.display = '';
+    badge.textContent = arr.length;
+  }
+
+  function fmtAgo(ts) {
+    const dt = (Date.now() - ts) / 1000;
+    if (dt < 60)   return Math.floor(dt) + 's ago';
+    if (dt < 3600) return Math.floor(dt / 60) + 'm ago';
+    if (dt < 86400) return Math.floor(dt / 3600) + 'h ago';
+    return Math.floor(dt / 86400) + 'd ago';
+  }
+
+  const histBtn = document.getElementById('history-btn');
+  const histPop = document.getElementById('history-pop');
+  const histList = document.getElementById('hist-list');
+  const histClear = document.getElementById('hist-clear');
+
+  function renderHistory() {
+    if (!histList) return;
+    const arr = readHistory();
+    if (!arr.length) {
+      histList.innerHTML = '<div class="pop-empty">No history yet — Generate something to start collecting.</div>';
+      return;
+    }
+    histList.innerHTML = arr.map((e, i) => {
+      const firstYamlLine = (e.yaml || '').split('\n').find(l => l.trim() && !l.trim().startsWith('#')) || '';
+      const preview = firstYamlLine.length > 60 ? firstYamlLine.slice(0, 57) + '…' : firstYamlLine;
+      const label = e.schemaId || preview || '(empty)';
+      return `
+        <div class="hist-item" data-idx="${i}" title="Restore this snapshot">
+          <div class="hist-meta">
+            <div class="hist-row1">
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">${escapeHtmlSafe(label)}</span>
+              <span class="hist-plugin">${escapeHtmlSafe(e.plugin || '?')}</span>
+              <span class="hist-files">${e.fileCount || 0} files</span>
+            </div>
+            <div class="hist-row2">
+              <span>${fmtAgo(e.ts)}</span>
+              <span class="hist-preview" style="flex:1;">${escapeHtmlSafe(preview)}</span>
+            </div>
+          </div>
+          <button class="hist-del" data-del="${i}" title="Remove from history" aria-label="Remove">×</button>
+        </div>
+      `;
+    }).join('');
+    // Click on item → restore; click on .hist-del → remove
+    histList.querySelectorAll('.hist-item').forEach(el => {
+      el.addEventListener('click', (ev) => {
+        if (ev.target.closest('.hist-del')) return;
+        const idx = parseInt(el.dataset.idx, 10);
+        const e = readHistory()[idx];
+        if (!e) return;
+        // Apply YAML via existing input flow (CodeMirror sync, autosave fire)
+        yaml.value = e.yaml;
+        yaml.dispatchEvent(new Event('input', { bubbles: true }));
+        // Plugin switch
+        if (e.plugin && window.state && e.plugin !== window.state.currentPluginId) {
+          const tab = document.querySelector(`.plugin-tab[data-plugin-id="${e.plugin}"]`);
+          if (tab) tab.click();
+        }
+        closeHistory();
+        toast(`Restored: ${e.schemaId || 'snapshot'}`, 'success');
+      });
+    });
+    histList.querySelectorAll('.hist-del').forEach(el => {
+      el.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const idx = parseInt(el.dataset.del, 10);
+        const arr = readHistory();
+        arr.splice(idx, 1);
+        writeHistory(arr);
+        refreshHistoryBadge();
+        renderHistory();
+      });
+    });
+  }
+  function escapeHtmlSafe(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+
+  function openHistory() {
+    if (!histBtn || !histPop) return;
+    renderHistory();
+    const r = histBtn.getBoundingClientRect();
+    const popW = 380;
+    const popH = Math.min(480, histPop.scrollHeight || 240);
+    // Anchor popover under the button, fall back to above if no room below
+    let left = r.left;
+    if (left + popW + 8 > window.innerWidth) left = window.innerWidth - popW - 8;
+    if (left < 8) left = 8;
+    let top = r.bottom + 6;
+    if (top + popH + 8 > window.innerHeight) {
+      top = Math.max(8, r.top - popH - 6);
+    }
+    histPop.style.left = `${left}px`;
+    histPop.style.right = 'auto';
+    histPop.style.top = `${top}px`;
+    histPop.classList.add('open');
+    histBtn.classList.add('open');
+  }
+  function closeHistory() {
+    histPop?.classList.remove('open');
+    histBtn?.classList.remove('open');
+  }
+
+  if (histBtn) {
+    histBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      histPop.classList.contains('open') ? closeHistory() : openHistory();
+    });
+  }
+  if (histClear) {
+    histClear.addEventListener('click', () => {
+      writeHistory([]);
+      refreshHistoryBadge();
+      renderHistory();
+      toast('History cleared', 'info');
+    });
+  }
+  // close on outside click / Escape
+  document.addEventListener('click', (e) => {
+    if (!histPop?.classList.contains('open')) return;
+    if (histPop.contains(e.target) || histBtn?.contains(e.target)) return;
+    closeHistory();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && histPop?.classList.contains('open')) closeHistory();
+  });
+  refreshHistoryBadge();
+
+  // ---------- Hook history capture into the existing fetch monkey-patch ----------
+  // The fetch wrapper above (installed for zip download) already clones
+  // /preview responses. Extend it to push successful generates into history.
+  const origFetch2 = window.fetch;
+  window.fetch = async function(...args) {
+    const res = await origFetch2.apply(this, args);
+    try {
+      const url = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+      const m = url.match(/\/api\/plugin\/([^/]+)\/preview/);
+      if (m && res.ok) {
+        const clone = res.clone();
+        clone.json().then(data => {
+          if (data && Array.isArray(data.files) && data.files.length) {
+            pushHistory({
+              ts: Date.now(),
+              plugin: decodeURIComponent(m[1]),
+              yaml: yaml.value,
+              fileCount: data.files.length,
+              firstFile: data.files[0]?.path || '',
+              schemaId: data.schema?.id || '',
+            });
+          }
+        }).catch(() => {});
+      }
+    } catch {}
+    return res;
+  };
 
   // ---------- One-time hint ----------
   try {
