@@ -1,7 +1,7 @@
 {
   "name": "boilergen",
   "version": "1.1.0",
-  "description": "Code generator for game development. YAML entity descriptions → boilerplate code across stack layers. Works as CLI, web playground, and MCP server (for Cursor / Claude Code / Windsurf).",
+  "description": "Open-source AI toolkit for game development. YAML entity descriptions → boilerplate code across stack layers (C++, Node, Flutter, Godot, Unity, Lua, FiveM-QB, i18n). Works as CLI, web playground, and MCP server (Cursor / Claude Code / Windsurf / Continue).",
   "main": "./dist/cli/index.js",
   "bin": {
     "boilergen": "./dist/cli/index.js",
@@ -16,11 +16,50 @@
     "test:watch": "vitest",
     "web": "tsx src/web/server.ts",
     "mcp": "tsx src/mcp/server.ts",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "files": [
+    "dist",
+    "plugins",
+    "schemas",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "gamedev",
+    "codegen",
+    "yaml",
+    "fivem",
+    "qbcore",
+    "unity",
+    "godot",
+    "unreal",
+    "boilerplate",
+    "scaffolding",
+    "rp",
+    "multiplayer",
+    "localization",
+    "i18n",
+    "schema-validator",
+    "mcp",
+    "ai",
+    "claude"
+  ],
+  "author": "Sariev Alizhan <raimzhan1907@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://boilergen-eight.vercel.app/landing.html",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sariev-Alizhan/GamesAI.git",
+    "directory": "boilergen"
+  },
+  "bugs": {
+    "url": "https://github.com/Sariev-Alizhan/GamesAI/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "type": "module",
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
