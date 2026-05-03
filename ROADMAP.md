@@ -40,12 +40,23 @@
 **Horizon-3 (1/6):**
 - ✅ 3.1 FiveM target в generic-rp — full coverage 7 entity types
 
+**Дополнительная work за session 2026-05-02 / 2026-05-03 (не в исходном horizon plan):**
+- ✅ Flump audit (`handoff/05-FLUMP-AUDIT.md`) — concrete adoption plan для team
+- ✅ Game-source triage (11 repos triaged, refused leaked, kept legitimate)
+- ✅ Mindustry deep-dive (GPL-3 hybrid content system audit)
+- ✅ Beyond All Reason audit (978 units validates balance-smell design)
+- ✅ Quake QC comparative entry (4 eras of game data architecture)
+- ✅ **Space Station 14 deep-dive** — largest OSS YAML-prototype RP-multiplayer (2068 prototypes / 10670 entities / 9101 inheritance edges; multi-parent, Fluent FTL, 25 prototype types — все patterns которые мы должны украсть)
+- ✅ **Engine version matrix framework** + 4 entries (Unity 2020 LTS → 6.3 LTS, FiveM fxmanifest evolution, Godot 3.5 → 4.5 с migration recipes, Unreal UE4.27 → UE5.6) — для version-aware codegen через AI Describe RAG
+
 **Текущее состояние:**
-- 12 модульных + plugin commits + 4 docs commits = 16 push'ей
-- boilergen 228 + localization 64 + schema-validator 73 = 365 тестов (было ~291)
+- **24 commits** на main за session
+- boilergen 228 + localization 64 + schema-validator 73 = **365 тестов** (было ~291)
 - 51 templates в generic-rp (было 12)
 - 3 модуля v0.2.0 (было 0.1.0 каждый)
+- **Knowledge-base: 34 entries** (было 16) — engines (12), games (10), patterns (7), research-notes (3), sources (2)
 - Все 3 модуля имеют production-grade README + CASE-STUDY где applicable
+- License posture зафиксирован в `NOTICE.md` — refused leaked Far Cry 1 / unknown p4ss / hacking requests; only OSI/permissive sources цитируются
 
 ---
 

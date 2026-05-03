@@ -90,7 +90,7 @@ Tracked work. Status updates as entries land.
 | Unity | 2020 LTS / 2021 LTS / 2022 LTS / 2023.x / 6.0 / 6.1 / 6.2 / 6.3 LTS | ✅ shipped 2026-05-03 | [`unity-version-matrix.md`](./unity-version-matrix.md) |
 | FiveM / Cfx.re | manifest 'adamant' / 'cerulean' / 'bodacious' + qb-core / Qbox / ox_core forks | ✅ shipped 2026-05-03 | [`fivem-version-matrix.md`](./fivem-version-matrix.md) |
 | Godot | 3.5 LTS / 4.0 / 4.1 / 4.2 / 4.3 / 4.4 / 4.5 | ✅ shipped 2026-05-03 | [`godot-version-matrix.md`](./godot-version-matrix.md) |
-| Unreal | UE4.27 / UE5.0 / UE5.1 / UE5.2 / UE5.3 / UE5.4 / UE5.5 / UE5.6 | ⏳ defer (no current Boilergen plugin) | TBD |
+| Unreal | UE4.27 / UE5.0 / UE5.1 / UE5.2 / UE5.3 / UE5.4 / UE5.5 / UE5.6 | ✅ shipped 2026-05-03 (RAG-only; no Boilergen plugin yet) | [`unreal-version-matrix.md`](./unreal-version-matrix.md) |
 | Bevy (Rust) | 0.10 / 0.11 / ... / 0.16 | ⏳ defer (rapid churn — perhaps a "stick to 0.14 LTS" strategy is more realistic than version matrix) | TBD |
 | Roblox / Luau | continuous | ⏳ defer (no current Boilergen plugin) | TBD |
 | Photon | Fusion 1/2/3, Quantum 1/2/3 | 🟡 covered partially in `engines/unity-mobile-multiplayer.md` | partial |
