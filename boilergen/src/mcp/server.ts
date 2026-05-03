@@ -20,8 +20,9 @@
 //     }
 //   }
 
-import { readdir } from 'node:fs/promises';
-import { resolve, basename, join } from 'node:path';
+import { readdir, readFile, stat } from 'node:fs/promises';
+import { resolve, basename, join, relative, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
@@ -31,6 +32,26 @@ import { generate } from '../core/generator.js';
 import { renderFile, renderString } from '../core/template-engine.js';
 
 const DEFAULT_PLUGINS_DIR = process.env.BOILERGEN_PLUGINS_DIR ?? resolve(process.cwd(), 'plugins');
+const DEFAULT_SCHEMAS_DIR = process.env.BOILERGEN_SCHEMAS_DIR ?? resolve(process.cwd(), 'schemas');
+
+// Resolve KB dir relative to the running script — works for both
+// `npm run mcp` (src/mcp/server.ts) and the published `boilergen-mcp` binary
+// (dist/mcp/server.js bundled with knowledge-base/ as a sibling top-level dir).
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const DEFAULT_KB_DIR = process.env.BOILERGEN_KB_DIR
+  ?? resolve(__dirname, '..', '..', '..', 'knowledge-base');         // dev: src/mcp/server.ts → ../../../knowledge-base
+const FALLBACK_KB_DIR = resolve(__dirname, '..', '..', 'knowledge-base'); // pkg: dist/mcp/server.js → ../../knowledge-base
+
+async function findKbDir(): Promise<string | null> {
+  for (const p of [DEFAULT_KB_DIR, FALLBACK_KB_DIR]) {
+    try {
+      const s = await stat(p);
+      if (s.isDirectory()) return p;
+    } catch { /* keep trying */ }
+  }
+  return null;
+}
 
 const server = new McpServer({
   name: 'boilergen',
@@ -209,11 +230,210 @@ server.registerTool(
   },
 );
 
+// ---- Tool 5: list bundled example schemas ----
+server.registerTool(
+  'boilergen_list_schemas',
+  {
+    title: 'List Bundled Example Schemas',
+    description:
+      'List every example YAML schema bundled with the project (schemas/<plugin>/*.yaml). Returns plugin / id / type / summary so the AI can pick a starting point for a new entity instead of writing one from scratch.',
+    inputSchema: {
+      schemasDir: z.string().optional().describe('Override schemas directory (defaults to ./schemas)'),
+      plugin: z.string().optional().describe('Filter to one plugin name'),
+    },
+  },
+  async ({ schemasDir, plugin: pluginFilter }) => {
+    const dir = schemasDir ? resolve(schemasDir) : DEFAULT_SCHEMAS_DIR;
+    type SchemaSummary = { plugin: string; file: string; id: string; type: string; name: string; firstComment?: string };
+    const out: SchemaSummary[] = [];
+    let pluginDirs: string[];
+    try {
+      pluginDirs = (await readdir(dir, { withFileTypes: true }))
+        .filter(d => d.isDirectory()).map(d => d.name);
+    } catch {
+      return { content: [{ type: 'text', text: JSON.stringify({ error: `schemas dir not found: ${dir}` }) }] };
+    }
+    for (const pName of pluginDirs) {
+      if (pluginFilter && pName !== pluginFilter) continue;
+      const pDir = join(dir, pName);
+      let files: string[];
+      try {
+        files = (await readdir(pDir)).filter(f => /\.ya?ml$/.test(f));
+      } catch { continue; }
+      for (const f of files) {
+        try {
+          const text = await readFile(join(pDir, f), 'utf8');
+          const schema = parseSchema(text, join(pDir, f));
+          const firstComment = (text.match(/^#\s+(.+)$/m) || [])[1];
+          const summary: SchemaSummary = {
+            plugin: pName,
+            file: relative(dir, join(pDir, f)),
+            id: String(schema.id),
+            type: String(schema.type),
+            name: String(schema.name ?? ''),
+          };
+          if (firstComment) summary.firstComment = firstComment;
+          out.push(summary);
+        } catch { /* skip bad YAMLs */ }
+      }
+    }
+    return { content: [{ type: 'text', text: JSON.stringify({ schemasDir: dir, total: out.length, schemas: out }, null, 2) }] };
+  },
+);
+
+// ---- Tool 6: list KB entries ----
+server.registerTool(
+  'boilergen_list_kb',
+  {
+    title: 'List Knowledge-Base Entries',
+    description:
+      'List every Markdown entry in the GamesAI knowledge-base (engines / games / patterns / research-notes / sources). Returns slug / title / type / engine / tags so the AI can decide what to read next via boilergen_read_kb. Use this BEFORE answering any engine/version/pattern question — there are 59+ entries grounding our positioning.',
+    inputSchema: {
+      category: z.enum(['engines', 'games', 'patterns', 'research-notes', 'sources']).optional()
+        .describe('Filter to one category folder. Omit to list all.'),
+    },
+  },
+  async ({ category }) => {
+    const kb = await findKbDir();
+    if (!kb) return { content: [{ type: 'text', text: JSON.stringify({ error: 'knowledge-base directory not found' }) }] };
+    const cats = category ? [category] : ['engines', 'games', 'patterns', 'research-notes', 'sources'];
+    const entries: Array<{ category: string; slug: string; title: string; type: string; engine?: string; tags?: string[]; relPath: string }> = [];
+    for (const cat of cats) {
+      const catDir = join(kb, cat);
+      let files: string[];
+      try { files = (await readdir(catDir)).filter(f => f.endsWith('.md') && !f.startsWith('_') && f !== 'README.md'); }
+      catch { continue; }
+      for (const f of files) {
+        try {
+          const text = await readFile(join(catDir, f), 'utf8');
+          const fm = parseFrontmatter(text);
+          const e: { category: string; slug: string; title: string; type: string; engine?: string; tags?: string[]; relPath: string } = {
+            category: cat,
+            slug: typeof fm.slug === 'string' ? fm.slug : f.replace(/\.md$/, ''),
+            title: typeof fm.title === 'string' ? fm.title : f,
+            type: typeof fm.type === 'string' ? fm.type : '',
+            relPath: relative(kb, join(catDir, f)),
+          };
+          if (typeof fm.engine === 'string') e.engine = fm.engine;
+          if (Array.isArray(fm.tags)) e.tags = fm.tags as string[];
+          entries.push(e);
+        } catch { /* skip */ }
+      }
+    }
+    return { content: [{ type: 'text', text: JSON.stringify({ kbDir: kb, total: entries.length, entries }, null, 2) }] };
+  },
+);
+
+// ---- Tool 7: read one KB entry ----
+server.registerTool(
+  'boilergen_read_kb',
+  {
+    title: 'Read a Knowledge-Base Entry',
+    description:
+      'Read the full Markdown content of one KB entry by relative path (e.g., "engines/mirror-networking.md") or by slug (e.g., "mirror-networking"). Returns frontmatter + body. Use this AFTER boilergen_list_kb to ground answers in our research.',
+    inputSchema: {
+      path: z.string().describe('Relative path under knowledge-base/ (e.g., "engines/mirror-networking.md") or just the slug'),
+    },
+  },
+  async ({ path }) => {
+    const kb = await findKbDir();
+    if (!kb) return { content: [{ type: 'text', text: JSON.stringify({ error: 'knowledge-base directory not found' }) }] };
+    let absPath: string | null = null;
+    if (path.includes('/')) {
+      absPath = resolve(kb, path);
+    } else {
+      // slug lookup — search every category
+      for (const cat of ['engines', 'games', 'patterns', 'research-notes', 'sources']) {
+        const candidate = resolve(kb, cat, `${path}.md`);
+        try { await stat(candidate); absPath = candidate; break; } catch { /* keep looking */ }
+      }
+    }
+    if (!absPath) return { content: [{ type: 'text', text: JSON.stringify({ error: `KB entry not found: ${path}` }) }] };
+    try {
+      const text = await readFile(absPath, 'utf8');
+      return { content: [{ type: 'text', text }] };
+    } catch (err) {
+      return { content: [{ type: 'text', text: JSON.stringify({ error: err instanceof Error ? err.message : String(err) }) }] };
+    }
+  },
+);
+
+// ---- Tool 8: keyword-search the KB ----
+server.registerTool(
+  'boilergen_search_kb',
+  {
+    title: 'Search the Knowledge-Base',
+    description:
+      'Case-insensitive keyword search across all KB entry bodies. Returns the top N matches with surrounding context. Cheaper than read_kb when you only need to know if a topic is covered.',
+    inputSchema: {
+      query: z.string().describe('Keyword or short phrase to search for'),
+      limit: z.number().int().min(1).max(50).optional().describe('Max results (default 10)'),
+    },
+  },
+  async ({ query, limit }) => {
+    const kb = await findKbDir();
+    if (!kb) return { content: [{ type: 'text', text: JSON.stringify({ error: 'knowledge-base directory not found' }) }] };
+    const max = limit ?? 10;
+    const needle = query.toLowerCase();
+    const hits: Array<{ relPath: string; line: number; snippet: string; title?: string }> = [];
+    const kbDir: string = kb;
+    async function walk(dir: string) {
+      const entries = await readdir(dir, { withFileTypes: true });
+      for (const e of entries) {
+        const p = join(dir, e.name);
+        if (e.isDirectory()) await walk(p);
+        else if (e.isFile() && e.name.endsWith('.md') && !e.name.startsWith('_') && e.name !== 'README.md') {
+          const text = await readFile(p, 'utf8').catch(() => '');
+          const fm = parseFrontmatter(text);
+          const lines = text.split('\n');
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i] ?? '';
+            if (line.toLowerCase().includes(needle)) {
+              const hit: { relPath: string; line: number; snippet: string; title?: string } = {
+                relPath: relative(kbDir, p),
+                line: i + 1,
+                snippet: line.trim().slice(0, 220),
+              };
+              if (typeof fm.title === 'string') hit.title = fm.title;
+              hits.push(hit);
+              if (hits.length >= max) return;
+            }
+          }
+        }
+        if (hits.length >= max) return;
+      }
+    }
+    await walk(kbDir);
+    return { content: [{ type: 'text', text: JSON.stringify({ query, total: hits.length, hits }, null, 2) }] };
+  },
+);
+
+// ---- Frontmatter parser (no extra dep) ----
+function parseFrontmatter(md: string): Record<string, string | string[]> {
+  const m = md.match(/^---\n([\s\S]*?)\n---/);
+  if (!m) return {};
+  const out: Record<string, string | string[]> = {};
+  for (const raw of (m[1] ?? '').split('\n')) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+    const idx = line.indexOf(':');
+    if (idx < 0) continue;
+    const key = line.slice(0, idx).trim();
+    let val = line.slice(idx + 1).trim();
+    val = val.replace(/^['"]|['"]$/g, '');
+    if (val.startsWith('[') && val.endsWith(']')) {
+      out[key] = val.slice(1, -1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean);
+    } else {
+      out[key] = val;
+    }
+  }
+  return out;
+}
+
 // ---- Boot stdio transport ----
 const transport = new StdioServerTransport();
 await server.connect(transport);
-// Server is now running over stdio. Cursor / Claude Code talk to it via JSON-RPC.
-process.stderr.write(`[boilergen-mcp] ready · plugins dir: ${DEFAULT_PLUGINS_DIR}\n`);
+process.stderr.write(`[boilergen-mcp] ready · plugins=${DEFAULT_PLUGINS_DIR} · schemas=${DEFAULT_SCHEMAS_DIR}\n`);
+process.stderr.write(`[boilergen-mcp] tools: list_plugins, list_entity_types, preview, generate, list_schemas, list_kb, read_kb, search_kb\n`);
 
-// Suppress unused import warning for basename (kept for future use)
 void basename;

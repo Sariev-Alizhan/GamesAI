@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "boilergen": {
+      "command": "node",
+      "args": [
+        "/Users/alizhan/dev/GamesAI/boilergen/dist/mcp/server.js"
+      ],
+      "env": {
+        "BOILERGEN_PLUGINS_DIR": "/Users/alizhan/dev/GamesAI/boilergen/plugins",
+        "BOILERGEN_SCHEMAS_DIR": "/Users/alizhan/dev/GamesAI/boilergen/schemas",
+        "BOILERGEN_KB_DIR": "/Users/alizhan/dev/GamesAI/knowledge-base"
+      }
+    }
+  }
+}
