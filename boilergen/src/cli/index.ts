@@ -4,6 +4,7 @@ import { generateCommand } from './commands/generate.js';
 import { listCommand } from './commands/list.js';
 import { initCommand } from './commands/init.js';
 import { schemaExportCommand } from './commands/schema-export.js';
+import { watchCommand } from './commands/watch.js';
 
 const program = new Command();
 
@@ -22,6 +23,21 @@ program
   .action(async (schema: string, options: { plugin: string; output: string; config?: string; dryRun?: boolean }) => {
     try {
       await generateCommand(schema, options);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('watch <schema-or-dir>')
+  .description('Re-run generate on every YAML change (tight Unity/UE/Godot dev loop)')
+  .option('-p, --plugin <dir>', 'Plugin directory', './plugins/gm1')
+  .option('-o, --output <dir>', 'Output base directory', './test-output')
+  .option('-c, --config <file>', 'Use boilergen.config.yaml (overrides --plugin/--output)')
+  .action(async (target: string, options: { plugin: string; output: string; config?: string }) => {
+    try {
+      await watchCommand(target, options);
     } catch (err) {
       console.error(err instanceof Error ? err.message : err);
       process.exit(1);
