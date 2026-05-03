@@ -30,6 +30,7 @@ import { parseSchema } from '../core/schema-loader.js';
 import { loadPlugin } from '../core/plugin-loader.js';
 import { generate } from '../core/generator.js';
 import { renderFile, renderString } from '../core/template-engine.js';
+import { bootstrapProgrammatic } from '../cli/commands/bootstrap.js';
 
 const DEFAULT_PLUGINS_DIR = process.env.BOILERGEN_PLUGINS_DIR ?? resolve(process.cwd(), 'plugins');
 const DEFAULT_SCHEMAS_DIR = process.env.BOILERGEN_SCHEMAS_DIR ?? resolve(process.cwd(), 'schemas');
@@ -227,6 +228,34 @@ server.registerTool(
     return {
       content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
     };
+  },
+);
+
+// ---- Tool: bootstrap (one-shot scaffold from all schemas in a plugin) ----
+server.registerTool(
+  'boilergen_bootstrap',
+  {
+    title: 'Bootstrap a project from a plugin\'s example schemas',
+    description:
+      'One-shot project scaffold: loop through every YAML in a plugin\'s schemas directory and generate each into one output dir. Designed for the "ship a complete Flump-class FPS in one command" use case — saves the AI from making 22 separate generate calls during a session. Supports --only / --skip substring filters to scope to a subset.',
+    inputSchema: {
+      plugin: z.string().describe('Path to plugin directory (e.g. /Users/you/dev/GamesAI/boilergen/plugins/unity-mobile-shooter)'),
+      outputDir: z.string().describe('Absolute output directory (e.g. /Users/you/dev/Flump/Assets/_Project)'),
+      schemasDir: z.string().optional().describe('Override schemas directory (defaults to <cwd>/schemas/<plugin-name>)'),
+      only: z.string().optional().describe('Comma-separated substrings — only run schemas whose filename matches one'),
+      skip: z.string().optional().describe('Comma-separated substrings — skip schemas whose filename matches one'),
+    },
+  },
+  async ({ plugin, outputDir, schemasDir, only, skip }) => {
+    const opts: { plugin: string; output: string; schemasDir?: string; only?: string; skip?: string } = {
+      plugin,
+      output: outputDir,
+    };
+    if (schemasDir !== undefined) opts.schemasDir = schemasDir;
+    if (only !== undefined) opts.only = only;
+    if (skip !== undefined) opts.skip = skip;
+    const result = await bootstrapProgrammatic(opts);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   },
 );
 
@@ -434,6 +463,6 @@ function parseFrontmatter(md: string): Record<string, string | string[]> {
 const transport = new StdioServerTransport();
 await server.connect(transport);
 process.stderr.write(`[boilergen-mcp] ready · plugins=${DEFAULT_PLUGINS_DIR} · schemas=${DEFAULT_SCHEMAS_DIR}\n`);
-process.stderr.write(`[boilergen-mcp] tools: list_plugins, list_entity_types, preview, generate, list_schemas, list_kb, read_kb, search_kb\n`);
+process.stderr.write(`[boilergen-mcp] tools (9): list_plugins, list_entity_types, preview, generate, bootstrap, list_schemas, list_kb, read_kb, search_kb\n`);
 
 void basename;

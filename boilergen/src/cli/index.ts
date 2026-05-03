@@ -5,6 +5,7 @@ import { listCommand } from './commands/list.js';
 import { initCommand } from './commands/init.js';
 import { schemaExportCommand } from './commands/schema-export.js';
 import { watchCommand } from './commands/watch.js';
+import { bootstrapCommand } from './commands/bootstrap.js';
 
 const program = new Command();
 
@@ -23,6 +24,23 @@ program
   .action(async (schema: string, options: { plugin: string; output: string; config?: string; dryRun?: boolean }) => {
     try {
       await generateCommand(schema, options);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('bootstrap')
+  .description('One-shot scaffold: generate every schema in a plugin\'s schemas dir into one output dir (Flump-class project setup in 1 command)')
+  .requiredOption('-p, --plugin <dir>', 'Plugin directory (e.g. plugins/unity-mobile-shooter)')
+  .requiredOption('-o, --output <dir>', 'Output base directory (e.g. ~/Flump/Assets/_Project)')
+  .option('-s, --schemas-dir <dir>', 'Schemas directory (defaults to ./schemas/<plugin-name>)')
+  .option('--only <substrings>', 'Comma-separated substrings — only run schemas whose filename matches one')
+  .option('--skip <substrings>', 'Comma-separated substrings — skip schemas whose filename matches one')
+  .action(async (options: { plugin: string; output: string; schemasDir?: string; only?: string; skip?: string }) => {
+    try {
+      await bootstrapCommand(options);
     } catch (err) {
       console.error(err instanceof Error ? err.message : err);
       process.exit(1);
