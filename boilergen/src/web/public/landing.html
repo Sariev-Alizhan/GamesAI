@@ -1009,6 +1009,43 @@ body.cursor-hover .cursor-ring { width: 60px; height: 60px; margin: -30px 0 0 -3
 <div class="divider"></div>
 
 <!-- ============================================================ -->
+<!-- LIVE PLAYGROUND — editor screenshot ribbon                   -->
+<!-- ============================================================ -->
+<section>
+  <div class="ribbon reverse">
+    <div class="text reveal">
+      <span class="section-eyebrow" style="margin-bottom: 10px;">Live web playground</span>
+      <h2 style="font-size: clamp(28px, 3.6vw, 40px); margin-bottom: 14px;">Open it in a browser. Paste YAML. Watch code decode.</h2>
+      <p class="text-muted" style="font-size: 16px; line-height: 1.6;">
+        The playground is the same renderer that runs in CI. Files appear with a scan-beam decode, line-by-line glow, and language-coded pips so you read structure at a glance.
+      </p>
+      <ul style="list-style: none; margin-top: 24px; display: grid; gap: 14px;">
+        <li style="display: flex; gap: 12px; font-size: 15px; color: var(--text-muted); line-height: 1.55;">
+          <span style="flex-shrink:0;width:6px;height:6px;margin-top:9px;border-radius:50%;background:var(--red-500);box-shadow:0 0 10px var(--accent-glow);"></span>
+          5 plugins ship with the live build (FiveM-QB, Unity-mobile, generic-RP, …)
+        </li>
+        <li style="display: flex; gap: 12px; font-size: 15px; color: var(--text-muted); line-height: 1.55;">
+          <span style="flex-shrink:0;width:6px;height:6px;margin-top:9px;border-radius:50%;background:var(--red-500);box-shadow:0 0 10px var(--accent-glow);"></span>
+          AI Describe → YAML round-trip via Claude (RAG-grounded, no hallucination)
+        </li>
+        <li style="display: flex; gap: 12px; font-size: 15px; color: var(--text-muted); line-height: 1.55;">
+          <span style="flex-shrink:0;width:6px;height:6px;margin-top:9px;border-radius:50%;background:var(--red-500);box-shadow:0 0 10px var(--accent-glow);"></span>
+          Per-file source / output toggle to inspect the template that produced it
+        </li>
+      </ul>
+      <div class="cta-row" style="margin-top: 28px; justify-content: flex-start;">
+        <a href="/" class="btn btn-primary magnetic">Open the playground →</a>
+      </div>
+    </div>
+    <div class="visual reveal-zoom delay-2">
+      <img src="/landing-assets/editor-mockup.jpg" alt="GamesAI playground UI screenshot">
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
 <!-- HOW IT WORKS — pipeline terminal                             -->
 <!-- ============================================================ -->
 <section id="how">

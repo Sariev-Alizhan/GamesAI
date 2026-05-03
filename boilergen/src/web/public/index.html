@@ -678,10 +678,24 @@ main {
   gap: 12px;
   padding: 60px 40px;
   text-align: center;
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(13, 15, 20, 0.85), rgba(13, 15, 20, 0.95)),
+    url('/landing-assets/terminal-iso.jpg');
+  background-size: cover, cover;
+  background-position: center;
+  overflow: hidden;
 }
-.empty-state svg { opacity: 0.3; }
-.empty-state .title { font-size: 14px; color: var(--text-muted); font-weight: 500; }
-.empty-state .desc { font-size: 12px; color: var(--text-dim); max-width: 320px; line-height: 1.6; }
+.empty-state::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 50% 50%, rgba(220, 38, 38, 0.16), transparent 60%);
+  pointer-events: none;
+}
+.empty-state > * { position: relative; z-index: 2; }
+.empty-state svg { opacity: 0.85; filter: drop-shadow(0 0 20px rgba(220, 38, 38, 0.4)); }
+.empty-state .title { font-size: 16px; color: var(--text); font-weight: 600; letter-spacing: -0.01em; }
+.empty-state .desc { font-size: 12.5px; color: var(--text-muted); max-width: 360px; line-height: 1.6; }
 .empty-state kbd {
   font-family: var(--mono);
   font-size: 10.5px;
@@ -729,9 +743,297 @@ main {
 
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 .pulse { animation: pulse 1.4s ease-in-out infinite; }
+
+/* ============================================================
+   PREMIUM REDESIGN LAYER — ambient 3D, cursor, magnetic,
+   animated file appearance, code reveal, glassmorphic polish.
+   ============================================================ */
+
+/* Subtle ambient canvas behind everything; UI sits above. */
+#ambient-canvas {
+  position: fixed; inset: 0;
+  width: 100vw; height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.85;
+}
+.ambient-glow {
+  position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background:
+    radial-gradient(ellipse 1100px 500px at 50% -10%, rgba(220, 38, 38, 0.10), transparent 60%),
+    radial-gradient(ellipse 600px 360px at 0% 100%, rgba(220, 38, 38, 0.06), transparent 60%),
+    radial-gradient(ellipse 600px 360px at 100% 0%, rgba(220, 38, 38, 0.05), transparent 60%);
+}
+header, main, .modal-backdrop, .scroll-progress { position: relative; z-index: 5; }
+
+/* Header gets glassy + gradient bottom edge */
+header {
+  background: rgba(13, 15, 20, 0.65);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-bottom: 1px solid transparent;
+  position: relative;
+}
+header::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(220, 38, 38, 0.45), transparent);
+  opacity: 0.8;
+}
+
+/* Panels — glassmorphic on top of ambient canvas */
+#input-panel, #output-panel {
+  background: rgba(13, 15, 20, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+#status-bar {
+  background: rgba(22, 26, 34, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Generate button — premium, with magnetic-friendly transitions */
+.btn { position: relative; overflow: hidden; transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), background 160ms ease, border-color 160ms ease, box-shadow 240ms ease; will-change: transform; }
+.btn:not(:disabled):not(.ghost) { box-shadow: 0 6px 20px rgba(220, 38, 38, 0.30), inset 0 1px 0 rgba(255,255,255,0.14); }
+.btn:not(:disabled):not(.ghost):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(220, 38, 38, 0.45), inset 0 1px 0 rgba(255,255,255,0.20);
+}
+.btn:not(:disabled):not(.ghost)::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
+  transition: left 700ms ease;
+}
+.btn:not(:disabled):not(.ghost):hover::before { left: 130%; }
+.btn:disabled { opacity: 0.55; cursor: progress; }
+
+/* Generating state — animated rotating dot */
+.btn .spin-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+  vertical-align: -1px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== File list — staggered slide-in on each new generation ===== */
+@keyframes file-enter {
+  0%   { opacity: 0; transform: translateX(-14px) scale(0.97); filter: blur(2px); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: none;                 filter: blur(0); }
+}
+.file-item {
+  opacity: 0;
+  animation: file-enter 380ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: calc(var(--idx, 0) * 50ms);
+  position: relative;
+}
+.file-item::before {
+  content: ''; position: absolute; left: 0; top: 6px; bottom: 6px;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, var(--accent-bright), transparent);
+  opacity: 0; transition: opacity 240ms ease;
+}
+.file-item.active::before { opacity: 1; box-shadow: 0 0 12px var(--accent-glow); }
+.file-item:hover::before  { opacity: 0.6; }
+
+/* File-type pip */
+.file-item .lang-pip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 5px;
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  color: white;
+  margin-right: 8px;
+  vertical-align: middle;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.file-item .lang-pip.l-yaml { background: linear-gradient(135deg, #dc2626, #991b1b); border-color: rgba(220,38,38,0.5); }
+.file-item .lang-pip.l-lua  { background: linear-gradient(135deg, #1e40af, #3b82f6); border-color: rgba(59,130,246,0.5); }
+.file-item .lang-pip.l-cpp  { background: linear-gradient(135deg, #7c2d12, #ea580c); border-color: rgba(234,88,12,0.5); }
+.file-item .lang-pip.l-ts   { background: linear-gradient(135deg, #1e3a8a, #2563eb); border-color: rgba(37,99,235,0.5); }
+.file-item .lang-pip.l-dart { background: linear-gradient(135deg, #0e7490, #06b6d4); border-color: rgba(6,182,212,0.5); }
+.file-item .lang-pip.l-json { background: linear-gradient(135deg, #166534, #16a34a); border-color: rgba(22,163,74,0.5); }
+.file-item .lang-pip.l-sql  { background: linear-gradient(135deg, #92400e, #f59e0b); border-color: rgba(245,158,11,0.5); }
+.file-item .lang-pip.l-md   { background: linear-gradient(135deg, #581c87, #a855f7); border-color: rgba(168,85,247,0.5); }
+.file-item .lang-pip.l-cs   { background: linear-gradient(135deg, #4c1d95, #8b5cf6); border-color: rgba(139,92,246,0.5); }
+.file-item .lang-pip.l-gd   { background: linear-gradient(135deg, #475569, #94a3b8); border-color: rgba(148,163,184,0.5); }
+
+.file-item .target-row { display: flex; align-items: center; }
+.file-item .target { display: inline-block; }
+
+/* ===== Code reveal — scan-beam decoder, glitch-flash, line stagger ===== */
+@keyframes code-line-in {
+  0%   { opacity: 0; transform: translateX(-4px); filter: blur(2px); color: var(--accent-bright); }
+  40%  { opacity: 1;                                filter: blur(0); }
+  60%  { color: var(--accent-bright); }
+  100% { opacity: 1; transform: none;               filter: blur(0); color: inherit; }
+}
+.code-anim pre code .code-line {
+  opacity: 0;
+  animation: code-line-in 360ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: calc(var(--li, 0) * 12ms);
+  display: block;
+  position: relative;
+}
+.code-anim pre code .code-line::after {
+  /* per-line subtle red highlight that fades */
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(220, 38, 38, 0.18), transparent 80%);
+  opacity: 0;
+  animation: line-flash 420ms ease-out forwards;
+  animation-delay: calc(var(--li, 0) * 12ms);
+  pointer-events: none;
+}
+@keyframes line-flash {
+  0%   { opacity: 0; }
+  30%  { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+.code-anim pre {
+  position: relative;
+  overflow: hidden;
+}
+/* Vertical scan-beam (left edge) */
+.code-anim pre::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent-bright), var(--accent), transparent);
+  box-shadow: 0 0 18px var(--accent-glow), 0 0 4px var(--accent-bright);
+  transform-origin: top;
+  opacity: 0;
+  animation: scan-bar 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+/* Horizontal sweep beam over the code block (very subtle, premium feel) */
+.code-anim pre::after {
+  content: '';
+  position: absolute; left: 0; right: 0; height: 60px; top: 0;
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.18), transparent);
+  pointer-events: none;
+  animation: scan-sweep 900ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes scan-bar {
+  0%   { transform: scaleY(0); opacity: 0.95; }
+  60%  { transform: scaleY(1); opacity: 0.95; }
+  100% { transform: scaleY(1); opacity: 0; }
+}
+@keyframes scan-sweep {
+  0%   { transform: translateY(-120%); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateY(800%);  opacity: 0; }
+}
+
+/* file-body content fade when switching files */
+@keyframes content-slide {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.content-enter { animation: content-slide 320ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+/* Status bar — animated badge entrance */
+#status-bar.success #status-text > * {
+  animation: badge-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+#status-bar.success #status-text > *:nth-child(1) { animation-delay: 0ms; }
+#status-bar.success #status-text > *:nth-child(2) { animation-delay: 60ms; }
+#status-bar.success #status-text > *:nth-child(3) { animation-delay: 120ms; }
+#status-bar.success #status-text > *:nth-child(4) { animation-delay: 180ms; }
+#status-bar.success #status-text > *:nth-child(5) { animation-delay: 240ms; }
+@keyframes badge-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.92); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Status pulse-dot for "processing" */
+#status-bar.processing #status-text::before {
+  content: '';
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--accent-bright);
+  margin-right: 8px; vertical-align: 0;
+  box-shadow: 0 0 0 0 var(--accent-glow);
+  animation: status-pulse 1.4s infinite;
+}
+@keyframes status-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); }
+  60% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+}
+
+/* Plugin tab — premium hover lift */
+.plugin-tab { transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), background 160ms ease, border-color 160ms ease, box-shadow 240ms ease; }
+.plugin-tab:hover { transform: translateY(-1px); }
+.plugin-tab.active { box-shadow: 0 6px 18px rgba(220, 38, 38, 0.25); }
+
+/* Tab buttons (Output / .hbs / Copy) — animated underline */
+.tab-btn { position: relative; overflow: hidden; }
+.tab-btn::after {
+  content: ''; position: absolute; left: 50%; right: 50%; bottom: 0;
+  height: 2px; background: var(--accent-bright);
+  transition: left 240ms ease, right 240ms ease;
+  border-radius: 2px;
+}
+.tab-btn.active::after { left: 0; right: 0; }
+
+/* Empty-state subtle floating animation */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.empty-state svg { animation: float-y 4s ease-in-out infinite; filter: drop-shadow(0 0 18px rgba(220, 38, 38, 0.25)); }
+
+/* ===== CUSTOM CURSOR ===== */
+.cursor-dot, .cursor-ring {
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 999;
+  border-radius: 50%;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  mix-blend-mode: difference;
+}
+.cursor-dot {
+  width: 6px; height: 6px;
+  background: #ff5252;
+  margin: -3px 0 0 -3px;
+  transition: width 240ms ease, height 240ms ease, margin 240ms ease, opacity 240ms ease;
+}
+.cursor-ring {
+  width: 32px; height: 32px;
+  border: 1.5px solid rgba(255, 100, 100, 0.7);
+  margin: -16px 0 0 -16px;
+  transition: width 240ms ease, height 240ms ease, margin 240ms ease, border-color 240ms ease, background 240ms ease;
+}
+body.cursor-hover .cursor-dot { width: 0; height: 0; margin: 0; opacity: 0; }
+body.cursor-hover .cursor-ring { width: 56px; height: 56px; margin: -28px 0 0 -28px; border-color: rgba(255, 80, 80, 0.95); background: rgba(220, 38, 38, 0.10); }
+@media (hover: none), (max-width: 900px) {
+  .cursor-dot, .cursor-ring { display: none; }
+}
+
+/* ===== MAGNETIC ===== */
+.magnetic { will-change: transform; transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), background 160ms ease, border-color 160ms ease, box-shadow 240ms ease; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .file-item, .code-anim pre code .code-line, .empty-state svg, .btn .spin-dot { animation: none !important; opacity: 1 !important; }
+  .code-anim pre::before { animation: none !important; opacity: 0 !important; }
+}
 </style>
 </head>
 <body>
+
+<canvas id="ambient-canvas"></canvas>
+<div class="ambient-glow"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+<div class="cursor-dot" id="cursor-dot"></div>
 
 <header>
   <a href="/landing.html" class="brand" title="Back to GamesAI site">
@@ -781,10 +1083,10 @@ main {
     </div>
     <textarea id="yaml-input" spellcheck="false" placeholder="Paste or write entity YAML here..."></textarea>
     <div class="actions">
-      <button class="btn" id="generate-btn">
+      <button class="btn magnetic" id="generate-btn">
         Generate <span class="kbd">⌘↵</span>
       </button>
-      <button class="btn ai" id="ai-describe-btn" title="Describe in natural language → AI generates the YAML">
+      <button class="btn ai magnetic" id="ai-describe-btn" title="Describe in natural language → AI generates the YAML">
         ✨ AI Describe
       </button>
       <button class="btn ghost" id="clear-btn">Clear</button>
@@ -809,17 +1111,9 @@ main {
         </div>
         <div id="file-body">
           <div class="empty-state">
-            <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
-              <circle cx="6" cy="16" r="3" fill="#dc2626"/>
-              <path d="M9 16 L24 8" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M9 16 L24 16" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M9 16 L24 24" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
-              <circle cx="25" cy="8" r="2.5" fill="#b08bff"/>
-              <circle cx="25" cy="16" r="2.5" fill="#58a6ff"/>
-              <circle cx="25" cy="24" r="2.5" fill="#3fb950"/>
-            </svg>
-            <div class="title">No file selected</div>
-            <div class="desc">Click <strong>Generate</strong> or press <kbd>⌘↵</kbd> to render templates.<br>Generated files will appear in the list to the left.</div>
+            <img src="/landing-assets/brand-mark.png" alt="" width="64" height="64" style="opacity:0.95;">
+            <div class="title">Ready to generate</div>
+            <div class="desc">Press <kbd>⌘↵</kbd> or click <strong>Generate</strong> to render templates from your YAML.<br>Files appear here with line-by-line scan-beam decoding.</div>
           </div>
         </div>
       </div>
@@ -926,18 +1220,28 @@ function langFromPath(path) {
 
 function emptyState(title, desc) {
   return `<div class="empty-state fade-in">
-    <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
-      <circle cx="6" cy="16" r="3" fill="#dc2626"/>
-      <path d="M9 16 L24 8" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
-      <path d="M9 16 L24 16" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
-      <path d="M9 16 L24 24" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="25" cy="8" r="2.5" fill="#b08bff"/>
-      <circle cx="25" cy="16" r="2.5" fill="#58a6ff"/>
-      <circle cx="25" cy="24" r="2.5" fill="#3fb950"/>
-    </svg>
+    <img src="/landing-assets/brand-mark.png" alt="" width="64" height="64" style="opacity:0.95;">
     <div class="title">${title}</div>
     <div class="desc">${desc}</div>
   </div>`;
+}
+
+function langPipFor(path) {
+  const ext = (path.match(/\.([a-z0-9]+)$/i) || ['', ''])[1].toLowerCase();
+  const map = {
+    yaml: ['yaml', 'YML'],   yml: ['yaml', 'YML'],
+    lua:  ['lua',  'LUA'],
+    cpp:  ['cpp',  'C++'],   hpp: ['cpp', 'HPP'],   h: ['cpp', 'H'],   cc: ['cpp', 'CC'],
+    ts:   ['ts',   'TS'],    tsx: ['ts', 'TSX'],    js: ['ts', 'JS'],
+    dart: ['dart', 'DRT'],
+    json: ['json', 'JSON'],
+    sql:  ['sql',  'SQL'],
+    md:   ['md',   'MD'],
+    cs:   ['cs',   'C#'],
+    gd:   ['gd',   'GD'],
+  };
+  const [cls, label] = map[ext] || ['', (ext || '?').slice(0, 4).toUpperCase()];
+  return `<span class="lang-pip l-${cls}">${label}</span>`;
 }
 
 function renderFileList(files) {
@@ -946,8 +1250,8 @@ function renderFileList(files) {
     return;
   }
   fileList.innerHTML = files.map((f, i) => `
-    <div class="file-item ${i === activeIdx ? 'active' : ''}" data-idx="${i}">
-      <div class="target">${f.target}${f.inject ? ' · inject' : ''}</div>
+    <div class="file-item ${i === activeIdx ? 'active' : ''}" data-idx="${i}" style="--idx: ${i};">
+      <div class="target-row">${langPipFor(f.path)}<span class="target">${f.target}${f.inject ? ' · inject' : ''}</span></div>
       <div class="name">${f.path}</div>
       ${f.inject ? `<div class="inject-tag">${f.inject.mode.toUpperCase()} «${f.inject.anchor.slice(0, 22)}»</div>` : ''}
     </div>
@@ -986,9 +1290,19 @@ function renderActiveView() {
   const hint = showingSource
     ? '<div class="hint">Raw template source. Compare with Output to see what got substituted.</div>'
     : '';
-  fileBody.innerHTML = `${hint}<pre class="fade-in"><code class="language-${lang}"></code></pre>`;
-  fileBody.querySelector('code').textContent = text;
+  fileBody.innerHTML = `${hint}<div class="content-enter code-anim"><pre><code class="language-${lang}"></code></pre></div>`;
+  const codeEl = fileBody.querySelector('code');
+  codeEl.textContent = text;
   if (window.Prism) Prism.highlightAllUnder(fileBody);
+  // After Prism, wrap each rendered line into .code-line with --li for stagger.
+  // We use innerHTML+split because Prism produces inline <span> highlighting.
+  const html = codeEl.innerHTML;
+  const lines = html.split('\n');
+  const MAX = 200; // cap stagger for huge files (perf)
+  codeEl.innerHTML = lines.map((line, i) => {
+    const li = i < MAX ? i : MAX;
+    return `<span class="code-line" style="--li: ${li};">${line || '​'}</span>`;
+  }).join('\n');
 }
 
 async function copyActive() {
@@ -1022,7 +1336,10 @@ async function generate() {
   }
   generateBtn.disabled = true;
   const originalText = generateBtn.innerHTML;
-  generateBtn.innerHTML = '<span class="pulse">Generating…</span>';
+  generateBtn.innerHTML = '<span class="spin-dot"></span>Generating…';
+  statusBar.className = 'processing';
+  statusText.style.color = 'var(--text)';
+  statusText.textContent = 'Rendering templates…';
   try {
     const res = await fetch(`/api/plugin/${encodeURIComponent(state.currentPluginId)}/preview`, {
       method: 'POST',
@@ -1326,5 +1643,184 @@ async function bootstrap() {
 
 bootstrap();
 </script>
+
+<!-- ============================================================
+     PREMIUM LAYER — ambient 3D + cursor + magnetic CTAs.
+     Loaded as a separate ES module after the legacy script so
+     none of the existing handlers are disturbed.
+     ============================================================ -->
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.164.1/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isMobile = window.matchMedia('(max-width: 900px)').matches;
+
+// ============================================================
+//  AMBIENT 3D — quiet drifting particle field, low opacity so
+//  it never fights the editor for attention. Three drifting
+//  light blobs and a starfield.
+// ============================================================
+(function initAmbient() {
+  const canvas = document.getElementById('ambient-canvas');
+  if (!canvas) return;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+  camera.position.set(0, 0, 10);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+  renderer.setClearColor(0x000000, 0);
+
+  // Star/particle field
+  const COUNT = reduceMotion ? 120 : (isMobile ? 250 : 500);
+  const positions = new Float32Array(COUNT * 3);
+  const colors    = new Float32Array(COUNT * 3);
+  for (let i = 0; i < COUNT; i++) {
+    positions[i*3]   = (Math.random() - 0.5) * 40;
+    positions[i*3+1] = (Math.random() - 0.5) * 30;
+    positions[i*3+2] = (Math.random() - 0.5) * 20 - 4;
+    const t = Math.random();
+    colors[i*3]   = 0.85 + t * 0.15;
+    colors[i*3+1] = 0.10 + t * 0.10;
+    colors[i*3+2] = 0.10 + t * 0.10;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(colors,    3));
+  const mat = new THREE.PointsMaterial({
+    size: 0.05, vertexColors: true, transparent: true, opacity: 0.55,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+
+  // Subtle red ring slowly rotating in deep background
+  const ringGeo = new THREE.RingGeometry(6, 6.04, 96);
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: 0xef4444, side: THREE.DoubleSide, transparent: true, opacity: 0.10,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.position.z = -6;
+  scene.add(ring);
+
+  // Glow blobs (additive sprites)
+  const blobMat = new THREE.MeshBasicMaterial({
+    color: 0xdc2626, transparent: true, opacity: 0.12,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const blob1 = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), blobMat);
+  const blob2 = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), blobMat.clone());
+  blob1.position.set(-6, 3, -2); blob2.position.set(6, -3, -2);
+  scene.add(blob1); scene.add(blob2);
+
+  function resize() {
+    const w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Cursor influence — slight parallax of the entire field
+  let mx = 0, my = 0, tx = 0, ty = 0;
+  window.addEventListener('mousemove', (e) => {
+    mx = (e.clientX / window.innerWidth - 0.5) * 0.6;
+    my = (e.clientY / window.innerHeight - 0.5) * 0.6;
+  });
+
+  const clock = new THREE.Clock();
+  function frame() {
+    const t = clock.getElapsedTime();
+    tx += (mx - tx) * 0.05;
+    ty += (my - ty) * 0.05;
+    points.rotation.y = t * 0.02 + tx * 0.4;
+    points.rotation.x = -ty * 0.3;
+    ring.rotation.z = t * 0.06;
+    blob1.position.x = -6 + Math.sin(t * 0.3) * 1.5;
+    blob1.position.y =  3 + Math.cos(t * 0.4) * 1.0;
+    blob2.position.x =  6 + Math.cos(t * 0.35) * 1.5;
+    blob2.position.y = -3 + Math.sin(t * 0.45) * 1.0;
+    blob1.lookAt(camera.position);
+    blob2.lookAt(camera.position);
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+// ============================================================
+//  CUSTOM CURSOR + MAGNETIC CTAs — single RAF loop
+// ============================================================
+(function initPointerFx() {
+  if (reduceMotion) return;
+  const isTouch = window.matchMedia('(hover: none)').matches || isMobile;
+  if (isTouch) return;
+
+  const dot  = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  let dx = mx, dy = my, rx = mx, ry = my;
+  window.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
+
+  // hover-aware: re-bind when DOM mutates (file list rerenders, modal opens, etc.)
+  const HOVER_SEL = 'a, button, .file-item, .plugin-tab, .magnetic, input, textarea';
+  function onEnter() { document.body.classList.add('cursor-hover'); }
+  function onLeave() { document.body.classList.remove('cursor-hover'); }
+  function bind(el) {
+    if (el._cfxBound) return;
+    el._cfxBound = true;
+    el.addEventListener('mouseenter', onEnter);
+    el.addEventListener('mouseleave', onLeave);
+  }
+  function refresh() { document.querySelectorAll(HOVER_SEL).forEach(bind); }
+  refresh();
+  const mo = new MutationObserver(refresh);
+  mo.observe(document.body, { childList: true, subtree: true });
+
+  // Magnetic CTAs
+  const magnetState = new Map();
+  function bindMagnet(el) {
+    if (el._magBound) return;
+    el._magBound = true;
+    magnetState.set(el, { tx: 0, ty: 0, x: 0, y: 0 });
+    el.addEventListener('mousemove', (e) => {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      const st = magnetState.get(el);
+      st.tx = (e.clientX - cx) * 0.28;
+      st.ty = (e.clientY - cy) * 0.40;
+    });
+    el.addEventListener('mouseleave', () => {
+      const st = magnetState.get(el);
+      st.tx = 0; st.ty = 0;
+    });
+  }
+  function refreshMagnets() { document.querySelectorAll('.magnetic').forEach(bindMagnet); }
+  refreshMagnets();
+  new MutationObserver(refreshMagnets).observe(document.body, { childList: true, subtree: true });
+
+  function tick() {
+    dx += (mx - dx) * 0.55; dy += (my - dy) * 0.55;
+    rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18;
+    if (dot)  dot.style.transform  = `translate3d(${dx}px, ${dy}px, 0)`;
+    if (ring) ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+    magnetState.forEach((st, el) => {
+      st.x += (st.tx - st.x) * 0.18;
+      st.y += (st.ty - st.y) * 0.18;
+      if (Math.abs(st.x) < 0.05 && Math.abs(st.y) < 0.05) el.style.transform = '';
+      else el.style.transform = `translate3d(${st.x}px, ${st.y}px, 0)`;
+    });
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
+
 </body>
 </html>
