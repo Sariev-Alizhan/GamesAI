@@ -1523,20 +1523,21 @@ body.cursor-hover .cursor-ring { width: 60px; height: 60px; margin: -30px 0 0 -3
     <div class="dl-card reveal-zoom delay-3" data-tilt>
       <div class="dl-head">
         <div class="dl-icon">⚡</div>
-        <span class="dl-status ready">✓ Available</span>
+        <span class="dl-status ready">✓ Available · 8 tools</span>
       </div>
-      <h3>MCP Server</h3>
-      <p class="dl-desc">Expose Boilergen to Claude Code / Cursor / Windsurf / Continue / any MCP-compatible AI agent. Vibe-code: describe an entity, AI calls our tools, files appear in your project.</p>
+      <h3>MCP Server (Claude / Cursor)</h3>
+      <p class="dl-desc">Expose Boilergen to Claude Code / Cursor / Windsurf / Continue / any MCP-compatible AI agent. Vibe-code: describe an entity in chat, AI calls these tools, files appear in your project.</p>
       <ul class="dl-features">
-        <li>Generate / Validate / Translate as MCP tools</li>
-        <li>RAG-grounded over 59 KB entries</li>
-        <li>Works with any MCP client</li>
+        <li>list_plugins · list_entity_types · list_schemas (20 examples)</li>
+        <li>preview · generate (dry-run + write)</li>
+        <li>list_kb · read_kb · search_kb (over 59 grounded entries)</li>
+        <li>Stdio JSON-RPC — same shape as Anthropic's reference</li>
       </ul>
       <div class="dl-cmd">
-        <span><span class="cmd-prompt">$ </span>npm run mcp <span style="color:var(--text-dim);"># in cloned repo</span></span>
-        <button class="dl-cmd-copy" data-copy="npm run mcp">Copy</button>
+        <span><span class="cmd-prompt">$ </span>cat .mcp.json   <span style="color:var(--text-dim);"># copy block into ~/.claude/mcp.json</span></span>
+        <button class="dl-cmd-copy" data-copy='{ "mcpServers": { "boilergen": { "command": "node", "args": ["./boilergen/dist/mcp/server.js"], "env": { "BOILERGEN_PLUGINS_DIR": "./boilergen/plugins", "BOILERGEN_SCHEMAS_DIR": "./boilergen/schemas", "BOILERGEN_KB_DIR": "./knowledge-base" } } } }'>Copy config</button>
       </div>
-      <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/boilergen/src/mcp/server.ts" target="_blank" class="dl-link">View MCP source →</a>
+      <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/handoff/06-FLUMP-NIGHT-SESSION.md" target="_blank" class="dl-link">Full setup guide (Claude Code / Cursor / Windsurf) →</a>
     </div>
 
     <!-- VS Code Extension -->

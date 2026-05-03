@@ -1,0 +1,93 @@
+# Schema Validator config for the unity-mobile-shooter plugin schemas.
+#
+# Catches Flump-style data drift at build time, BEFORE Unity-side bugs:
+#   - loadout.primaryWeaponId points at a weapon.id that was renamed
+#   - map.supportedModeIds[] references a deleted gamemode
+#   - bot.preferredLoadoutId points at a non-existent loadout
+#   - player.spawnGearLoadoutId orphaned
+#   - playersPerTeam * 2 > maxPlayers in any map (capacity check)
+#
+# Run from repo root:
+#   schema-validator check ./boilergen/schemas/unity-mobile-shooter \
+#     --config ./boilergen/schemas/unity-mobile-shooter/validator.config.yaml
+
+namespaceByDirectory: false   # single plugin, single namespace
+
+# Strict mode: every cross-reference must resolve. No "orphans OK" pass —
+# Flump's Unity Inspector will fail silently if a SO points at a
+# non-existent ID. We catch it here at YAML-time instead.
+ignoreOrphans: false
+
+# Pure-explicit mode: no suffix-based heuristics. We map every
+# cross-reference field by hand below, gets us precise type mismatches
+# (e.g. loadout.primaryWeaponId set to a gamemode id).
+useHeuristics: false
+
+# Strings that look ID-shaped but are actually enum values
+knownEnums:
+  # weapon categories
+  - rifle
+  - pistol
+  - smg
+  - shotgun
+  - sniper
+  - melee
+  # bot movement styles
+  - cautious
+  - balanced
+  - aggressive
+  - hit_and_run
+  # gamemode types (used as numeric in .asset, but string in YAML readability)
+  - duel
+  - tdm
+  - hardpoint
+  - practice
+  # loadout perk IDs (stub — real perk system out of scope)
+  - hold_breath_steady
+  - quick_scope
+  - last_stand
+  - silent_steps
+  - extra_mag
+
+# Cross-reference field → entity type. Validator checks each field
+# against the entity registry built from all YAML files in this dir.
+referenceFields:
+  # loadout → weapon (3 weapon slots)
+  primaryWeaponId:     weapon
+  secondaryWeaponId:   weapon
+  meleeWeaponId:       weapon
+
+  # player → loadout (one default loadout per class)
+  spawnGearLoadoutId:  loadout
+
+  # bot → loadout (preference, not hard requirement)
+  preferredLoadoutId:  loadout
+
+  # map.supportedModeIds is an array — handled below
+
+# Array-valued cross-reference fields (each element validated)
+arrayReferenceFields:
+  supportedModeIds:    gamemode
+
+# Custom domain-specific rules.
+# These are advisory hints in the YAML; the schema-validator doesn't
+# enforce them today (out of scope for v0.2.x), but documenting them
+# here makes the intent explicit and preps for v0.3 rule support.
+#
+# Rule: every map's recommendedTeamSize * 2 must be ≤ maxPlayers
+# Rule: every weapon's reserveAmmo must be a multiple of magazineSize
+#       (otherwise the last reload is partial — common Flump bug)
+# Rule: bot.aggression * (1 - bot.fleeHpThreshold) > 0.2 — the bot
+#       won't be passive AND retreat-prone simultaneously
+customRules:
+  - name: map_team_capacity
+    description: "recommendedTeamSize × 2 ≤ maxPlayers (otherwise the map can't host its own recommended team config)"
+    appliesTo: [map]
+
+  - name: weapon_ammo_alignment
+    description: "reserveAmmo is a multiple of magazineSize (avoids partial-reload bug)"
+    appliesTo: [weapon]
+
+  - name: bot_balance_floor
+    description: "high-aggression bots shouldn't have high flee thresholds (otherwise they'll trigger their own retreat constantly)"
+    appliesTo: [bot-personality]
