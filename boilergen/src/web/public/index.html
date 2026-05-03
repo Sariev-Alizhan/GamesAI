@@ -1133,6 +1133,94 @@ body.cursor-hover .cursor-ring { width: 56px; height: 56px; margin: -28px 0 0 -2
 @media (max-width: 900px) and (prefers-reduced-motion: reduce) {
   #mobile-block .mb-mark { animation: none; }
 }
+
+/* ============================================================
+   DX LAYER — drag-drop YAML, toast notifications, keyboard hints
+   ============================================================ */
+
+/* Drag-drop highlight on the input panel */
+#input-panel { transition: background 200ms ease, box-shadow 200ms ease; position: relative; }
+#input-panel.drop-active {
+  background: rgba(220, 38, 38, 0.06);
+  box-shadow: inset 0 0 0 2px var(--accent-bright), inset 0 0 24px rgba(220, 38, 38, 0.18);
+}
+#input-panel .drop-hint {
+  position: absolute; inset: 0;
+  display: none;
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 8px;
+  background: rgba(13, 15, 20, 0.92);
+  z-index: 50;
+  pointer-events: none;
+  font-family: var(--mono); font-size: 13px;
+  color: var(--accent-bright);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+#input-panel .drop-hint .ico {
+  font-size: 28px; line-height: 1;
+  filter: drop-shadow(0 0 16px var(--accent-glow));
+}
+#input-panel.drop-active .drop-hint { display: flex; }
+
+/* Toast notifications */
+#toast-host {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column-reverse; gap: 8px; align-items: center;
+  z-index: 9000;
+  pointer-events: none;
+}
+.toast {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--sans); font-size: 13px;
+  padding: 11px 16px;
+  background: rgba(13, 15, 20, 0.92);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  color: var(--text);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+  animation: toast-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  max-width: 460px;
+}
+.toast.leaving { animation: toast-out 200ms cubic-bezier(0.4, 0, 1, 1) forwards; }
+.toast.success { border-color: rgba(63, 185, 80, 0.45); }
+.toast.success .ico { color: var(--green); }
+.toast.error   { border-color: rgba(220, 38, 38, 0.55); }
+.toast.error   .ico { color: var(--accent-bright); }
+.toast.info    { border-color: rgba(220, 38, 38, 0.30); }
+.toast.info    .ico { color: var(--accent-bright); }
+.toast .ico { display: inline-flex; font-size: 14px; line-height: 1; }
+.toast .kbd-hint { font-family: var(--mono); font-size: 10.5px; color: var(--text-dim); margin-left: 4px; padding: 2px 6px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 3px; }
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(20px); }
+}
+
+/* Persisted-input badge */
+.input-restored {
+  position: absolute; top: 50%; right: 14px; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-dim);
+  background: rgba(22, 26, 34, 0.85);
+  padding: 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  display: none;
+  pointer-events: none;
+  letter-spacing: 0.06em;
+}
+.input-restored.visible { display: inline-block; animation: toast-in 240ms ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .toast { animation: none; }
+  .toast.leaving { animation: none; opacity: 0; }
+}
 </style>
 </head>
 <body>
@@ -1216,7 +1304,12 @@ body.cursor-hover .cursor-ring { width: 56px; height: 56px; margin: -28px 0 0 -2
         <span style="color:var(--text-dim);font-size:11px;">no examples yet</span>
       </div>
     </div>
-    <textarea id="yaml-input" spellcheck="false" placeholder="Paste or write entity YAML here..."></textarea>
+    <textarea id="yaml-input" spellcheck="false" placeholder="Paste or write entity YAML here…  (drag a .yaml file here too)"></textarea>
+    <div class="drop-hint">
+      <span class="ico">⤓</span>
+      <span>Drop YAML to load</span>
+    </div>
+    <span class="input-restored" id="input-restored" title="Restored from your last session">restored</span>
     <div class="actions">
       <button class="btn magnetic" id="generate-btn">
         Generate <span class="kbd">⌘↵</span>
@@ -1283,6 +1376,8 @@ body.cursor-hover .cursor-ring { width: 56px; height: 56px; margin: -28px 0 0 -2
     </div>
   </div>
 </div>
+
+<div id="toast-host" aria-live="polite"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
@@ -1777,6 +1872,179 @@ async function bootstrap() {
 }
 
 bootstrap();
+</script>
+
+<!-- ============================================================
+     DX LAYER — autosave, drag-drop, keyboard nav, toasts.
+     All additive: only observes/listens to existing elements,
+     never replaces handlers. Safe to drop in or pull out.
+     ============================================================ -->
+<script>
+(function initDxLayer() {
+  const yaml = document.getElementById('yaml-input');
+  const inputPanel = document.getElementById('input-panel');
+  const copyBtn = document.getElementById('copy-btn');
+  const statusBar = document.getElementById('status-bar');
+  const fileList = document.getElementById('file-list');
+  const tabOutput = document.getElementById('tab-output');
+  const tabSource = document.getElementById('tab-source');
+  const restoredBadge = document.getElementById('input-restored');
+  const toastHost = document.getElementById('toast-host');
+  if (!yaml || !inputPanel || !toastHost) return;
+
+  // ---------- Toasts ----------
+  function toast(msg, kind = 'info', opts = {}) {
+    const el = document.createElement('div');
+    el.className = `toast ${kind}`;
+    const ico = kind === 'success' ? '✓' : kind === 'error' ? '✗' : 'ⓘ';
+    el.innerHTML = `<span class="ico">${ico}</span><span>${msg}</span>${opts.kbd ? `<span class="kbd-hint">${opts.kbd}</span>` : ''}`;
+    toastHost.appendChild(el);
+    const ttl = opts.ttl || 2200;
+    setTimeout(() => {
+      el.classList.add('leaving');
+      setTimeout(() => el.remove(), 220);
+    }, ttl);
+  }
+  // expose for debugging / future use
+  window.__toast = toast;
+
+  // ---------- localStorage YAML autosave ----------
+  const STORAGE_KEY = 'boilergen.yaml.autosave.v1';
+  // restore on load (only if textarea is currently empty)
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && saved.trim() && !yaml.value.trim()) {
+      yaml.value = saved;
+      if (restoredBadge) {
+        restoredBadge.classList.add('visible');
+        setTimeout(() => restoredBadge.classList.remove('visible'), 2500);
+      }
+    }
+  } catch { /* localStorage may be blocked in private mode */ }
+
+  // debounced save on input
+  let saveTimer = null;
+  yaml.addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      try { localStorage.setItem(STORAGE_KEY, yaml.value); } catch {}
+    }, 400);
+  });
+
+  // ---------- Drag & drop ----------
+  let dragDepth = 0;
+  inputPanel.addEventListener('dragenter', (e) => {
+    if (!Array.from(e.dataTransfer?.types || []).includes('Files')) return;
+    dragDepth++;
+    inputPanel.classList.add('drop-active');
+  });
+  inputPanel.addEventListener('dragover', (e) => {
+    if (!Array.from(e.dataTransfer?.types || []).includes('Files')) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  });
+  inputPanel.addEventListener('dragleave', () => {
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (dragDepth === 0) inputPanel.classList.remove('drop-active');
+  });
+  inputPanel.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    dragDepth = 0;
+    inputPanel.classList.remove('drop-active');
+    const file = e.dataTransfer?.files?.[0];
+    if (!file) return;
+    const looksYaml = /\.(ya?ml|json|txt)$/i.test(file.name);
+    if (!looksYaml) {
+      toast(`"${file.name}" doesn't look like YAML`, 'error');
+      return;
+    }
+    try {
+      const text = await file.text();
+      yaml.value = text;
+      yaml.dispatchEvent(new Event('input', { bubbles: true }));
+      yaml.focus();
+      toast(`Loaded ${file.name}`, 'success');
+    } catch {
+      toast('Could not read the file', 'error');
+    }
+  });
+
+  // ---------- Keyboard navigation ----------
+  // ↑/↓ or j/k → cycle files; Tab (when file selected, not in input) → toggle Output/Source
+  function activeFileIdx() {
+    const items = fileList?.querySelectorAll('.file-item') || [];
+    for (let i = 0; i < items.length; i++) if (items[i].classList.contains('active')) return i;
+    return -1;
+  }
+  function clickFile(idx) {
+    const items = fileList?.querySelectorAll('.file-item') || [];
+    if (idx >= 0 && idx < items.length) items[idx].click();
+  }
+  document.addEventListener('keydown', (e) => {
+    const t = e.target;
+    const inEditable = t && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT' || t.isContentEditable);
+    if (e.metaKey || e.ctrlKey || e.altKey) return; // leave existing ⌘↵ alone
+    if (inEditable) return;
+
+    const items = fileList?.querySelectorAll('.file-item') || [];
+    if (!items.length) return;
+    const idx = activeFileIdx();
+
+    if (e.key === 'ArrowDown' || e.key === 'j') {
+      e.preventDefault();
+      const next = idx < 0 ? 0 : Math.min(items.length - 1, idx + 1);
+      clickFile(next);
+    } else if (e.key === 'ArrowUp' || e.key === 'k') {
+      e.preventDefault();
+      const prev = idx < 0 ? 0 : Math.max(0, idx - 1);
+      clickFile(prev);
+    } else if (e.key === 'Tab' && idx >= 0) {
+      e.preventDefault();
+      const showingSource = tabSource?.classList.contains('active');
+      (showingSource ? tabOutput : tabSource)?.click();
+    }
+  });
+
+  // ---------- Observe copyBtn → toast ----------
+  if (copyBtn) {
+    let lastText = copyBtn.textContent;
+    new MutationObserver(() => {
+      const t = copyBtn.textContent;
+      if (t === lastText) return;
+      if (t.includes('Copied')) toast('Copied to clipboard', 'success');
+      else if (t.includes('failed')) toast('Copy failed', 'error');
+      lastText = t;
+    }).observe(copyBtn, { childList: true, characterData: true, subtree: true });
+  }
+
+  // ---------- Observe statusBar → toast on terminal states ----------
+  if (statusBar) {
+    let lastClass = statusBar.className;
+    new MutationObserver(() => {
+      const c = statusBar.className;
+      if (c === lastClass) return;
+      if (c === 'success' && lastClass !== 'success') {
+        // text now has badges; pull file count from "<N> files" badge
+        const m = statusBar.textContent.match(/(\d+)\s+files/);
+        if (m) toast(`Generated ${m[1]} files`, 'success');
+      } else if (c === 'error' && lastClass !== 'error') {
+        const text = (statusBar.textContent || '').trim().replace(/^✗\s*/, '');
+        if (text && text.length < 120) toast(text, 'error');
+      }
+      lastClass = c;
+    }).observe(statusBar, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  // ---------- One-time hint ----------
+  try {
+    if (!localStorage.getItem('boilergen.dx.hinted')) {
+      setTimeout(() => {
+        toast('Tip: drop a .yaml file, or press', 'info', { kbd: '↓ / ↑', ttl: 4000 });
+        localStorage.setItem('boilergen.dx.hinted', '1');
+      }, 1200);
+    }
+  } catch {}
+})();
 </script>
 
 <!-- ============================================================
