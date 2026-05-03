@@ -51,6 +51,8 @@ PvP match configuration. Matches `FlumpGame.Data.GameModeData`:
 | `bot-personality` | `BotPersonality.asset` SO — AI profile (difficulty / aggression / accuracy / reaction time / movement style / preferred range) | bot-rookie, bot-veteran |
 | `map` | `MapData.asset` SO — scene reference, supported modes, spawn zones, hardpoint zones, kill volume, ambient lighting | map-warehouse |
 | `loadout` | `LoadoutData.asset` SO — primary + secondary + melee weapon refs, perks, unlock level | loadout-assault-starter, loadout-sniper |
+| `network-player` | `<Name>NetworkPlayer.cs` — NGO 2.x NetworkBehaviour skeleton (server-authoritative Health/Armor/Kills/Deaths NetworkVariables, TryFireServerRpc + ClientRpc damage broadcast, partial-class hooks for custom logic) + prefab-registration .meta doc + i18n stub | network-player-default |
+| `touch-input` | `<Name>TouchController.cs` — mobile twin-stick FPS input (left stick movement / right stick look / fire / ADS / sprint / reload buttons) with schema-bound layout constants for designer tuning in YAML | touch-input-default |
 | `project-init` | `LocaleManager.cs` (~148 LOC, JSON-backed i18n, no Newtonsoft dep) + `Resources/Locales/en.json` (18 stock UI strings) | project-init |
 
 Each entity also generates an `i18n/<entity>/<id>.locale.json` stub keyed by ID with EN-seeded names + `TODO: …` placeholders for ru/kk that Localization Assistant fills via one Anthropic call.

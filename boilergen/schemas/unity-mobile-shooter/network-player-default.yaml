@@ -1,0 +1,20 @@
+# Default NetworkPlayer skeleton — generates DefaultNetworkPlayer.cs (NetworkBehaviour)
+# wired to the "assault" PlayerData class profile + "assault_starter" loadout.
+#
+# Overrides at runtime via [SerializeField] — the schema fields above are
+# baked into private const defaults inside the generated class so it works
+# in tests / when SOs aren't wired yet.
+id: default
+type: network-player
+name: Default Network Player
+data:
+  assetName: DefaultNetworkPlayer
+  scriptGuid: __NETWORK_PLAYER_SCRIPT_GUID__
+  # Class profile defaults baked into const fallbacks
+  maxHealth: 100
+  maxArmor: 50
+  walkSpeed: 5.0
+  sprintMultiplier: 1.6
+  jumpHeight: 1.2
+  # The default loadout this player spawns with (cross-ref to loadout entity)
+  spawnGearLoadoutId: assault_starter

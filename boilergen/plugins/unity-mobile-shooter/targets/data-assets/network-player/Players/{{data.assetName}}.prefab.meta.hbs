@@ -1,0 +1,27 @@
+# Boilergen NOTE: NetworkPrefab registration helper, NOT a real .meta file.
+#
+# Drop the {{pascalCase id}}NetworkPlayer.cs into Assets/_Project/Scripts/Player/,
+# then create a prefab with the following components attached and add the
+# entry below to Assets/_Project/NetworkPrefabsList.asset.
+#
+# Component list to add to the prefab (in this order):
+#   - NetworkObject (auto-added by Unity when first NetworkBehaviour is attached)
+#   - CharacterController
+#   - {{pascalCase id}}NetworkPlayer (this script)
+#   - {{pascalCase id}}NetworkPlayer.Custom.cs (your custom partial — optional)
+#   - ClientNetworkTransform (from Unity Transports samples — for owner-driven transform)
+#   - AudioListener (only on the local-player prefab)
+#
+# Suggested Inspector wiring:
+#   classData         → ./{{pascalCase id}}Class_Data.asset (player schema output)
+#   startingLoadout   → ./{{pascalCase id}}_StartingLoadout.asset (loadout schema output)
+#   controller        → drag the GameObject's CharacterController
+#   cameraRoot        → empty Transform on the prefab (where the local-player camera mounts)
+#   weaponSocket      → empty Transform on the right hand bone (where weapon prefabs spawn)
+#
+# NetworkPrefabsList.asset entry (add this block to the existing file's m_Prefabs array):
+#   - SourcePrefab: {fileID: <YOUR_PREFAB_FILE_ID>, guid: <YOUR_PREFAB_GUID>, type: 3}
+#     OverridingTargetPrefab: {fileID: 0}
+#
+# After registration, NetworkManager spawns this prefab via PlayerPrefab assignment
+# OR via Spawn(prefab) calls in your match controller.

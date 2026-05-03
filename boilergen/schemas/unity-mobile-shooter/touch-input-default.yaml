@@ -1,0 +1,37 @@
+# Default mobile twin-stick FPS touch layout for 1920×1080 reference resolution.
+# Sticks anchored bottom-left/right, fire+ADS on the right edge, sprint+reload
+# on the right above. Tune by editing this YAML — boilergen regenerates the
+# layout constants in DefaultTouchController.cs.
+#
+# All anchors in screen-space pixels. The runtime UI auto-creates RectTransforms
+# at these positions if you don't drag your own into the Inspector.
+id: default
+type: touch-input
+name: Default Mobile Twin-Stick
+data:
+  assetName: DefaultTouchController
+  scriptGuid: __TOUCH_INPUT_SCRIPT_GUID__
+
+  # Left stick — movement (bottom-left)
+  leftStickAnchorX: 280
+  leftStickAnchorY: 280
+  leftStickRadius: 160
+
+  # Right stick — look (sample anchor; actual gesture uses delta on the right half)
+  rightStickAnchorX: 1640
+  rightStickAnchorY: 280
+  rightStickRadius: 160
+
+  # Fire button — bottom-right primary
+  fireButtonX: 1740
+  fireButtonY: 540
+  fireButtonRadius: 110
+
+  # ADS button — above fire button
+  adsButtonX: 1740
+  adsButtonY: 770
+  adsButtonRadius: 80
+
+  lookSensitivity: 0.20
+  adsLookMultiplier: 0.55     # slows look while ADS — feels more controlled
+  invertY: false
