@@ -9,17 +9,18 @@
 <meta property="og:title" content="GamesAI — Open-source AI toolkit for game dev">
 <meta property="og:description" content="From one YAML to a working FiveM resource in 60 seconds. Deterministic core + opt-in AI + open-source forever.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://boilergen-eight.vercel.app/landing-assets/hero.jpg">
+<meta property="og:image" content="https://boilergen-eight.vercel.app/landing-assets/workflow.jpg">
 <meta property="og:url" content="https://boilergen-eight.vercel.app/landing.html">
 <link rel="icon" type="image/png" href="/landing-assets/brand-mark.png">
-<link rel="preload" as="image" href="/landing-assets/hero.jpg">
+<link rel="preload" as="image" href="/landing-assets/workflow.jpg">
+<link rel="preload" as="image" href="/landing-assets/icon-boilergen.png">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg-0: #07080b;
-  --bg-1: #0e1015;
+  --bg-0: #06070a;
+  --bg-1: #0d0f14;
   --bg-2: #161a22;
   --bg-3: #1d222c;
 
@@ -67,21 +68,47 @@ body {
   -webkit-font-smoothing: antialiased;
   font-feature-settings: 'cv02', 'cv03', 'cv11';
   overflow-x: hidden;
+  position: relative;
 }
 
-/* Global ambient glow that moves with scroll */
-.ambient-glow {
-  position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  background:
-    radial-gradient(ellipse 1400px 700px at 50% var(--glow-y, -10%), rgba(220, 38, 38, 0.18), transparent 60%),
-    radial-gradient(ellipse 800px 500px at 10% 80%, rgba(220, 38, 38, 0.06), transparent 60%),
-    radial-gradient(ellipse 800px 500px at 90% 20%, rgba(220, 38, 38, 0.05), transparent 60%);
-  transition: background-position 200ms linear;
+/* ========== GLOBAL FIXED 3D CANVAS ========== */
+#bg-canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
 }
+/* Ambient red glow that follows scroll */
+.ambient-glow {
+  position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background:
+    radial-gradient(ellipse 1400px 700px at 50% var(--glow-y, -10%), rgba(220, 38, 38, 0.16), transparent 60%),
+    radial-gradient(ellipse 800px 500px at 10% 80%, rgba(220, 38, 38, 0.05), transparent 60%),
+    radial-gradient(ellipse 800px 500px at 90% 20%, rgba(220, 38, 38, 0.04), transparent 60%);
+}
+/* Vignette around content for legibility */
+.vignette {
+  position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 50%, transparent 40%, rgba(6, 7, 10, 0.55) 100%);
+}
+/* All content sits above the canvas */
+header, main, footer, section, .stat-strip, .final-cta-wrap, .scroll-progress { position: relative; z-index: 5; }
 
 a { color: var(--text); text-decoration: none; transition: color var(--transition); }
 a:hover { color: var(--red-400); }
 code, .mono { font-family: var(--mono); font-size: 0.92em; }
+
+/* ========== SCROLL PROGRESS BAR ========== */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; height: 2px;
+  background: linear-gradient(to right, transparent, var(--red-500), var(--red-300));
+  z-index: 200;
+  width: var(--prog, 0%);
+  transition: width 80ms linear;
+  box-shadow: 0 0 12px var(--accent-glow);
+}
 
 /* ========== HEADER ========== */
 header {
@@ -89,15 +116,16 @@ header {
   z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 32px;
-  background: rgba(7, 8, 11, 0.55);
+  background: rgba(6, 7, 10, 0.45);
   backdrop-filter: blur(14px) saturate(160%);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   border-bottom: 1px solid transparent;
-  transition: background 200ms ease, border-color 200ms ease;
+  transition: background 200ms ease, border-color 200ms ease, padding 200ms ease;
 }
 header.scrolled {
-  background: rgba(7, 8, 11, 0.85);
+  background: rgba(6, 7, 10, 0.85);
   border-bottom-color: var(--border);
+  padding: 10px 32px;
 }
 .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
 .brand img {
@@ -137,12 +165,12 @@ nav a:hover { color: var(--text); }
 }
 
 /* ========== LAYOUT ========== */
-section { padding: 120px 32px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
-@media (max-width: 768px) { section { padding: 72px 16px; } }
+section { padding: 140px 32px; max-width: 1200px; margin: 0 auto; }
+@media (max-width: 768px) { section { padding: 80px 16px; } }
 
 h1, h2, h3 { letter-spacing: -0.025em; line-height: 1.12; }
-h1 { font-size: clamp(40px, 6vw, 72px); font-weight: 700; }
-h2 { font-size: clamp(30px, 4vw, 44px); font-weight: 700; margin-bottom: 16px; }
+h1 { font-size: clamp(40px, 6.5vw, 78px); font-weight: 700; }
+h2 { font-size: clamp(32px, 4.2vw, 48px); font-weight: 700; margin-bottom: 18px; }
 h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
 
 .section-eyebrow {
@@ -152,7 +180,7 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--red-400);
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   padding: 5px 14px;
   background: var(--accent-soft);
   border: 1px solid var(--border-red);
@@ -164,10 +192,10 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
   background: var(--red-500);
   box-shadow: 0 0 12px var(--accent-glow);
 }
-.section-sub { color: var(--text-muted); font-size: 17px; max-width: 740px; margin-bottom: 48px; line-height: 1.6; }
+.section-sub { color: var(--text-muted); font-size: 17px; max-width: 740px; margin-bottom: 56px; line-height: 1.6; }
 
 /* Reveal on scroll */
-.reveal { opacity: 0; transform: translateY(40px); transition: opacity 700ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.reveal { opacity: 0; transform: translateY(40px); transition: opacity 800ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 800ms cubic-bezier(0.2, 0.8, 0.2, 1); }
 .reveal.in { opacity: 1; transform: none; }
 .reveal.delay-1 { transition-delay: 80ms; }
 .reveal.delay-2 { transition-delay: 160ms; }
@@ -176,29 +204,26 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
 .reveal.delay-5 { transition-delay: 400ms; }
 .reveal.delay-6 { transition-delay: 480ms; }
 
+.reveal-zoom { opacity: 0; transform: scale(0.92); transition: opacity 900ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 900ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.reveal-zoom.in { opacity: 1; transform: none; }
+
 /* ========== HERO (sticky 3D scene) ========== */
 .hero-stage {
   position: relative;
-  height: 320vh; /* tall scroll-track for the sticky scene */
+  height: 200vh; /* shorter than v2 — global canvas continues anyway */
 }
 .hero-sticky {
   position: sticky; top: 0;
   height: 100vh;
   display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
-}
-#hero-canvas {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  z-index: 1;
-  display: block;
 }
 .hero-content {
-  position: relative; z-index: 3;
   text-align: center;
   padding: 0 32px;
-  max-width: 980px;
-  pointer-events: none; /* let canvas receive nothing, but keep links clickable */
+  max-width: 1000px;
+  pointer-events: none;
+  transition: opacity 240ms linear, transform 240ms linear;
+  will-change: opacity, transform;
 }
 .hero-content > * { pointer-events: auto; }
 .hero-eyebrow {
@@ -297,18 +322,15 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
   50% { opacity: 1; transform: scaleY(1); }
 }
 
-/* Hero scroll-driven UI fade — controlled via JS */
-.hero-content { transition: opacity 240ms linear, transform 240ms linear; will-change: opacity, transform; }
-
 /* ========== STAT STRIP ========== */
 .stat-strip {
   border-top: 1px solid var(--border-red);
   border-bottom: 1px solid var(--border-red);
   background:
-    linear-gradient(180deg, rgba(220, 38, 38, 0.06) 0%, var(--bg-1) 50%, rgba(220, 38, 38, 0.06) 100%);
-  padding: 44px 32px;
-  position: relative;
-  z-index: 5;
+    linear-gradient(180deg, rgba(220, 38, 38, 0.06) 0%, rgba(13, 15, 20, 0.85) 50%, rgba(220, 38, 38, 0.06) 100%);
+  padding: 50px 32px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .stat-strip::before, .stat-strip::after {
   content: ''; position: absolute; left: 50%; transform: translateX(-50%);
@@ -324,17 +346,17 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
   text-align: center;
 }
 .stat-num {
-  font-family: var(--mono); font-size: 38px; font-weight: 700;
+  font-family: var(--mono); font-size: 42px; font-weight: 700;
   color: var(--red-400); letter-spacing: -0.02em;
   text-shadow: 0 0 30px rgba(220, 38, 38, 0.4);
   line-height: 1;
 }
 .stat-label { font-size: 11px; color: var(--text-dim); margin-top: 8px; letter-spacing: 0.10em; text-transform: uppercase; }
 
-/* ========== MODULES ========== */
-.module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; perspective: 1200px; }
+/* ========== MODULE CARDS — image-driven ========== */
+.module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 22px; perspective: 1200px; }
 .module-card {
-  background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
+  background: linear-gradient(180deg, rgba(13, 15, 20, 0.85), rgba(22, 26, 34, 0.85));
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 30px;
@@ -343,6 +365,7 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
   overflow: hidden;
   transform-style: preserve-3d;
   will-change: transform;
+  backdrop-filter: blur(10px);
 }
 .module-card::after {
   content: ''; position: absolute; inset: 0;
@@ -363,18 +386,16 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
   opacity: 0; transition: opacity var(--transition);
 }
 .module-card:hover::before { opacity: 1; }
-.module-icon {
-  width: 52px; height: 52px;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, var(--red-600), var(--red-500));
-  border-radius: var(--radius);
-  margin-bottom: 20px;
-  font-family: var(--mono); font-size: 18px; font-weight: 700;
-  color: white;
-  box-shadow: 0 8px 22px rgba(220, 38, 38, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
-  transform: translateZ(40px);
+.module-icon-img {
+  width: 88px; height: 88px;
+  display: block;
+  margin-bottom: 22px;
+  filter: drop-shadow(0 8px 24px rgba(220, 38, 38, 0.45));
+  transform: translateZ(50px);
+  transition: transform 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.module-card h3 { color: var(--text); transform: translateZ(20px); }
+.module-card:hover .module-icon-img { transform: translateZ(60px) scale(1.06) rotate(-3deg); }
+.module-card h3 { color: var(--text); transform: translateZ(20px); font-size: 22px; }
 .module-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 18px; transform: translateZ(10px); }
 .module-meta {
   display: flex; gap: 18px; font-size: 12px; color: var(--text-dim);
@@ -384,20 +405,112 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
 .module-meta .meta-key { color: var(--text-dim); }
 .module-meta .meta-val { color: var(--red-400); }
 
-/* ========== PIPELINE (terminal) ========== */
-.pipeline-section { position: relative; }
-.pipeline-bg {
-  position: absolute; inset: 0;
-  background-image: url('/landing-assets/pipeline-bg.jpg');
-  background-size: cover; background-position: center;
-  opacity: 0.18;
-  z-index: 0;
-  mask-image: linear-gradient(180deg, transparent, black 20%, black 80%, transparent);
-  -webkit-mask-image: linear-gradient(180deg, transparent, black 20%, black 80%, transparent);
+/* Plain (text-only) module-cards still get the icon badge slot */
+.module-card.plain { padding-top: 30px; }
+
+/* ========== PHOTO GALLERY ========== */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: 200px;
+  gap: 16px;
+  perspective: 1400px;
+}
+.gallery-item {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-1);
+  transform-style: preserve-3d;
+  transition: transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 400ms ease, border-color 240ms ease;
   will-change: transform;
 }
+.gallery-item img {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block;
+  transition: transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 400ms ease;
+  filter: saturate(1.1) contrast(1.05);
+}
+.gallery-item .caption {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 18px 20px;
+  background: linear-gradient(180deg, transparent, rgba(6, 7, 10, 0.92));
+  color: var(--text);
+  font-size: 14px;
+  display: flex; align-items: end; justify-content: space-between; gap: 16px;
+  transform: translateY(8px);
+  transition: transform 400ms ease;
+}
+.gallery-item .caption .tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--red-400);
+  padding: 3px 8px;
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 4px;
+}
+.gallery-item:hover {
+  border-color: var(--border-red);
+  box-shadow: 0 24px 60px rgba(220, 38, 38, 0.22);
+}
+.gallery-item:hover img { transform: scale(1.08); filter: saturate(1.25) contrast(1.1); }
+.gallery-item:hover .caption { transform: translateY(0); }
+.gallery-item.size-lg  { grid-column: span 7; grid-row: span 2; }
+.gallery-item.size-md  { grid-column: span 5; grid-row: span 1; }
+.gallery-item.size-md2 { grid-column: span 5; grid-row: span 1; }
+.gallery-item.size-wide { grid-column: span 12; grid-row: span 1; }
+@media (max-width: 768px) {
+  .gallery { grid-template-columns: 1fr; grid-auto-rows: 240px; }
+  .gallery-item { grid-column: span 1 !important; grid-row: span 1 !important; }
+}
+
+/* ========== INSIDE-THE-PLATFORM ribbon ========== */
+.ribbon {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+@media (max-width: 768px) { .ribbon { grid-template-columns: 1fr; gap: 32px; } }
+.ribbon .text h2 { margin-bottom: 16px; }
+.ribbon .text ul { list-style: none; margin-top: 24px; display: grid; gap: 14px; }
+.ribbon .text li {
+  display: flex; gap: 12px; font-size: 15px; color: var(--text-muted); line-height: 1.55;
+}
+.ribbon .text li::before {
+  content: ''; flex-shrink: 0;
+  width: 6px; height: 6px; margin-top: 9px; border-radius: 50%;
+  background: var(--red-500); box-shadow: 0 0 10px var(--accent-glow);
+}
+.ribbon .visual {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--border-red);
+  box-shadow: 0 30px 80px rgba(220, 38, 38, 0.20), 0 0 0 1px rgba(220, 38, 38, 0.10);
+  aspect-ratio: 16 / 11;
+}
+.ribbon .visual img {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block;
+  transition: transform 800ms ease;
+}
+.ribbon .visual:hover img { transform: scale(1.04); }
+.ribbon .visual::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 60%, rgba(220, 38, 38, 0.18) 100%);
+  pointer-events: none;
+}
+
+/* Reverse alternation */
+.ribbon.reverse { grid-template-columns: 1fr 1.1fr; }
+.ribbon.reverse .visual { order: -1; }
+@media (max-width: 768px) { .ribbon.reverse { grid-template-columns: 1fr; } .ribbon.reverse .visual { order: 0; } }
+
+/* ========== PIPELINE (terminal) ========== */
 .pipeline {
-  background: linear-gradient(180deg, rgba(14, 16, 21, 0.92), rgba(7, 8, 11, 0.92));
+  background: linear-gradient(180deg, rgba(13, 15, 20, 0.92), rgba(6, 7, 10, 0.92));
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 0;
@@ -425,11 +538,12 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
 
 /* ========== COMPARISON TABLE ========== */
 .compare {
-  background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
+  background: linear-gradient(180deg, rgba(13, 15, 20, 0.85), rgba(22, 26, 34, 0.85));
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow-x: auto;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
 }
 .compare table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 700px; }
 .compare th, .compare td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border); }
@@ -440,24 +554,14 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
 .compare .col-us-th { background: rgba(220, 38, 38, 0.12); color: var(--red-400); }
 
 /* ========== ENGINE GRID ========== */
-.engine-section { position: relative; }
-.engine-bg {
-  position: absolute; inset: 0;
-  background-image: url('/landing-assets/engines-bg.jpg');
-  background-size: cover; background-position: center;
-  opacity: 0.10;
-  z-index: 0;
-  mask-image: radial-gradient(ellipse at center, black, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black, transparent 75%);
-  will-change: transform;
-}
 .engine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; perspective: 1000px; }
 .engine-card {
-  background: linear-gradient(180deg, var(--bg-1), rgba(14, 16, 21, 0.7));
+  background: linear-gradient(180deg, rgba(13, 15, 20, 0.85), rgba(22, 26, 34, 0.5));
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 22px;
   transition: transform 280ms ease, border-color 200ms ease, box-shadow 280ms ease;
+  backdrop-filter: blur(8px);
 }
 .engine-card:hover {
   transform: translateY(-4px);
@@ -477,34 +581,23 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
 .engine-card .status.deferred { background: rgba(141, 150, 163, 0.10); color: var(--text-dim); border: 1px solid rgba(141, 150, 163, 0.18); }
 
 /* ========== KB GRID ========== */
-.kb-section { position: relative; }
-.kb-bg {
-  position: absolute; inset: 0;
-  background-image: url('/landing-assets/kb-bg.jpg');
-  background-size: cover; background-position: center;
-  opacity: 0.12;
-  z-index: 0;
-  mask-image: linear-gradient(180deg, transparent, black 30%, black 70%, transparent);
-  -webkit-mask-image: linear-gradient(180deg, transparent, black 30%, black 70%, transparent);
-  will-change: transform;
-}
 .kb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
 .kb-card {
-  background: linear-gradient(180deg, var(--bg-1), rgba(14, 16, 21, 0.6));
+  background: linear-gradient(180deg, rgba(13, 15, 20, 0.85), rgba(22, 26, 34, 0.5));
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 26px 18px;
+  padding: 28px 18px;
   text-align: center;
   transition: all var(--transition);
   backdrop-filter: blur(8px);
 }
 .kb-card:hover {
   border-color: var(--border-red);
-  background: linear-gradient(180deg, rgba(220, 38, 38, 0.08), var(--bg-1));
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.08), rgba(13, 15, 20, 0.85));
   transform: translateY(-3px);
 }
 .kb-card .num {
-  font-family: var(--mono); font-size: 38px; font-weight: 700;
+  font-family: var(--mono); font-size: 42px; font-weight: 700;
   color: var(--red-400);
   text-shadow: 0 0 20px rgba(220, 38, 38, 0.35);
   line-height: 1;
@@ -512,17 +605,17 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
 .kb-card .label { color: var(--text-muted); font-size: 13px; margin-top: 8px; }
 
 /* ========== CTA SECTION ========== */
-.final-cta-wrap { padding: 0 32px; }
+.final-cta-wrap { padding: 0 32px; max-width: 1200px; margin: 0 auto; padding-bottom: 60px; }
 .final-cta {
   position: relative;
   border-radius: var(--radius-xl);
-  padding: 80px 40px;
+  padding: 90px 40px;
   text-align: center;
   overflow: hidden;
   border: 1px solid var(--border-red);
   background:
-    linear-gradient(180deg, rgba(7, 8, 11, 0.5), rgba(7, 8, 11, 0.85)),
-    url('/landing-assets/cta-bg.jpg');
+    linear-gradient(180deg, rgba(6, 7, 10, 0.55), rgba(6, 7, 10, 0.85)),
+    url('/landing-assets/photo-holo.jpg');
   background-size: cover, cover;
   background-position: center;
   box-shadow: 0 30px 80px rgba(220, 38, 38, 0.18);
@@ -547,8 +640,6 @@ footer {
   font-size: 13px;
   color: var(--text-dim);
   text-align: center;
-  position: relative;
-  z-index: 2;
 }
 footer a { color: var(--text-muted); }
 footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom: 18px; flex-wrap: wrap; }
@@ -559,7 +650,7 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
   margin: 0 auto;
   max-width: 1200px;
   background: linear-gradient(to right, transparent, rgba(220, 38, 38, 0.40), transparent);
-  position: relative; z-index: 2;
+  position: relative; z-index: 5;
 }
 
 /* helpers */
@@ -570,18 +661,189 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
 .mt-4 { margin-top: 16px; }
 .mt-8 { margin-top: 32px; }
 
+/* ========== CUSTOM CURSOR ========== */
+.cursor-dot, .cursor-ring {
+  position: fixed; top: 0; left: 0;
+  pointer-events: none;
+  z-index: 999;
+  border-radius: 50%;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  mix-blend-mode: difference;
+}
+.cursor-dot {
+  width: 6px; height: 6px;
+  background: #ff5252;
+  margin: -3px 0 0 -3px;
+  transition: width 240ms ease, height 240ms ease, margin 240ms ease, opacity 240ms ease;
+}
+.cursor-ring {
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(255, 100, 100, 0.7);
+  margin: -18px 0 0 -18px;
+  transition: width 240ms ease, height 240ms ease, margin 240ms ease, border-color 240ms ease, background 240ms ease;
+}
+body.cursor-hover .cursor-dot { width: 0; height: 0; margin: 0; opacity: 0; }
+body.cursor-hover .cursor-ring { width: 60px; height: 60px; margin: -30px 0 0 -30px; border-color: rgba(255, 80, 80, 0.95); background: rgba(220, 38, 38, 0.10); }
+@media (hover: none), (max-width: 768px) {
+  .cursor-dot, .cursor-ring { display: none; }
+}
+
+/* ========== MAGNETIC ========== */
+.magnetic { will-change: transform; transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+/* ========== HERO WORD REVEAL ========== */
+.word-reveal { display: inline-block; overflow: hidden; vertical-align: bottom; }
+.word-reveal > .word-inner {
+  display: inline-block; transform: translateY(110%);
+  transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.word-reveal.in > .word-inner { transform: translateY(0); }
+.word-reveal + .word-reveal { margin-left: 0.25em; }
+
+/* ========== MARQUEE ========== */
+.marquee {
+  position: relative;
+  overflow: hidden;
+  padding: 22px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(13, 15, 20, 0.6), rgba(6, 7, 10, 0.6));
+  backdrop-filter: blur(8px);
+  z-index: 5;
+  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 56px;
+  animation: marquee 30s linear infinite;
+}
+.marquee-item {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.marquee-item .pip {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--red-500); box-shadow: 0 0 10px var(--accent-glow);
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ========== SECTION RAIL (right-side dots) ========== */
+.rail {
+  position: fixed;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 14px 8px;
+  background: rgba(13, 15, 20, 0.55);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  backdrop-filter: blur(10px);
+}
+.rail a {
+  display: block; width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.20);
+  transition: all 220ms ease;
+  position: relative;
+}
+.rail a::after {
+  content: attr(data-label);
+  position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text);
+  background: rgba(13, 15, 20, 0.95);
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+.rail a:hover::after { opacity: 1; transform: translateY(-50%) translateX(0); }
+.rail a:hover { background: var(--red-500); transform: scale(1.3); }
+.rail a.active { background: var(--red-500); box-shadow: 0 0 12px var(--accent-glow); }
+@media (max-width: 900px) { .rail { display: none; } }
+
+/* ========== LOADER ========== */
+#loader {
+  position: fixed; inset: 0;
+  background: var(--bg-0);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 28px;
+  transition: opacity 600ms ease 200ms, visibility 0s linear 800ms;
+}
+#loader.gone { opacity: 0; visibility: hidden; }
+#loader .l-mark {
+  width: 64px; height: 64px;
+  filter: drop-shadow(0 0 20px var(--accent-glow));
+  animation: l-rotate 2.4s linear infinite;
+}
+#loader .l-bar {
+  width: 200px; height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 100px;
+  overflow: hidden;
+  position: relative;
+}
+#loader .l-bar::before {
+  content: ''; position: absolute; top: 0; left: -40%;
+  width: 40%; height: 100%;
+  background: linear-gradient(to right, transparent, var(--red-500), transparent);
+  animation: l-slide 1.2s ease-in-out infinite;
+}
+@keyframes l-rotate {
+  0%, 30% { transform: rotate(0); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes l-slide {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal, .reveal-zoom { opacity: 1; transform: none; transition: none; }
   .scroll-cue .line { animation: none; }
   .hero-eyebrow .pulse { animation: none; }
+  .marquee-track { animation: none; }
+  .word-reveal > .word-inner { transform: none; }
+  #loader .l-mark { animation: none; }
 }
 </style>
 </head>
 
 <body>
 
+<div id="loader" aria-hidden="true">
+  <img class="l-mark" src="/landing-assets/brand-mark.png" alt="">
+  <div class="l-bar"></div>
+</div>
+
+<canvas id="bg-canvas"></canvas>
 <div class="ambient-glow"></div>
+<div class="vignette"></div>
+<div class="scroll-progress" id="scroll-progress"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+<div class="cursor-dot" id="cursor-dot"></div>
+
+<aside class="rail" aria-hidden="true">
+  <a href="#hero-stage" data-label="Intro" data-rail-target="hero-stage"></a>
+  <a href="#modules" data-label="Modules" data-rail-target="modules"></a>
+  <a href="#gallery" data-label="Inside" data-rail-target="gallery"></a>
+  <a href="#how" data-label="Demo" data-rail-target="how"></a>
+  <a href="#engines" data-label="Engines" data-rail-target="engines"></a>
+</aside>
 
 <header id="site-header">
   <a href="#" class="brand">
@@ -592,29 +854,29 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
     <a href="#modules" class="hide-mobile">Modules</a>
     <a href="#engines" class="hide-mobile">Engines</a>
     <a href="#how" class="hide-mobile">How it works</a>
+    <a href="#gallery" class="hide-mobile">Inside</a>
     <a href="https://github.com/Sariev-Alizhan/GamesAI" target="_blank" rel="noopener">GitHub</a>
     <a href="/" class="nav-cta">Try Live →</a>
   </nav>
 </header>
 
 <!-- ============================================================ -->
-<!-- HERO — sticky 3D scene linked to scroll                      -->
+<!-- HERO — sticky text over global Three.js canvas                -->
 <!-- ============================================================ -->
 <div class="hero-stage" id="hero-stage">
   <div class="hero-sticky">
-    <canvas id="hero-canvas"></canvas>
     <div class="hero-content" id="hero-content">
       <span class="hero-eyebrow"><span class="pulse"></span>v0.2.0 · 3 modules · 5 engine plugins · 365 tests</span>
-      <h1>Open-source AI toolkit that <span class="accent">eliminates the rote work</span> in game development.</h1>
+      <h1 id="hero-title" data-word-reveal>Open-source AI toolkit that <span class="accent">eliminates the rote work</span> in game development.</h1>
       <p class="lead">
         Three composable tools — <strong>Boilergen</strong> for codegen, <strong>Schema Validator</strong> for cross-reference + FiveM linting, <strong>Localization Assistant</strong> for static checks + AI translation. Replace boring boilerplate-and-validation work across your stack so the team can focus on what's actually engineering.
       </p>
       <div class="cta-row">
-        <a href="/" class="btn btn-primary">
+        <a href="/" class="btn btn-primary magnetic">
           Try the live demo
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-        <a href="https://github.com/Sariev-Alizhan/GamesAI" target="_blank" rel="noopener" class="btn btn-secondary">
+        <a href="https://github.com/Sariev-Alizhan/GamesAI" target="_blank" rel="noopener" class="btn btn-secondary magnetic">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5 3.3 9.3 7.8 10.8.6.1.8-.2.8-.6v-2.2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.4-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.4-1.3-5.4-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2.9-.3 2-.4 3-.4s2.1.1 3 .4c2.3-1.6 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.4 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6C20.2 21.3 23.5 17 23.5 12 23.5 5.7 18.3.5 12 .5z"/></svg>
           Star on GitHub
         </a>
@@ -626,7 +888,7 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
         <span class="badge"><span class="check">✓</span> No vendor lock-in</span>
       </div>
     </div>
-    <div class="scroll-cue"><span>Scroll</span><span class="line"></span></div>
+    <div class="scroll-cue"><span>Scroll to explore</span><span class="line"></span></div>
   </div>
 </div>
 
@@ -645,16 +907,45 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
 </div>
 
 <!-- ============================================================ -->
-<!-- MODULES                                                      -->
+<!-- MARQUEE — engines / capabilities / brand keywords            -->
+<!-- ============================================================ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-item"><span class="pip"></span>Unity 2020 → 6.3 LTS</span>
+    <span class="marquee-item"><span class="pip"></span>Godot 3.5 → 4.5</span>
+    <span class="marquee-item"><span class="pip"></span>FiveM cerulean / bodacious</span>
+    <span class="marquee-item"><span class="pip"></span>Unreal UE4.27 → UE5.6</span>
+    <span class="marquee-item"><span class="pip"></span>Photon Fusion / Quantum</span>
+    <span class="marquee-item"><span class="pip"></span>Lua 5.3 / 5.4</span>
+    <span class="marquee-item"><span class="pip"></span>QBCore / Qbox / ox_core</span>
+    <span class="marquee-item"><span class="pip"></span>Anthropic Claude · DeepL Pro</span>
+    <span class="marquee-item"><span class="pip"></span>MIT licensed</span>
+    <span class="marquee-item"><span class="pip"></span>34 KB entries</span>
+    <!-- duplicate for seamless loop -->
+    <span class="marquee-item"><span class="pip"></span>Unity 2020 → 6.3 LTS</span>
+    <span class="marquee-item"><span class="pip"></span>Godot 3.5 → 4.5</span>
+    <span class="marquee-item"><span class="pip"></span>FiveM cerulean / bodacious</span>
+    <span class="marquee-item"><span class="pip"></span>Unreal UE4.27 → UE5.6</span>
+    <span class="marquee-item"><span class="pip"></span>Photon Fusion / Quantum</span>
+    <span class="marquee-item"><span class="pip"></span>Lua 5.3 / 5.4</span>
+    <span class="marquee-item"><span class="pip"></span>QBCore / Qbox / ox_core</span>
+    <span class="marquee-item"><span class="pip"></span>Anthropic Claude · DeepL Pro</span>
+    <span class="marquee-item"><span class="pip"></span>MIT licensed</span>
+    <span class="marquee-item"><span class="pip"></span>34 KB entries</span>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODULES — image-driven 3D-tilt cards                         -->
 <!-- ============================================================ -->
 <section id="modules">
   <span class="section-eyebrow reveal">The platform</span>
-  <h2 class="reveal delay-1">Three tools. One pipeline. Zero AI lock-in.</h2>
+  <h2 class="reveal delay-1">Three tools. One pipeline. <span style="color:var(--red-400)">Zero AI lock-in.</span></h2>
   <p class="section-sub reveal delay-2">Each module owns one boring-but-time-consuming part of game development. Composed, they form a build pipeline that takes one YAML and emits production-grade output across your entire stack.</p>
 
   <div class="module-grid">
-    <div class="module-card reveal delay-2" data-tilt>
-      <div class="module-icon">B</div>
+    <div class="module-card reveal-zoom delay-2" data-tilt>
+      <img class="module-icon-img" src="/landing-assets/icon-boilergen.png" alt="Boilergen icon" loading="lazy">
       <h3>Boilergen</h3>
       <p>YAML entity → boilerplate code across the stack. Generates C++ / Node / Flutter / Godot / Unity / Lua / i18n stubs from one schema. Five engine plugins shipped, each composable.</p>
       <div class="module-meta">
@@ -664,8 +955,8 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
       </div>
     </div>
 
-    <div class="module-card reveal delay-3" data-tilt>
-      <div class="module-icon">SV</div>
+    <div class="module-card reveal-zoom delay-3" data-tilt>
+      <img class="module-icon-img" src="/landing-assets/icon-validator.png" alt="Schema Validator icon" loading="lazy">
       <h3>Schema Validator</h3>
       <p>Catches broken cross-references in YAML/JSON game data <strong>and</strong> lints FiveM <code>fxmanifest.lua</code> graphs against case-sensitivity, missing-script, and unmanifested-dep footguns.</p>
       <div class="module-meta">
@@ -675,8 +966,8 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
       </div>
     </div>
 
-    <div class="module-card reveal delay-4" data-tilt>
-      <div class="module-icon">L</div>
+    <div class="module-card reveal-zoom delay-4" data-tilt>
+      <img class="module-icon-img" src="/landing-assets/icon-localization.png" alt="Localization Assistant icon" loading="lazy">
       <h3>Localization Assistant</h3>
       <p>Static checks (placeholder parity, length overflow, per-key caps) <strong>before</strong> any AI call. Then AI fill via Claude or DeepL Pro. AI translates only what passes lint.</p>
       <div class="module-meta">
@@ -691,15 +982,41 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
 <div class="divider"></div>
 
 <!-- ============================================================ -->
+<!-- INSIDE THE PLATFORM — image+text ribbon (workflow)           -->
+<!-- ============================================================ -->
+<section id="gallery">
+  <span class="section-eyebrow reveal">Inside the platform</span>
+  <h2 class="reveal delay-1">A workflow built like a build system, not a chat box.</h2>
+  <p class="section-sub reveal delay-2">Modules read your config, talk to each other through stable contracts, and emit deterministic output. AI runs at the edges — translation, RAG-grounded suggestions, never the codegen core.</p>
+
+  <div class="ribbon">
+    <div class="text reveal">
+      <h3 style="font-size: 26px; margin-bottom: 14px;">One YAML in. Nine production files out.</h3>
+      <p class="text-muted">The codegen pipeline is content-addressable: change the YAML, only the affected files regenerate. CI runs the same pipeline. AI is opt-in for the parts that benefit from it.</p>
+      <ul>
+        <li>Schema-driven entity definitions consumed by every plugin.</li>
+        <li>Per-engine plugins emit version-correct code (NGO 2.x, Lua 5.4, GDScript v2).</li>
+        <li>Validator runs as a pre-commit hook and a CI job.</li>
+        <li>Localization keys ride along; lint catches placeholder drift before AI fill.</li>
+      </ul>
+    </div>
+    <div class="visual reveal-zoom delay-2">
+      <img src="/landing-assets/workflow.jpg" alt="GamesAI workflow visualization">
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
 <!-- HOW IT WORKS — pipeline terminal                             -->
 <!-- ============================================================ -->
-<section id="how" class="pipeline-section">
-  <div class="pipeline-bg" data-parallax="0.25"></div>
+<section id="how">
   <span class="section-eyebrow reveal">End-to-end demo</span>
   <h2 class="reveal delay-1">From one YAML to a working FiveM/QBCore resource in 60 seconds.</h2>
   <p class="section-sub reveal delay-2">Reproducible step-by-step in <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/CASE-STUDY-PLATFORM-LOOP.md" target="_blank">CASE-STUDY-PLATFORM-LOOP.md</a>. Every command runs from a fresh clone of the public repo.</p>
 
-  <div class="pipeline reveal delay-3">
+  <div class="pipeline reveal-zoom delay-3">
     <div class="pipeline-header">
       <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
       <span class="title">~/games-ai · zsh — generate</span>
@@ -738,6 +1055,48 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
    <span class="step">Total time: ~40 seconds.</span>
    <span class="step">Hand-rolled equivalent: 1 hour minimum.</span>
 </pre>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- PHOTO GALLERY — masonry parallax                             -->
+<!-- ============================================================ -->
+<section>
+  <span class="section-eyebrow reveal">Built for studios that ship</span>
+  <h2 class="reveal delay-1">From quiet workstations to production servers.</h2>
+  <p class="section-sub reveal delay-2">GamesAI is the toolchain your team picks because it's predictable, not because it's flashy. Here's the surface area it covers.</p>
+
+  <div class="gallery">
+    <div class="gallery-item size-lg reveal-zoom" data-tilt>
+      <img src="/landing-assets/photo-server.jpg" alt="Server room with red status LEDs" loading="lazy">
+      <div class="caption">
+        <span><strong>Production-aware</strong><br><span class="text-muted" style="font-size:13px">Validator catches the broken-manifest crash before it ever reaches your live FiveM box.</span></span>
+        <span class="tag">Servers</span>
+      </div>
+    </div>
+    <div class="gallery-item size-md reveal-zoom delay-1" data-tilt>
+      <img src="/landing-assets/photo-hands.jpg" alt="Developer hands typing" loading="lazy">
+      <div class="caption">
+        <span><strong>Developer-first</strong></span>
+        <span class="tag">DX</span>
+      </div>
+    </div>
+    <div class="gallery-item size-md2 reveal-zoom delay-2" data-tilt>
+      <img src="/landing-assets/photo-holo.jpg" alt="Holographic UI" loading="lazy">
+      <div class="caption">
+        <span><strong>Web playground</strong></span>
+        <span class="tag">Live demo</span>
+      </div>
+    </div>
+    <div class="gallery-item size-wide reveal-zoom delay-3" data-tilt>
+      <img src="/landing-assets/nebula.jpg" alt="Data network constellation" loading="lazy">
+      <div class="caption">
+        <span><strong>34 knowledge-base entries</strong> grounding every AI suggestion via RAG — no hallucinated APIs, no fabricated config keys.</span>
+        <span class="tag">RAG</span>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -814,8 +1173,7 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
 <!-- ============================================================ -->
 <!-- ENGINES                                                      -->
 <!-- ============================================================ -->
-<section id="engines" class="engine-section">
-  <div class="engine-bg" data-parallax="0.18"></div>
+<section id="engines">
   <span class="section-eyebrow reveal">Version-aware codegen</span>
   <h2 class="reveal delay-1">One YAML adapts to your engine version.</h2>
   <p class="section-sub reveal delay-2">AI Describe consults per-engine version matrices to emit version-correct API calls. Use Unity 2022 LTS APIs in 2022 LTS code, NGO 2.x in Unity 6.3, Enhanced Input in UE5.1+, GDScript v2 in Godot 4. Knowledge-base entries cover 2020 → 2026.</p>
@@ -859,18 +1217,17 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
 <!-- ============================================================ -->
 <!-- KB                                                           -->
 <!-- ============================================================ -->
-<section class="kb-section">
-  <div class="kb-bg" data-parallax="0.20"></div>
+<section>
   <span class="section-eyebrow reveal">Knowledge-base</span>
   <h2 class="reveal delay-1">34 entries grounding every AI suggestion.</h2>
   <p class="section-sub reveal delay-2">AI Describe doesn't hallucinate — it cites. Every "what should I do here" answer is grounded in the knowledge-base via RAG. Entries cover real games (Mindustry, Beyond All Reason, Space Station 14), engine conventions (QBCore, Unity SO patterns), cross-cutting patterns (data-driven content, role hierarchy), and version matrices.</p>
 
   <div class="kb-grid">
-    <div class="kb-card reveal delay-2"><div class="num">12</div><div class="label">Engines</div></div>
-    <div class="kb-card reveal delay-3"><div class="num">10</div><div class="label">Game Studies</div></div>
-    <div class="kb-card reveal delay-4"><div class="num">7</div><div class="label">Patterns</div></div>
-    <div class="kb-card reveal delay-5"><div class="num">3</div><div class="label">Research Notes</div></div>
-    <div class="kb-card reveal delay-6"><div class="num">2</div><div class="label">Sources / Sentiment</div></div>
+    <div class="kb-card reveal delay-2"><div class="num" data-counter="12">0</div><div class="label">Engines</div></div>
+    <div class="kb-card reveal delay-3"><div class="num" data-counter="10">0</div><div class="label">Game Studies</div></div>
+    <div class="kb-card reveal delay-4"><div class="num" data-counter="7">0</div><div class="label">Patterns</div></div>
+    <div class="kb-card reveal delay-5"><div class="num" data-counter="3">0</div><div class="label">Research Notes</div></div>
+    <div class="kb-card reveal delay-6"><div class="num" data-counter="2">0</div><div class="label">Sources</div></div>
   </div>
 
   <div class="mt-8 text-muted reveal delay-3" style="text-align: center; font-size: 14px;">
@@ -885,20 +1242,20 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
 <!-- ============================================================ -->
 <section>
   <span class="section-eyebrow reveal">Trust posture</span>
-  <h2 class="reveal delay-1">Clean licenses. Auditable AI providers. No surprises.</h2>
+  <h2 class="reveal delay-1">Clean licenses. Auditable AI providers. <span style="color:var(--red-400)">No surprises.</span></h2>
   <p class="section-sub reveal delay-2">Every runtime dependency is MIT, Apache 2.0, or BSD. Every studied source is OSI-open or developer-published. We refused leaked code (Far Cry 1) on principle. We refuse hacking requests on principle. The platform's competitive posture <strong>is</strong> license cleanliness — not a checkbox, a moat.</p>
 
   <div class="module-grid">
-    <div class="module-card reveal delay-2" data-tilt>
-      <h3>Currently used</h3>
+    <div class="module-card plain reveal-zoom delay-2" data-tilt>
+      <h3 style="margin-bottom: 14px;">Currently used</h3>
       <p>Anthropic Claude API (default), DeepL Pro API (opt-in BYO-key). Both: SOC 2, no training on your prompts, commercial use OK.</p>
     </div>
-    <div class="module-card reveal delay-3" data-tilt>
-      <h3>Refused</h3>
+    <div class="module-card plain reveal-zoom delay-3" data-tilt>
+      <h3 style="margin-bottom: 14px;">Refused</h3>
       <p>NLLB-200 (CC-BY-NC), DeepL Free tier (TOS forbids similar product), Mistral Experiment / Gemini free (train on prompts), Suno/Udio (red zone), leaked AAA code (legal hazard).</p>
     </div>
-    <div class="module-card reveal delay-4" data-tilt>
-      <h3>On the roadmap</h3>
+    <div class="module-card plain reveal-zoom delay-4" data-tilt>
+      <h3 style="margin-bottom: 14px;">On the roadmap</h3>
       <p>Local Ollama (default fallback), Groq + Cerebras free tiers (commercial OK, no training), OPUS-MT for offline, NVIDIA Audio2Face for lipsync. All license-verified.</p>
     </div>
   </div>
@@ -913,13 +1270,13 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
 <!-- ============================================================ -->
 <!-- FINAL CTA                                                    -->
 <!-- ============================================================ -->
-<div class="final-cta-wrap" style="max-width: 1200px; margin: 0 auto; padding-top: 60px; padding-bottom: 60px;">
-  <div class="final-cta reveal">
+<div class="final-cta-wrap" style="padding-top: 60px;">
+  <div class="final-cta reveal-zoom">
     <h2>Ship a richer feature in 1 day instead of 1 week.</h2>
     <p>Open the live demo, paste a YAML, click Generate. Or clone the repo and run it locally — every example in the case study is reproducible from a fresh clone.</p>
     <div class="cta-row">
-      <a href="/" class="btn btn-primary">Try the live demo →</a>
-      <a href="https://github.com/Sariev-Alizhan/GamesAI" target="_blank" rel="noopener" class="btn btn-secondary">View on GitHub</a>
+      <a href="/" class="btn btn-primary magnetic">Try the live demo →</a>
+      <a href="https://github.com/Sariev-Alizhan/GamesAI" target="_blank" rel="noopener" class="btn btn-secondary magnetic">View on GitHub</a>
     </div>
   </div>
 </div>
@@ -951,115 +1308,181 @@ footer .links { display: flex; justify-content: center; gap: 22px; margin-bottom
 import * as THREE from 'three';
 
 // ============================================================
-//  3D HERO SCENE — three glowing modules, scroll-driven motion
+//  GLOBAL FIXED 3D SCENE — 6 stages morphed by global scrollT
 // ============================================================
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+//  Stages map to scrollT (0..1 across full document):
+//    0.00 — 0.18  Hero: 3 cubes clustered, slow orbit
+//    0.18 — 0.34  Cubes spread into pipeline, beam ignites
+//    0.34 — 0.52  Modules section: cubes pull back, torus knot fades in
+//    0.52 — 0.70  Compare/Engines: torus → wireframe sphere with orbit ring
+//    0.70 — 0.86  KB: sphere explodes into particle nebula (uses 1500 pts)
+//    0.86 — 1.00  CTA: nebula converges into a single luminous portal
+// ============================================================
 
-(function initHero3D() {
-  const canvas = document.getElementById('hero-canvas');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+(function initGlobalScene() {
+  const canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x07080b, 0.06);
+  scene.fog = new THREE.FogExp2(0x06070a, 0.045);
 
-  const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 200);
+  const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
   camera.position.set(0, 1.2, 12);
 
   const renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: true,
-    alpha: true,
-    powerPreference: 'high-performance'
+    canvas, antialias: true, alpha: true, powerPreference: 'high-performance'
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+  renderer.setClearColor(0x000000, 0);
 
   // ---- lights ----
-  scene.add(new THREE.AmbientLight(0x150a0a, 1.2));
-  const keyLight = new THREE.PointLight(0xff3030, 18, 40, 1.6);
-  keyLight.position.set(0, 4, 6);
-  scene.add(keyLight);
-  const rimLight = new THREE.PointLight(0xff5555, 10, 30, 1.6);
-  rimLight.position.set(-6, -2, -4);
-  scene.add(rimLight);
-  const fillLight = new THREE.PointLight(0xffffff, 0.4, 25);
-  fillLight.position.set(8, 6, 8);
-  scene.add(fillLight);
+  scene.add(new THREE.AmbientLight(0x180a0a, 1.4));
+  const keyLight = new THREE.PointLight(0xff3030, 22, 50, 1.6);
+  keyLight.position.set(0, 4, 6); scene.add(keyLight);
+  const rimLight = new THREE.PointLight(0xff6060, 12, 36, 1.6);
+  rimLight.position.set(-7, -2, -4); scene.add(rimLight);
+  const fillLight = new THREE.PointLight(0xffffff, 0.45, 28);
+  fillLight.position.set(8, 6, 8); scene.add(fillLight);
 
-  // ---- 3 module cubes (B, SV, L) ----
-  const moduleGroup = new THREE.Group();
-  scene.add(moduleGroup);
+  // ============================================================
+  //  Stage objects — each in its own Group, opacity controlled
+  // ============================================================
+  const stages = {};
 
+  // --- Stage A: 3 module cubes ---
+  const cubesGroup = new THREE.Group(); scene.add(cubesGroup);
   const cubeGeo = new THREE.BoxGeometry(1.6, 1.6, 1.6, 4, 4, 4);
   const edgesGeo = new THREE.EdgesGeometry(cubeGeo);
-
-  const modules = [];
-  const moduleColors = [0xdc2626, 0xef4444, 0xb91c1c];
-
+  const cubeColors = [0xdc2626, 0xef4444, 0xb91c1c];
+  const cubes = [];
   for (let i = 0; i < 3; i++) {
     const mat = new THREE.MeshStandardMaterial({
-      color: moduleColors[i],
-      emissive: moduleColors[i],
-      emissiveIntensity: 0.55,
-      metalness: 0.6,
-      roughness: 0.25,
-      transparent: true,
-      opacity: 0.95
+      color: cubeColors[i], emissive: cubeColors[i], emissiveIntensity: 0.55,
+      metalness: 0.6, roughness: 0.25, transparent: true, opacity: 0.95
     });
     const mesh = new THREE.Mesh(cubeGeo, mat);
-
     const lineMat = new THREE.LineBasicMaterial({ color: 0xff8080, transparent: true, opacity: 0.85 });
     const edges = new THREE.LineSegments(edgesGeo, lineMat);
     mesh.add(edges);
-
-    // halo plane behind each cube for soft glow
     const halo = new THREE.Mesh(
       new THREE.PlaneGeometry(4, 4),
-      new THREE.MeshBasicMaterial({ color: moduleColors[i], transparent: true, opacity: 0.10, blending: THREE.AdditiveBlending, depthWrite: false })
+      new THREE.MeshBasicMaterial({ color: cubeColors[i], transparent: true, opacity: 0.10, blending: THREE.AdditiveBlending, depthWrite: false })
     );
     mesh.add(halo);
-
-    moduleGroup.add(mesh);
-    modules.push({ mesh, mat, edges, halo, lineMat, baseColor: moduleColors[i] });
+    cubesGroup.add(mesh);
+    cubes.push({ mesh, mat, edges, lineMat, halo });
   }
+  stages.cubes = { group: cubesGroup, materials: [...cubes.map(c => c.mat), ...cubes.map(c => c.lineMat), ...cubes.map(c => c.halo.material)] };
 
-  // ---- particle field (deep background) ----
-  const PARTICLE_COUNT = reduceMotion ? 200 : 700;
-  const positions = new Float32Array(PARTICLE_COUNT * 3);
-  const colors = new Float32Array(PARTICLE_COUNT * 3);
-  for (let i = 0; i < PARTICLE_COUNT; i++) {
-    positions[i*3]   = (Math.random() - 0.5) * 60;
-    positions[i*3+1] = (Math.random() - 0.5) * 30;
-    positions[i*3+2] = (Math.random() - 0.5) * 50 - 8;
-    const t = Math.random();
-    colors[i*3]   = 0.86 + t * 0.14; // R
-    colors[i*3+1] = 0.10 + t * 0.10; // G
-    colors[i*3+2] = 0.10 + t * 0.10; // B
-  }
-  const partGeo = new THREE.BufferGeometry();
-  partGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  partGeo.setAttribute('color',    new THREE.BufferAttribute(colors,    3));
-  const partMat = new THREE.PointsMaterial({
-    size: 0.06,
-    vertexColors: true,
-    transparent: true,
-    opacity: 0.7,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
-  });
-  const particles = new THREE.Points(partGeo, partMat);
-  scene.add(particles);
-
-  // ---- pipeline beam (line that connects modules) ----
+  // beam between cubes
   const beamMat = new THREE.LineBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0 });
   const beamGeo = new THREE.BufferGeometry();
   beamGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(9), 3));
   const beam = new THREE.Line(beamGeo, beamMat);
-  scene.add(beam);
+  cubesGroup.add(beam);
+
+  // --- Stage B: torus knot wireframe ---
+  const knotGeo = new THREE.TorusKnotGeometry(2.2, 0.55, 220, 24, 2, 3);
+  const knotMat = new THREE.MeshStandardMaterial({
+    color: 0xdc2626, emissive: 0xef4444, emissiveIntensity: 0.7,
+    metalness: 0.7, roughness: 0.2, wireframe: true, transparent: true, opacity: 0
+  });
+  const knot = new THREE.Mesh(knotGeo, knotMat);
+  scene.add(knot);
+  stages.knot = { group: knot, materials: [knotMat] };
+
+  // --- Stage C: wireframe sphere with orbit ring ---
+  const sphereGroup = new THREE.Group(); scene.add(sphereGroup);
+  const sphereGeo = new THREE.IcosahedronGeometry(2.6, 3);
+  const sphereMat = new THREE.MeshBasicMaterial({
+    color: 0xef4444, wireframe: true, transparent: true, opacity: 0
+  });
+  const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+  sphereGroup.add(sphere);
+  // glowing core
+  const coreGeo = new THREE.SphereGeometry(0.6, 32, 32);
+  const coreMat = new THREE.MeshBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0 });
+  const core = new THREE.Mesh(coreGeo, coreMat);
+  sphereGroup.add(core);
+  // orbit ring
+  const ringGeo = new THREE.RingGeometry(3.3, 3.4, 96);
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0xff6060, side: THREE.DoubleSide, transparent: true, opacity: 0 });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = Math.PI / 2.4;
+  sphereGroup.add(ring);
+  stages.sphere = { group: sphereGroup, materials: [sphereMat, coreMat, ringMat] };
+
+  // --- Stage D: particle nebula (full-bleed) ---
+  const NEBULA_COUNT = reduceMotion ? 200 : (isMobile ? 600 : 1500);
+  const nebPositions = new Float32Array(NEBULA_COUNT * 3);
+  const nebColors    = new Float32Array(NEBULA_COUNT * 3);
+  const nebTargets   = new Float32Array(NEBULA_COUNT * 3); // converged-to-portal targets
+  for (let i = 0; i < NEBULA_COUNT; i++) {
+    // sphere distribution
+    const u = Math.random(), v = Math.random();
+    const theta = 2 * Math.PI * u;
+    const phi   = Math.acos(2 * v - 1);
+    const r = 5 + Math.random() * 8;
+    nebPositions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+    nebPositions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+    nebPositions[i*3+2] = r * Math.cos(phi);
+    const t = Math.random();
+    nebColors[i*3]   = 0.85 + t * 0.15;
+    nebColors[i*3+1] = 0.10 + t * 0.15;
+    nebColors[i*3+2] = 0.10 + t * 0.10;
+    // converged target: thin disk forming the portal
+    const ang = Math.random() * Math.PI * 2;
+    const rad = 0.4 + Math.random() * 2.6;
+    nebTargets[i*3]   = Math.cos(ang) * rad;
+    nebTargets[i*3+1] = Math.sin(ang) * rad;
+    nebTargets[i*3+2] = (Math.random() - 0.5) * 0.4;
+  }
+  const nebGeo = new THREE.BufferGeometry();
+  nebGeo.setAttribute('position', new THREE.BufferAttribute(nebPositions, 3));
+  nebGeo.setAttribute('color',    new THREE.BufferAttribute(nebColors,    3));
+  const nebMat = new THREE.PointsMaterial({
+    size: 0.10, vertexColors: true, transparent: true,
+    opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false
+  });
+  const nebula = new THREE.Points(nebGeo, nebMat);
+  scene.add(nebula);
+  // Save initial positions for morphing
+  const nebInit = new Float32Array(nebPositions);
+  stages.nebula = { group: nebula, materials: [nebMat] };
+
+  // --- Stage E: portal disk (final CTA) ---
+  const portalGeo = new THREE.RingGeometry(1.0, 3.0, 96, 1);
+  const portalMat = new THREE.MeshBasicMaterial({
+    color: 0xff3030, side: THREE.DoubleSide, transparent: true, opacity: 0,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  });
+  const portal = new THREE.Mesh(portalGeo, portalMat);
+  scene.add(portal);
+  stages.portal = { group: portal, materials: [portalMat] };
+
+  // ---- background star field (always visible, low intensity) ----
+  const STAR_COUNT = reduceMotion ? 200 : (isMobile ? 400 : 800);
+  const starPos = new Float32Array(STAR_COUNT * 3);
+  for (let i = 0; i < STAR_COUNT; i++) {
+    starPos[i*3]   = (Math.random() - 0.5) * 80;
+    starPos[i*3+1] = (Math.random() - 0.5) * 50;
+    starPos[i*3+2] = (Math.random() - 0.5) * 60 - 12;
+  }
+  const starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  const starMat = new THREE.PointsMaterial({
+    color: 0xff5555, size: 0.04, transparent: true, opacity: 0.4,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  });
+  const stars = new THREE.Points(starGeo, starMat);
+  scene.add(stars);
 
   // ---- responsive sizing ----
   function resize() {
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
+    const w = window.innerWidth, h = window.innerHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
@@ -1067,85 +1490,145 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
   resize();
   window.addEventListener('resize', resize);
 
-  // ---- scroll-driven animation ----
+  // ---- scroll progress (entire document) ----
+  let scrollT = 0;
+  let heroT = 0; // 0..1 within hero stage only
   const heroStage = document.getElementById('hero-stage');
   const heroContent = document.getElementById('hero-content');
+  const progressBar = document.getElementById('scroll-progress');
 
-  let scrollT = 0; // 0..1 across hero-stage
   function updateScroll() {
-    const rect = heroStage.getBoundingClientRect();
-    const total = heroStage.offsetHeight - window.innerHeight;
-    const scrolled = Math.max(0, -rect.top);
-    scrollT = total > 0 ? Math.min(1, scrolled / total) : 0;
+    const docHeight = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    scrollT = Math.min(1, Math.max(0, window.scrollY / docHeight));
+    progressBar.style.setProperty('--prog', `${scrollT * 100}%`);
 
-    // Fade hero text out as we scroll
-    const fade = Math.max(0, 1 - scrollT * 1.6);
+    // hero text fade local to its sticky range
+    const hr = heroStage.getBoundingClientRect();
+    const heroTotal = heroStage.offsetHeight - window.innerHeight;
+    heroT = heroTotal > 0 ? Math.min(1, Math.max(0, -hr.top / heroTotal)) : 0;
+    const fade = Math.max(0, 1 - heroT * 1.6);
     heroContent.style.opacity = fade;
-    heroContent.style.transform = `translateY(${scrollT * -40}px) scale(${1 - scrollT * 0.04})`;
+    heroContent.style.transform = `translateY(${heroT * -40}px) scale(${1 - heroT * 0.04})`;
 
-    // Move global ambient glow
-    document.documentElement.style.setProperty('--glow-y', `${-10 + scrollT * 20}%`);
+    // global ambient glow drifts with scroll
+    document.documentElement.style.setProperty('--glow-y', `${-10 + scrollT * 25}%`);
   }
   window.addEventListener('scroll', updateScroll, { passive: true });
   updateScroll();
 
+  // ---- helpers ----
+  const smoothstep = (e0, e1, x) => {
+    const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
+    return t * t * (3 - 2 * t);
+  };
+  const fadeIn  = (e0, e1, t) => smoothstep(e0, e1, t);
+  const fadeOut = (e0, e1, t) => 1 - smoothstep(e0, e1, t);
+
   // ---- main loop ----
   const clock = new THREE.Clock();
-  const tmpVec = new THREE.Vector3();
 
   function frame() {
     const t = clock.getElapsedTime();
     const s = scrollT;
 
-    // Phase 1 (s 0 → 0.4): three cubes stacked at center, slowly orbit
-    // Phase 2 (s 0.4 → 0.75): cubes spread apart horizontally into pipeline
-    // Phase 3 (s 0.75 → 1): camera pulls back, beam ignites
+    // ============================================================
+    //  Per-stage opacity windows (smoothstep blends)
+    // ============================================================
+    const cubesOpacity   = Math.min(fadeIn(0.0, 0.05, s), fadeOut(0.30, 0.42, s));
+    const knotOpacity    = Math.min(fadeIn(0.30, 0.42, s), fadeOut(0.50, 0.60, s));
+    const sphereOpacity  = Math.min(fadeIn(0.50, 0.60, s), fadeOut(0.68, 0.78, s));
+    const nebulaOpacity  = Math.min(fadeIn(0.68, 0.78, s), 1);
+    const portalOpacity  = fadeIn(0.86, 0.96, s);
 
-    const spread = THREE.MathUtils.smoothstep(s, 0.15, 0.7);
-    const spreadDist = spread * 4.2;
-
-    modules.forEach((m, i) => {
+    // -------- Cubes (Stage A → B) --------
+    const heroSpread = smoothstep(0.05, 0.30, s);
+    const spreadDist = heroSpread * 4.6;
+    cubes.forEach((c, i) => {
       const offset = (i - 1) * spreadDist;
-      const wobbleY = Math.sin(t * 0.8 + i * 1.7) * 0.25 * (1 - s * 0.5);
-      const baseY = -spread * 0.2;
-      m.mesh.position.set(offset, baseY + wobbleY, 0);
-
-      // rotation: tighter while clustered, slower when spread
-      const rotSpeed = 0.4 - spread * 0.2;
-      m.mesh.rotation.x = t * rotSpeed * (i % 2 ? 1 : -1) + i * 0.4;
-      m.mesh.rotation.y = t * rotSpeed * 0.7 + i * 0.6;
-
-      // emissive pulse linked to scroll
-      m.mat.emissiveIntensity = 0.5 + Math.sin(t * 2 + i) * 0.15 + s * 0.3;
-      m.lineMat.opacity = 0.4 + s * 0.4;
-      m.halo.lookAt(camera.position);
-      m.halo.material.opacity = 0.07 + s * 0.10;
+      const wobbleY = Math.sin(t * 0.8 + i * 1.7) * 0.25 * (1 - heroSpread * 0.5);
+      c.mesh.position.set(offset, -heroSpread * 0.2 + wobbleY, 0);
+      const rotSpeed = 0.4 - heroSpread * 0.15;
+      c.mesh.rotation.x = t * rotSpeed * (i % 2 ? 1 : -1) + i * 0.4;
+      c.mesh.rotation.y = t * rotSpeed * 0.7 + i * 0.6;
+      c.mat.emissiveIntensity = 0.5 + Math.sin(t * 2 + i) * 0.15 + heroSpread * 0.3;
+      c.mat.opacity        = 0.95 * cubesOpacity;
+      c.lineMat.opacity    = 0.85 * cubesOpacity;
+      c.halo.material.opacity = (0.07 + heroSpread * 0.08) * cubesOpacity;
+      c.halo.lookAt(camera.position);
     });
-
-    // beam between modules
     const beamPos = beam.geometry.attributes.position.array;
-    beamPos[0] = modules[0].mesh.position.x; beamPos[1] = modules[0].mesh.position.y; beamPos[2] = modules[0].mesh.position.z;
-    beamPos[3] = modules[1].mesh.position.x; beamPos[4] = modules[1].mesh.position.y; beamPos[5] = modules[1].mesh.position.z;
-    beamPos[6] = modules[2].mesh.position.x; beamPos[7] = modules[2].mesh.position.y; beamPos[8] = modules[2].mesh.position.z;
+    for (let i = 0; i < 3; i++) {
+      beamPos[i*3]   = cubes[i].mesh.position.x;
+      beamPos[i*3+1] = cubes[i].mesh.position.y;
+      beamPos[i*3+2] = cubes[i].mesh.position.z;
+    }
     beam.geometry.attributes.position.needsUpdate = true;
-    beamMat.opacity = Math.max(0, (s - 0.35) * 1.6);
+    beamMat.opacity = Math.max(0, (heroSpread - 0.4) * 1.6) * cubesOpacity;
 
-    // group level rotation — adds parallax life
-    moduleGroup.rotation.y = Math.sin(t * 0.18) * 0.15 + s * 0.4;
-    moduleGroup.rotation.x = -s * 0.25;
+    cubesGroup.rotation.y = Math.sin(t * 0.18) * 0.15 + heroSpread * 0.4;
+    cubesGroup.rotation.x = -heroSpread * 0.25;
 
-    // Camera dolly — pulls back as scroll progresses
-    camera.position.z = 12 + s * 6;
-    camera.position.y = 1.2 + s * 0.8;
+    // -------- Torus knot --------
+    knot.rotation.x = t * 0.25;
+    knot.rotation.y = t * 0.35;
+    knotMat.opacity = 0.85 * knotOpacity;
+    knotMat.emissiveIntensity = 0.6 + Math.sin(t * 1.4) * 0.2;
+    // pulse-scale the knot subtly with scroll-within-stage
+    const knotS = 1 + Math.sin(t * 0.9) * 0.05;
+    knot.scale.set(knotS, knotS, knotS);
+
+    // -------- Sphere + ring --------
+    sphereGroup.rotation.y = t * 0.2;
+    sphereGroup.rotation.x = Math.sin(t * 0.4) * 0.2;
+    sphereMat.opacity = 0.7 * sphereOpacity;
+    coreMat.opacity   = 0.85 * sphereOpacity;
+    ringMat.opacity   = 0.55 * sphereOpacity;
+    ring.rotation.z = t * 0.5;
+    const coreS = 1 + Math.sin(t * 2.2) * 0.18;
+    core.scale.set(coreS, coreS, coreS);
+
+    // -------- Nebula (with morph to portal) --------
+    nebMat.opacity = 0.85 * nebulaOpacity;
+    // morph between init position and target as portal opacity climbs
+    const morph = smoothstep(0.86, 1.0, s);
+    if (nebulaOpacity > 0.001) {
+      const arr = nebula.geometry.attributes.position.array;
+      for (let i = 0; i < NEBULA_COUNT; i++) {
+        const ix = i*3, iy = i*3+1, iz = i*3+2;
+        // gentle drift
+        const drift = Math.sin(t * 0.4 + i) * 0.04;
+        const fx = nebInit[ix] + drift;
+        const fy = nebInit[iy] + Math.cos(t * 0.4 + i) * 0.04;
+        const fz = nebInit[iz];
+        arr[ix] = fx + (nebTargets[ix] - fx) * morph;
+        arr[iy] = fy + (nebTargets[iy] - fy) * morph;
+        arr[iz] = fz + (nebTargets[iz] - fz) * morph;
+      }
+      nebula.geometry.attributes.position.needsUpdate = true;
+    }
+    nebula.rotation.y = t * 0.05;
+
+    // -------- Portal --------
+    portalMat.opacity = 0.55 * portalOpacity;
+    portal.rotation.z = t * 0.7;
+    const portS = 1 + Math.sin(t * 1.8) * 0.12 + portalOpacity * 0.4;
+    portal.scale.set(portS, portS, portS);
+
+    // -------- Camera (global travel) --------
+    // Camera dollies + drifts as scroll progresses
+    const camZ = 12 + smoothstep(0.0, 0.30, s) * 4 + smoothstep(0.30, 0.55, s) * 2 + smoothstep(0.7, 1.0, s) * (-6);
+    const camY = 1.2 + Math.sin(s * Math.PI * 2) * 0.6 + smoothstep(0.7, 1.0, s) * 0.2;
+    const camX = Math.sin(s * Math.PI * 1.4) * 1.5;
+    camera.position.set(camX, camY, camZ);
     camera.lookAt(0, 0, 0);
 
-    // particle drift
-    particles.rotation.y = t * 0.012;
-    particles.rotation.x = t * 0.005;
+    // stars subtle drift
+    stars.rotation.y = t * 0.008;
+    stars.rotation.x = t * 0.004;
 
-    // light pulse
-    keyLight.intensity = 16 + Math.sin(t * 1.4) * 3 + s * 6;
-    rimLight.intensity = 8 + Math.cos(t * 0.9) * 2;
+    // light pulse linked to scroll
+    keyLight.intensity = 18 + Math.sin(t * 1.4) * 4 + s * 8;
+    rimLight.intensity = 10 + Math.cos(t * 0.9) * 2;
 
     renderer.render(scene, camera);
     requestAnimationFrame(frame);
@@ -1167,7 +1650,7 @@ onScroll();
 // ============================================================
 //  REVEAL ON SCROLL  +  COUNTER ANIMATIONS
 // ============================================================
-const revealEls = document.querySelectorAll('.reveal');
+const revealEls = document.querySelectorAll('.reveal, .reveal-zoom');
 const io = new IntersectionObserver((entries) => {
   for (const e of entries) {
     if (e.isIntersecting) {
@@ -1200,23 +1683,7 @@ const counterIO = new IntersectionObserver((entries) => {
 counters.forEach(c => counterIO.observe(c));
 
 // ============================================================
-//  PARALLAX BACKGROUNDS
-// ============================================================
-const parallaxEls = document.querySelectorAll('[data-parallax]');
-function updateParallax() {
-  for (const el of parallaxEls) {
-    const speed = parseFloat(el.getAttribute('data-parallax')) || 0.2;
-    const rect = el.getBoundingClientRect();
-    const center = rect.top + rect.height / 2 - window.innerHeight / 2;
-    el.style.transform = `translate3d(0, ${center * -speed}px, 0)`;
-  }
-}
-window.addEventListener('scroll', updateParallax, { passive: true });
-window.addEventListener('resize', updateParallax);
-updateParallax();
-
-// ============================================================
-//  3D TILT on .module-card[data-tilt]
+//  3D TILT  on  [data-tilt]  (used by both module-cards and gallery items)
 // ============================================================
 if (!reduceMotion) {
   document.querySelectorAll('[data-tilt]').forEach(card => {
@@ -1224,10 +1691,10 @@ if (!reduceMotion) {
     card.addEventListener('mouseenter', () => { rect = card.getBoundingClientRect(); });
     card.addEventListener('mousemove', (e) => {
       if (!rect) rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;  // 0..1
-      const y = (e.clientY - rect.top)  / rect.height; // 0..1
-      const rx = (0.5 - y) * 8;  // deg
-      const ry = (x - 0.5) * 10; // deg
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top)  / rect.height;
+      const rx = (0.5 - y) * 8;
+      const ry = (x - 0.5) * 12;
       card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
       card.style.setProperty('--mx', `${x * 100}%`);
       card.style.setProperty('--my', `${y * 100}%`);
@@ -1238,6 +1705,151 @@ if (!reduceMotion) {
     });
   });
 }
+
+// ============================================================
+//  LOADER — fade out on first paint settle
+// ============================================================
+window.addEventListener('load', () => {
+  const loader = document.getElementById('loader');
+  // small delay so the brand mark + 3D have a chance to materialize
+  setTimeout(() => loader && loader.classList.add('gone'), 400);
+});
+
+// ============================================================
+//  WORD REVEAL  on  [data-word-reveal]
+// ============================================================
+(function initWordReveal() {
+  const targets = document.querySelectorAll('[data-word-reveal]');
+  targets.forEach(el => {
+    // walk children, splitting only TEXT nodes into <span class="word-reveal"><span class="word-inner">word</span></span>
+    const frag = document.createDocumentFragment();
+    el.childNodes.forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        node.textContent.split(/(\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+          const wrap  = document.createElement('span');
+          wrap.className = 'word-reveal';
+          const inner = document.createElement('span');
+          inner.className = 'word-inner';
+          inner.textContent = part;
+          wrap.appendChild(inner);
+          frag.appendChild(wrap);
+        });
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        // wrap whole element (e.g. .accent <span>) as a single word group
+        const wrap = document.createElement('span');
+        wrap.className = 'word-reveal';
+        const inner = document.createElement('span');
+        inner.className = 'word-inner';
+        // move children of <span class="accent"> into inner; preserve original tag class via outer wrap
+        inner.appendChild(node.cloneNode(true));
+        wrap.appendChild(inner);
+        frag.appendChild(wrap);
+      }
+    });
+    el.innerHTML = '';
+    el.appendChild(frag);
+    // reveal staggered
+    const words = el.querySelectorAll('.word-reveal');
+    words.forEach((w, i) => {
+      setTimeout(() => w.classList.add('in'), 200 + i * 70);
+    });
+  });
+})();
+
+// ============================================================
+//  CUSTOM CURSOR  +  MAGNETIC CTAs  (single RAF loop)
+// ============================================================
+(function initPointerFx() {
+  if (reduceMotion) return;
+  const isTouch = window.matchMedia('(hover: none)').matches || isMobile;
+  if (isTouch) return;
+
+  const dot  = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  let dx = mx, dy = my;   // dot lerp
+  let rx = mx, ry = my;   // ring lerp
+
+  window.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
+
+  // hover state
+  const hoverables = document.querySelectorAll('a, button, [data-tilt], .magnetic, input, textarea');
+  hoverables.forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+  });
+
+  // magnetic CTAs — translate toward cursor while hovered
+  const magnets = document.querySelectorAll('.magnetic');
+  const magnetState = new Map();
+  magnets.forEach(el => {
+    magnetState.set(el, { active: false, tx: 0, ty: 0, x: 0, y: 0 });
+    el.addEventListener('mouseenter', () => { magnetState.get(el).active = true; });
+    el.addEventListener('mousemove', (e) => {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top  + r.height / 2;
+      const st = magnetState.get(el);
+      st.tx = (e.clientX - cx) * 0.30; // strength
+      st.ty = (e.clientY - cy) * 0.45;
+    });
+    el.addEventListener('mouseleave', () => {
+      const st = magnetState.get(el);
+      st.active = false; st.tx = 0; st.ty = 0;
+    });
+  });
+
+  function tick() {
+    // dot follows quickly, ring lazily
+    dx += (mx - dx) * 0.55;
+    dy += (my - dy) * 0.55;
+    rx += (mx - rx) * 0.18;
+    ry += (my - ry) * 0.18;
+    dot.style.transform  = `translate3d(${dx}px, ${dy}px, 0)`;
+    ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+
+    // magnetic lerp
+    magnetState.forEach((st, el) => {
+      st.x += (st.tx - st.x) * 0.18;
+      st.y += (st.ty - st.y) * 0.18;
+      if (Math.abs(st.x) < 0.05 && Math.abs(st.y) < 0.05 && !st.active) {
+        el.style.transform = '';
+      } else {
+        el.style.transform = `translate3d(${st.x}px, ${st.y}px, 0)`;
+      }
+    });
+
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+
+// ============================================================
+//  RIGHT-RAIL  active-section indicator
+// ============================================================
+(function initRail() {
+  const links = Array.from(document.querySelectorAll('.rail a'));
+  if (!links.length) return;
+  const map = new Map();
+  links.forEach(a => {
+    const id = a.getAttribute('data-rail-target');
+    const el = document.getElementById(id);
+    if (el) map.set(el, a);
+  });
+  const railIO = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      const a = map.get(e.target);
+      if (!a) continue;
+      if (e.isIntersecting && e.intersectionRatio > 0.25) {
+        links.forEach(l => l.classList.remove('active'));
+        a.classList.add('active');
+      }
+    }
+  }, { threshold: [0, 0.25, 0.5, 1] });
+  map.forEach((_, el) => railIO.observe(el));
+})();
 </script>
 
 </body>
