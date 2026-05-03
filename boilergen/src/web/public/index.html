@@ -650,6 +650,21 @@ main {
   border-color: rgba(63, 185, 80, 0.5);
   background: rgba(63, 185, 80, 0.1);
 }
+.tab-btn.download {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+.tab-btn.download:hover {
+  color: var(--accent-bright);
+  border-color: rgba(220, 38, 38, 0.45);
+  background: rgba(220, 38, 38, 0.06);
+}
+.tab-btn.download:disabled {
+  opacity: 0.6; cursor: progress;
+}
 
 #file-body {
   flex: 1;
@@ -1336,6 +1351,7 @@ body.cursor-hover .cursor-ring { width: 56px; height: 56px; margin: -28px 0 0 -2
           <button class="tab-btn active" id="tab-output">Output</button>
           <button class="tab-btn" id="tab-source">.hbs</button>
           <button class="tab-btn copy" id="copy-btn">Copy</button>
+          <button class="tab-btn download" id="download-zip" title="Download all generated files as .zip">⤓ .zip</button>
         </div>
         <div id="file-body">
           <div class="empty-state">
@@ -1381,6 +1397,7 @@ body.cursor-hover .cursor-ring { width: 56px; height: 56px; margin: -28px 0 0 -2
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 // Multi-plugin state. Plugins, examples, and current selection are loaded
 // dynamically from the server. No hardcoded examples — every example comes
@@ -2034,6 +2051,72 @@ bootstrap();
       lastClass = c;
     }).observe(statusBar, { attributes: true, attributeFilter: ['class'] });
   }
+
+  // ---------- Download all as .zip ----------
+  const dlBtn = document.getElementById('download-zip');
+  if (dlBtn) {
+    dlBtn.addEventListener('click', async () => {
+      const files = (window.lastFiles || []);
+      if (!files.length) { toast('Nothing to download — generate first', 'info'); return; }
+      if (typeof window.JSZip !== 'function') { toast('Zip library not loaded', 'error'); return; }
+      const original = dlBtn.textContent;
+      dlBtn.disabled = true;
+      dlBtn.textContent = '⤓ packing…';
+      try {
+        const zip = new window.JSZip();
+        for (const f of files) zip.file(f.path, f.content || '');
+        // include the original YAML next to the generated tree as a manifest
+        if (yaml.value.trim()) zip.file('_source.yaml', yaml.value);
+        const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        const fname = `boilergen-${stamp}.zip`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 500);
+        const kb = Math.max(1, Math.round(blob.size / 1024));
+        toast(`Downloaded ${files.length} files (${kb} KB)`, 'success');
+      } catch (e) {
+        toast('Zip failed: ' + (e?.message || 'unknown'), 'error');
+      } finally {
+        dlBtn.disabled = false;
+        dlBtn.textContent = original;
+      }
+    });
+  }
+
+  // Re-export lastFiles from the legacy script's closure into window so the
+  // DX layer can see it. The legacy generate() updates `let lastFiles = …`
+  // which is closure-scoped — bridge it via the file-list MutationObserver
+  // and a small accessor probe.
+  if (fileList) {
+    const sync = () => {
+      // Probe through a hand-installed accessor on the global if present
+      if (Array.isArray(window.lastFiles)) return;
+      // Fallback: derive from .file-item elements + their cached content
+      // (legacy renderActiveView stores text in <code>; for download we need
+      // the raw content keyed by path, so the easier path is to ask the
+      // generate() to expose lastFiles. We monkey-patch fetch responses below.)
+    };
+    new MutationObserver(sync).observe(fileList, { childList: true });
+  }
+
+  // Patch fetch to capture the /preview response body so we have access to
+  // the file contents. Non-destructive: passes through unchanged.
+  const origFetch = window.fetch;
+  window.fetch = async function (...args) {
+    const res = await origFetch.apply(this, args);
+    try {
+      const url = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+      if (/\/api\/plugin\/.+\/preview/.test(url) && res.ok) {
+        const clone = res.clone();
+        clone.json().then(data => {
+          if (Array.isArray(data?.files)) window.lastFiles = data.files;
+        }).catch(() => {});
+      }
+    } catch {}
+    return res;
+  };
 
   // ---------- One-time hint ----------
   try {
