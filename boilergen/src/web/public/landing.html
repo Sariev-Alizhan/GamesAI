@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GamesAI — Open-source AI toolkit for game development</title>
+<meta name="description" content="Open-source toolkit for game developers. Three composable tools — Boilergen, Schema Validator, Localization Assistant — replace boilerplate, validation, and i18n drudgery across your stack. Ship a richer feature in 1 day instead of 1 week.">
+<meta name="theme-color" content="#0a0c10">
+<meta property="og:title" content="GamesAI — Open-source AI toolkit for game dev">
+<meta property="og:description" content="From one YAML to a working FiveM resource in 60 seconds. Deterministic core + opt-in AI + open-source forever.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://boilergen-eight.vercel.app/landing.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='6' cy='16' r='3' fill='%23dc2626'/><path d='M9 16 L24 8' stroke='%238d96a3' stroke-width='1.5' stroke-linecap='round'/><path d='M9 16 L24 16' stroke='%238d96a3' stroke-width='1.5' stroke-linecap='round'/><path d='M9 16 L24 24' stroke='%238d96a3' stroke-width='1.5' stroke-linecap='round'/><circle cx='25' cy='8' r='2.5' fill='%23b08bff'/><circle cx='25' cy='16' r='2.5' fill='%2358a6ff'/><circle cx='25' cy='24' r='2.5' fill='%233fb950'/></svg>">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-0: #0a0c10;
+  --bg-1: #11141a;
+  --bg-2: #181c24;
+  --bg-3: #20252e;
+  --bg-glow: radial-gradient(ellipse 1200px 600px at 50% -100px, rgba(220, 38, 38, 0.22), transparent 70%);
+
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
+
+  --text: #e6edf3;
+  --text-muted: #8d96a3;
+  --text-dim: #5d6573;
+
+  --accent: #dc2626;
+  --accent-bright: #ef4444;
+  --accent-glow: rgba(220, 38, 38, 0.35);
+  --accent-soft: rgba(220, 38, 38, 0.10);
+
+  --purple: #b08bff;
+  --blue: #58a6ff;
+  --green: #3fb950;
+  --orange: #f59e0b;
+
+  --mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, system-ui, sans-serif;
+
+  --radius: 8px;
+  --radius-lg: 12px;
+  --transition: 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-0);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv02', 'cv03', 'cv11';
+  background-image: var(--bg-glow);
+  background-attachment: fixed;
+}
+
+a { color: var(--text); text-decoration: none; transition: color var(--transition); }
+a:hover { color: var(--accent-bright); }
+code, .mono { font-family: var(--mono); font-size: 0.92em; }
+
+/* ========== HEADER ========== */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 32px;
+  background: rgba(10, 12, 16, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+.brand svg { width: 30px; height: 30px; filter: drop-shadow(0 0 8px rgba(220, 38, 38, 0.5)); }
+.brand .gen {
+  background: linear-gradient(180deg, var(--accent-bright), var(--accent));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 24px rgba(220, 38, 38, 0.4);
+}
+nav { display: flex; align-items: center; gap: 28px; font-size: 14px; }
+nav a { color: var(--text-muted); }
+nav a:hover { color: var(--text); }
+.nav-cta {
+  padding: 7px 14px;
+  background: var(--accent);
+  color: white !important;
+  border-radius: var(--radius);
+  font-weight: 500;
+  transition: background var(--transition);
+}
+.nav-cta:hover { background: var(--accent-bright); color: white !important; }
+@media (max-width: 768px) {
+  nav .hide-mobile { display: none; }
+  header { padding: 12px 16px; }
+}
+
+/* ========== LAYOUT ========== */
+section { padding: 96px 32px; max-width: 1200px; margin: 0 auto; }
+@media (max-width: 768px) { section { padding: 64px 16px; } }
+
+h1, h2, h3 { letter-spacing: -0.02em; line-height: 1.15; }
+h1 { font-size: clamp(36px, 5.5vw, 60px); font-weight: 700; }
+h2 { font-size: clamp(28px, 3.5vw, 38px); font-weight: 600; margin-bottom: 16px; }
+h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
+.section-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+  margin-bottom: 12px;
+  padding: 4px 12px;
+  background: var(--accent-soft);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: 100px;
+}
+.section-eyebrow::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent-bright);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.section-sub { color: var(--text-muted); font-size: 17px; max-width: 720px; margin-bottom: 48px; }
+
+/* ========== HERO ========== */
+.hero { padding-top: 112px; padding-bottom: 80px; text-align: center; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em;
+  padding: 6px 14px;
+  background: var(--accent-soft);
+  border: 1px solid rgba(220, 38, 38, 0.22);
+  border-radius: 100px;
+  color: var(--accent-bright);
+  margin-bottom: 28px;
+}
+.hero-eyebrow .pulse {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--accent-bright);
+  box-shadow: 0 0 0 0 var(--accent-glow);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  70% { box-shadow: 0 0 0 8px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.hero h1 { margin-bottom: 24px; max-width: 920px; margin-left: auto; margin-right: auto; }
+.hero h1 .accent {
+  background: linear-gradient(180deg, var(--accent-bright) 0%, var(--accent) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 64px rgba(220, 38, 38, 0.4);
+}
+.hero p.lead {
+  font-size: clamp(17px, 2vw, 21px);
+  color: var(--text-muted);
+  max-width: 720px;
+  margin: 0 auto 40px;
+  line-height: 1.55;
+}
+.cta-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px;
+  border-radius: var(--radius);
+  font-weight: 500; font-size: 15px;
+  border: 1px solid transparent;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.btn-primary {
+  background: linear-gradient(180deg, var(--accent-bright), var(--accent));
+  color: white !important;
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.btn-primary:hover {
+  background: linear-gradient(180deg, #f87171, var(--accent-bright));
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.btn-secondary { background: var(--bg-2); color: var(--text) !important; border-color: var(--border-strong); }
+.btn-secondary:hover { background: var(--bg-3); color: var(--text) !important; }
+
+.hero-badges {
+  margin-top: 56px;
+  display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
+  font-size: 13px; color: var(--text-dim);
+}
+.hero-badges .badge { display: flex; align-items: center; gap: 6px; }
+.hero-badges .badge .check { color: var(--green); }
+
+/* ========== STAT STRIP ========== */
+.stat-strip {
+  border-top: 1px solid rgba(220, 38, 38, 0.18);
+  border-bottom: 1px solid rgba(220, 38, 38, 0.18);
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.04) 0%, var(--bg-1) 50%, rgba(220, 38, 38, 0.04) 100%);
+  padding: 36px 32px;
+  margin: 0 -32px;
+  position: relative;
+}
+.stat-strip::before, .stat-strip::after {
+  content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+  width: 200px; height: 2px;
+  background: linear-gradient(to right, transparent, var(--accent), transparent);
+}
+.stat-strip::before { top: -1px; }
+.stat-strip::after { bottom: -1px; }
+.stat-strip-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 24px;
+  text-align: center;
+}
+.stat-num {
+  font-family: var(--mono); font-size: 32px; font-weight: 700;
+  color: var(--accent-bright); letter-spacing: -0.02em;
+  text-shadow: 0 0 24px rgba(220, 38, 38, 0.35);
+}
+.stat-label { font-size: 12px; color: var(--text-dim); margin-top: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* ========== MODULES ========== */
+.module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.module-card {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.module-card:hover {
+  border-color: rgba(220, 38, 38, 0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(220, 38, 38, 0.12);
+}
+.module-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(to right, var(--accent-bright), var(--accent));
+  opacity: 0; transition: opacity var(--transition);
+}
+.module-card:hover::before { opacity: 1; }
+.module-icon {
+  width: 44px; height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-bright));
+  border-radius: var(--radius);
+  margin-bottom: 18px;
+  font-family: var(--mono); font-size: 16px; font-weight: 700;
+  color: white;
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
+}
+.module-card h3 { color: var(--text); }
+.module-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; }
+.module-meta {
+  display: flex; gap: 16px; font-size: 12px; color: var(--text-dim);
+  font-family: var(--mono);
+  border-top: 1px solid var(--border); padding-top: 14px;
+}
+.module-meta .meta-key { color: var(--text-dim); }
+.module-meta .meta-val { color: var(--text); }
+
+/* ========== PIPELINE ========== */
+.pipeline {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  font-family: var(--mono); font-size: 13px;
+  overflow-x: auto;
+}
+.pipeline pre { color: var(--text-muted); white-space: pre; }
+.pipeline .accent { color: var(--accent-bright); }
+.pipeline .ok { color: var(--green); }
+.pipeline .step { color: var(--purple); }
+
+/* ========== COMPARISON TABLE ========== */
+.compare {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+.compare table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 700px; }
+.compare th, .compare td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border); }
+.compare th { background: var(--bg-2); color: var(--text-muted); font-weight: 500; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+.compare td:first-child { font-weight: 500; color: var(--text); }
+.compare .col-us { background: rgba(220, 38, 38, 0.04); color: var(--accent-bright); font-weight: 500; }
+.compare .col-us-th { background: rgba(220, 38, 38, 0.08); color: var(--accent-bright); }
+
+/* ========== ENGINE GRID ========== */
+.engine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.engine-card {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.engine-card .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.engine-card .name { font-weight: 600; font-size: 16px; }
+.engine-card .ver { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+.engine-card .desc { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+.engine-card .status {
+  display: inline-block; padding: 3px 8px; border-radius: 4px;
+  font-family: var(--mono); font-size: 11px;
+}
+.engine-card .status.ok { background: rgba(63, 185, 80, 0.12); color: var(--green); }
+.engine-card .status.partial { background: rgba(245, 158, 11, 0.12); color: var(--orange); }
+.engine-card .status.deferred { background: rgba(141, 150, 163, 0.12); color: var(--text-dim); }
+
+/* ========== KB GRID ========== */
+.kb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.kb-card {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 18px;
+  text-align: center;
+  transition: all var(--transition);
+}
+.kb-card:hover {
+  border-color: rgba(220, 38, 38, 0.35);
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.06), var(--bg-1));
+}
+.kb-card .num {
+  font-family: var(--mono); font-size: 32px; font-weight: 700;
+  color: var(--accent-bright);
+  text-shadow: 0 0 16px rgba(220, 38, 38, 0.3);
+}
+.kb-card .label { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+
+/* ========== CTA SECTION ========== */
+.final-cta {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(220, 38, 38, 0.22), transparent 60%),
+    linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 64px 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.final-cta::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 300px; height: 3px;
+  background: linear-gradient(to right, transparent, var(--accent-bright), transparent);
+}
+.final-cta h2 {
+  background: linear-gradient(180deg, var(--text), var(--accent-bright));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.final-cta h2 { margin-bottom: 12px; }
+.final-cta p { color: var(--text-muted); max-width: 540px; margin: 0 auto 28px; }
+
+/* ========== FOOTER ========== */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px;
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: center;
+}
+footer a { color: var(--text-muted); }
+footer .links { display: flex; justify-content: center; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
+
+/* ========== SECTION DIVIDER (red gradient line) ========== */
+.divider {
+  height: 1px;
+  margin: 0 auto;
+  max-width: 1200px;
+  background: linear-gradient(to right, transparent, rgba(220, 38, 38, 0.45), transparent);
+}
+.divider-strong {
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--accent), transparent);
+}
+
+/* helpers */
+.text-muted { color: var(--text-muted); }
+.text-dim { color: var(--text-dim); }
+.text-accent { color: var(--accent-bright); }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.mt-8 { margin-top: 32px; }
+</style>
+</head>
+
+<body>
+
+<header>
+  <a href="#" class="brand">
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="6" cy="16" r="3" fill="#dc2626"/>
+      <path d="M9 16 L24 8" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M9 16 L24 16" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M9 16 L24 24" stroke="#8d96a3" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="25" cy="8" r="2.5" fill="#b08bff"/>
+      <circle cx="25" cy="16" r="2.5" fill="#58a6ff"/>
+      <circle cx="25" cy="24" r="2.5" fill="#3fb950"/>
+    </svg>
+    Games<span class="gen">AI</span>
+  </a>
+  <nav>
+    <a href="#modules" class="hide-mobile">Modules</a>
+    <a href="#engines" class="hide-mobile">Engines</a>
+    <a href="#how" class="hide-mobile">How it works</a>
+    <a href="https://github.com/Sariev-Alizhan/GamesAI" target="_blank" rel="noopener">GitHub</a>
+    <a href="/" class="nav-cta">Try Live →</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <span class="hero-eyebrow"><span class="pulse"></span>v0.2.0 — 3 modules · 5 engine plugins · 365 tests</span>
+  <h1>Open-source AI toolkit that <span class="accent">eliminates the rote work</span> in game development.</h1>
+  <p class="lead">
+    Three composable tools — <strong>Boilergen</strong> for codegen, <strong>Schema Validator</strong> for cross-reference + FiveM linting, <strong>Localization Assistant</strong> for static checks + AI translation. Replace the boring boilerplate-and-validation work across your stack so the team can focus on what's actually engineering.
+  </p>
+  <div class="cta-row">
+    <a href="/" class="btn btn-primary">
+      Try the live demo
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <a href="https://github.com/Sariev-Alizhan/GamesAI" target="_blank" rel="noopener" class="btn btn-secondary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5 3.3 9.3 7.8 10.8.6.1.8-.2.8-.6v-2.2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.4-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.4-1.3-5.4-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2.9-.3 2-.4 3-.4s2.1.1 3 .4c2.3-1.6 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.4 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6C20.2 21.3 23.5 17 23.5 12 23.5 5.7 18.3.5 12 .5z"/></svg>
+      Star on GitHub
+    </a>
+  </div>
+  <div class="hero-badges">
+    <span class="badge"><span class="check">✓</span> MIT license</span>
+    <span class="badge"><span class="check">✓</span> Deterministic core</span>
+    <span class="badge"><span class="check">✓</span> AI is opt-in</span>
+    <span class="badge"><span class="check">✓</span> No vendor lock-in</span>
+  </div>
+</section>
+
+<!-- STAT STRIP -->
+<div class="stat-strip">
+  <div class="stat-strip-inner">
+    <div><div class="stat-num">3</div><div class="stat-label">Modules</div></div>
+    <div><div class="stat-num">5</div><div class="stat-label">Engine Plugins</div></div>
+    <div><div class="stat-num">7</div><div class="stat-label">Entity Types</div></div>
+    <div><div class="stat-num">34</div><div class="stat-label">KB Entries</div></div>
+    <div><div class="stat-num">365</div><div class="stat-label">Tests Passing</div></div>
+    <div><div class="stat-num">4</div><div class="stat-label">Engine Versions Covered</div></div>
+  </div>
+</div>
+
+<!-- MODULES -->
+<section id="modules">
+  <span class="section-eyebrow">The platform</span>
+  <h2>Three tools. One pipeline. Zero AI lock-in.</h2>
+  <p class="section-sub">Each module owns one boring-but-time-consuming part of game development. Composed, they form a build pipeline that takes one YAML and emits production-grade output across your entire stack.</p>
+
+  <div class="module-grid">
+    <div class="module-card">
+      <div class="module-icon">B</div>
+      <h3>Boilergen</h3>
+      <p>YAML entity → boilerplate code across the stack. Generates C++ / Node / Flutter / Godot / Unity / Lua / i18n stubs from one schema. Five engine plugins shipped, each composable.</p>
+      <div class="module-meta">
+        <span><span class="meta-key">v</span> <span class="meta-val">1.x</span></span>
+        <span><span class="meta-key">tests</span> <span class="meta-val">228</span></span>
+        <span><span class="meta-key">templates</span> <span class="meta-val">51</span></span>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="module-icon">SV</div>
+      <h3>Schema Validator</h3>
+      <p>Catches broken cross-references in YAML/JSON game data <strong>and</strong> lints FiveM <code>fxmanifest.lua</code> graphs against case-sensitivity, missing-script, and unmanifested-dep footguns.</p>
+      <div class="module-meta">
+        <span><span class="meta-key">v</span> <span class="meta-val">0.2.0</span></span>
+        <span><span class="meta-key">tests</span> <span class="meta-val">73</span></span>
+        <span><span class="meta-key">modes</span> <span class="meta-val">YAML + FiveM</span></span>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="module-icon">L</div>
+      <h3>Localization Assistant</h3>
+      <p>Static checks (placeholder parity, length overflow, per-key caps) <strong>before</strong> any AI call. Then AI fill via Claude or DeepL Pro. AI translates only what passes lint.</p>
+      <div class="module-meta">
+        <span><span class="meta-key">v</span> <span class="meta-val">0.2.0</span></span>
+        <span><span class="meta-key">tests</span> <span class="meta-val">64</span></span>
+        <span><span class="meta-key">providers</span> <span class="meta-val">2</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <span class="section-eyebrow">End-to-end demo</span>
+  <h2>From one YAML to a working FiveM/QBCore resource in 60 seconds.</h2>
+  <p class="section-sub">Reproducible step-by-step in <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/CASE-STUDY-PLATFORM-LOOP.md" target="_blank">CASE-STUDY-PLATFORM-LOOP.md</a>. Every command runs from a fresh clone of the public repo.</p>
+
+  <div class="pipeline">
+<pre><span class="step">1.</span> Author <span class="accent">taxi-driver.yaml</span> (~25 lines)
+
+<span class="step">2.</span> <span class="accent">$</span> boilergen generate ./schemas/generic-rp/taxi-driver.yaml \
+                  --plugin ./plugins/generic-rp \
+                  --output /tmp/demo-out
+
+   <span class="ok">✓</span> Generated 9 files across 5 stacks:
+     /tmp/demo-out/cpp-server/Jobs/JobTaxiDriver.cpp
+     /tmp/demo-out/node-api/jobs/taxi-driver.controller.ts
+     /tmp/demo-out/flutter-admin/jobs/taxi_driver_form.dart
+     /tmp/demo-out/shared/i18n/taxi_driver.locale.json
+     /tmp/demo-out/<span class="accent">fivem-qb/jobs/taxi-driver/</span>fxmanifest.lua
+                                     /config.lua
+                                     /server/main.lua
+                                     /client/main.lua
+                                     /migrations/001_seed.sql
+
+<span class="step">3.</span> <span class="accent">$</span> schema-validator check-fivem /tmp/qb-tree
+   <span class="ok">✓</span> 0 errors on Boilergen-generated resource.
+     (Manifest is structured to PASS by construction.)
+
+<span class="step">4.</span> <span class="accent">$</span> localization-assistant lint --source en.json --target ru.json
+   <span class="ok">✓</span> No issues — placeholder parity + length budgets OK.
+
+<span class="step">5.</span> <span class="accent">$</span> localization-assistant fill --provider anthropic
+   <span class="ok">✓</span> 6 keys translated, &lt;3 seconds, ~$0.02 cost.
+
+<span class="step">6.</span> Drop <span class="accent">/tmp/demo-out/fivem-qb/jobs/taxi-driver</span> into your server's resources/
+   restart, ensure it.
+   <span class="ok">✓</span> [taxi-driver] Registered job "Таксист" with 4 grade(s).
+
+   <span class="step">Total time: ~40 seconds.</span>
+   <span class="step">Hand-rolled equivalent: 1 hour minimum.</span>
+</pre>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- COMPARISON -->
+<section>
+  <span class="section-eyebrow">How we're different</span>
+  <h2>The bucket nobody else fills.</h2>
+  <p class="section-sub">Most "AI for gamedev" startups ship narrative generation, art generation, or general AI coding assistants. None of them ship deterministic engine-aware codegen + cross-reference validation, OSS, for RP/multiplayer studios. <strong>That bucket is empty, and that's what GamesAI fills.</strong></p>
+
+  <div class="compare">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th class="col-us-th">GamesAI</th>
+          <th>modl.ai</th>
+          <th>Inworld / Charisma</th>
+          <th>Layer / Promethean</th>
+          <th>Copilot / Cursor</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bucket</td>
+          <td class="col-us">Engine-aware codegen + cross-ref validation + i18n</td>
+          <td>AI QA bots</td>
+          <td>Generative NPC dialogue</td>
+          <td>Generative final art</td>
+          <td>General AI coding</td>
+        </tr>
+        <tr>
+          <td>Source</td>
+          <td class="col-us">Open-source MIT</td>
+          <td>Closed-SaaS</td>
+          <td>Closed-SaaS</td>
+          <td>Closed-SaaS</td>
+          <td>Closed</td>
+        </tr>
+        <tr>
+          <td>AI posture</td>
+          <td class="col-us">Deterministic core, AI is opt-in</td>
+          <td>AI-first by design</td>
+          <td>AI is the product</td>
+          <td>AI is the product</td>
+          <td>AI-first</td>
+        </tr>
+        <tr>
+          <td>Engine knowledge</td>
+          <td class="col-us">FiveM / Unity / Godot / Unreal / Custom</td>
+          <td>Some (QA-flavored)</td>
+          <td>Some (narrative)</td>
+          <td>Yes (art)</td>
+          <td>None</td>
+        </tr>
+        <tr>
+          <td>Self-hostable</td>
+          <td class="col-us">Yes — fork it</td>
+          <td>No</td>
+          <td>No</td>
+          <td>No</td>
+          <td>No</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ENGINES -->
+<section id="engines">
+  <span class="section-eyebrow">Version-aware codegen</span>
+  <h2>One YAML adapts to your engine version.</h2>
+  <p class="section-sub">AI Describe consults per-engine version matrices to emit version-correct API calls. Use Unity 2022 LTS APIs in 2022 LTS code, NGO 2.x in Unity 6.3, Enhanced Input in UE5.1+, GDScript v2 in Godot 4. Knowledge-base entries cover 2020 → 2026.</p>
+
+  <div class="engine-grid">
+    <div class="engine-card">
+      <div class="head">
+        <span class="name">Unity</span>
+        <span class="ver">2020 LTS → 6.3 LTS</span>
+      </div>
+      <p class="desc">UNet → MLAPI → NGO migration, Input System adoption, URP+Render Graph, Multiplayer Center.</p>
+      <span class="status ok">✓ matrix shipped</span>
+    </div>
+    <div class="engine-card">
+      <div class="head">
+        <span class="name">Godot</span>
+        <span class="ver">3.5 LTS → 4.5</span>
+      </div>
+      <p class="desc">The 3 → 4 wall: GDScript v1 vs v2, scene format, renderer rewrite. Migration recipes per-version.</p>
+      <span class="status ok">✓ matrix shipped</span>
+    </div>
+    <div class="engine-card">
+      <div class="head">
+        <span class="name">FiveM / Cfx.re</span>
+        <span class="ver">cerulean / bodacious</span>
+      </div>
+      <p class="desc">fxmanifest generations, Lua 5.3/5.4, qbcore / Qbox / ox_core fork landscape, Cfx.re Jan 12 2026 license posture.</p>
+      <span class="status ok">✓ matrix shipped</span>
+    </div>
+    <div class="engine-card">
+      <div class="head">
+        <span class="name">Unreal Engine</span>
+        <span class="ver">UE4.27 → UE5.6</span>
+      </div>
+      <p class="desc">Nanite, Lumen, Enhanced Input timeline. RAG-only (no Boilergen UE plugin yet — by demand).</p>
+      <span class="status ok">✓ matrix shipped</span>
+    </div>
+    <div class="engine-card">
+      <div class="head">
+        <span class="name">Photon Fusion / Quantum</span>
+        <span class="ver">F1/F2/F3 · Q1/Q2/Q3</span>
+      </div>
+      <p class="desc">Fusion 2 vs Quantum 3 decision tree for mobile. Covered in unity-mobile-multiplayer entry.</p>
+      <span class="status partial">~ partial</span>
+    </div>
+    <div class="engine-card">
+      <div class="head">
+        <span class="name">Bevy / Roblox</span>
+        <span class="ver">deferred</span>
+      </div>
+      <p class="desc">No active Boilergen plugin yet. Will be added when a real studio in our orbit ships on these.</p>
+      <span class="status deferred">⏳ on demand</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- KB -->
+<section>
+  <span class="section-eyebrow">Knowledge-base</span>
+  <h2>34 entries grounding every AI suggestion.</h2>
+  <p class="section-sub">AI Describe doesn't hallucinate — it cites. Every "what should I do here" answer is grounded in the knowledge-base via RAG. Entries cover real games (Mindustry, Beyond All Reason, Space Station 14), engine conventions (QBCore, Unity SO patterns), cross-cutting patterns (data-driven content, role hierarchy), and version matrices.</p>
+
+  <div class="kb-grid">
+    <div class="kb-card"><div class="num">12</div><div class="label">Engines</div></div>
+    <div class="kb-card"><div class="num">10</div><div class="label">Game Studies</div></div>
+    <div class="kb-card"><div class="num">7</div><div class="label">Patterns</div></div>
+    <div class="kb-card"><div class="num">3</div><div class="label">Research Notes</div></div>
+    <div class="kb-card"><div class="num">2</div><div class="label">Sources / Sentiment</div></div>
+  </div>
+
+  <div class="mt-8 text-muted" style="text-align: center; font-size: 14px;">
+    Latest deep-dives: <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/knowledge-base/games/space-station-14.md" target="_blank">Space Station 14</a> · <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/knowledge-base/games/mindustry.md" target="_blank">Mindustry</a> · <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/knowledge-base/games/beyond-all-reason.md" target="_blank">Beyond All Reason</a> · <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/knowledge-base/engines/qbcore-conventions.md" target="_blank">QBCore conventions</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LICENSE POSTURE -->
+<section>
+  <span class="section-eyebrow">Trust posture</span>
+  <h2>Clean licenses. Auditable AI providers. No surprises.</h2>
+  <p class="section-sub">Every runtime dependency is MIT, Apache 2.0, or BSD. Every studied source is OSI-open or developer-published. We refused leaked code (Far Cry 1) on principle. We refuse hacking requests on principle. The platform's competitive posture <strong>is</strong> license cleanliness — not a checkbox, a moat.</p>
+
+  <div class="module-grid">
+    <div class="module-card">
+      <h3>Currently used</h3>
+      <p>Anthropic Claude API (default), DeepL Pro API (opt-in BYO-key). Both: SOC 2, no training on your prompts, commercial use OK.</p>
+    </div>
+    <div class="module-card">
+      <h3>Refused</h3>
+      <p>NLLB-200 (CC-BY-NC), DeepL Free tier (TOS forbids similar product), Mistral Experiment / Gemini free (train on prompts), Suno/Udio (red zone), leaked AAA code (legal hazard).</p>
+    </div>
+    <div class="module-card">
+      <h3>On the roadmap</h3>
+      <p>Local Ollama (default fallback), Groq + Cerebras free tiers (commercial OK, no training), OPUS-MT for offline, NVIDIA Audio2Face for lipsync. All license-verified.</p>
+    </div>
+  </div>
+
+  <div class="mt-8" style="text-align: center;">
+    <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/NOTICE.md" target="_blank" class="btn btn-secondary">
+      Read NOTICE.md license posture →
+    </a>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section>
+  <div class="final-cta">
+    <h2>Ship a richer feature in 1 day instead of 1 week.</h2>
+    <p>Open the live demo, paste a YAML, click Generate. Or clone the repo and run it locally — every example in the case study is reproducible from a fresh clone.</p>
+    <div class="cta-row">
+      <a href="/" class="btn btn-primary">Try the live demo →</a>
+      <a href="https://github.com/Sariev-Alizhan/GamesAI" target="_blank" rel="noopener" class="btn btn-secondary">View on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="links">
+    <a href="https://github.com/Sariev-Alizhan/GamesAI" target="_blank">GitHub</a>
+    <a href="/" target="_blank">Live Demo</a>
+    <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/VISION.md" target="_blank">Vision</a>
+    <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/ROADMAP.md" target="_blank">Roadmap</a>
+    <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/NOTICE.md" target="_blank">License posture</a>
+    <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/CONTRIBUTING.md" target="_blank">Contributing</a>
+  </div>
+  <div>
+    GamesAI · MIT-licensed · Maintained by <a href="https://github.com/Sariev-Alizhan" target="_blank">Sariev-Alizhan</a> ·
+    Built for game studios that ship.
+  </div>
+</footer>
+
+</body>
+</html>
