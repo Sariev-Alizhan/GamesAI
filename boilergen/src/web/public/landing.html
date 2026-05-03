@@ -547,6 +547,128 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
   pointer-events: none;
 }
 
+/* ========== DOWNLOADS / IDE INSTALLS ========== */
+.downloads-section {
+  position: relative;
+  border-top: 1px solid var(--border-red);
+  border-bottom: 1px solid var(--border-red);
+}
+.downloads-bg {
+  position: absolute; inset: 0;
+  background-image: url('/landing-assets/ide-extension.jpg');
+  background-size: cover; background-position: center;
+  opacity: 0.15;
+  z-index: 0;
+  mask-image: linear-gradient(180deg, transparent, black 25%, black 75%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, transparent, black 25%, black 75%, transparent);
+  will-change: transform;
+}
+.downloads-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  perspective: 1200px;
+}
+.dl-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(13, 15, 20, 0.92), rgba(22, 26, 34, 0.92));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 26px;
+  transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 200ms ease, box-shadow 320ms ease;
+  backdrop-filter: blur(12px);
+  display: flex; flex-direction: column;
+}
+.dl-card:hover {
+  border-color: var(--border-red);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 48px rgba(220, 38, 38, 0.18);
+}
+.dl-card .dl-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.dl-card .dl-icon {
+  width: 44px; height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--red-600), var(--red-500));
+  border-radius: 10px;
+  font-family: var(--mono); font-size: 16px; font-weight: 700;
+  color: white;
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+.dl-card .dl-status {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+.dl-card .dl-status.ready {
+  color: var(--green);
+  background: rgba(63, 185, 80, 0.10);
+  border: 1px solid rgba(63, 185, 80, 0.30);
+}
+.dl-card .dl-status.soon {
+  color: var(--red-400);
+  background: rgba(220, 38, 38, 0.10);
+  border: 1px solid rgba(220, 38, 38, 0.30);
+}
+.dl-card .dl-status.later {
+  color: var(--text-dim);
+  background: rgba(141, 150, 163, 0.08);
+  border: 1px solid rgba(141, 150, 163, 0.20);
+}
+.dl-card h3 {
+  font-size: 18px; font-weight: 600;
+  color: var(--text); margin-bottom: 8px;
+}
+.dl-card .dl-desc {
+  color: var(--text-muted); font-size: 13.5px;
+  line-height: 1.55; margin-bottom: 18px; flex: 1;
+}
+.dl-card .dl-cmd {
+  font-family: var(--mono); font-size: 12px;
+  background: rgba(7, 8, 11, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: var(--red-300);
+  user-select: all; -webkit-user-select: all;
+  overflow-x: auto; white-space: nowrap;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.dl-card .dl-cmd .cmd-prompt { color: var(--text-dim); }
+.dl-card .dl-cmd-copy {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-dim); padding: 3px 8px; border-radius: 4px;
+  font-family: var(--mono); font-size: 10px; cursor: pointer;
+  transition: all 160ms ease;
+  flex-shrink: 0;
+}
+.dl-card .dl-cmd-copy:hover { color: var(--red-400); border-color: var(--border-red); background: var(--accent-soft); }
+.dl-card .dl-cmd-copy.copied { color: var(--green); border-color: rgba(63, 185, 80, 0.4); background: rgba(63, 185, 80, 0.06); }
+.dl-card .dl-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--red-400); font-size: 13px;
+  text-decoration: none; padding: 10px 0 0;
+  font-weight: 500;
+  transition: color 160ms ease;
+}
+.dl-card .dl-link:hover { color: var(--red-300); }
+.dl-card .dl-features {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: grid; gap: 6px;
+}
+.dl-card .dl-features li {
+  display: flex; gap: 8px;
+  font-size: 12.5px; color: var(--text-muted); line-height: 1.5;
+}
+.dl-card .dl-features li::before {
+  content: '✓'; color: var(--red-400); flex-shrink: 0; font-weight: 700; font-size: 11px; margin-top: 1px;
+}
+
 /* Reverse alternation */
 .ribbon.reverse { grid-template-columns: 1fr 1.1fr; }
 .ribbon.reverse .visual { order: -1; }
@@ -890,6 +1012,7 @@ body.cursor-hover .cursor-ring { width: 60px; height: 60px; margin: -30px 0 0 -3
   <a href="#gallery" data-label="Inside" data-rail-target="gallery"></a>
   <a href="#how" data-label="Demo" data-rail-target="how"></a>
   <a href="#engines" data-label="Engines" data-rail-target="engines"></a>
+  <a href="#downloads" data-label="Install" data-rail-target="downloads"></a>
 </aside>
 
 <header id="site-header">
@@ -902,6 +1025,7 @@ body.cursor-hover .cursor-ring { width: 60px; height: 60px; margin: -30px 0 0 -3
     <a href="#engines" class="hide-mobile">Engines</a>
     <a href="#how" class="hide-mobile">How it works</a>
     <a href="#gallery" class="hide-mobile">Inside</a>
+    <a href="#downloads" class="hide-mobile">Install</a>
     <a href="https://github.com/Sariev-Alizhan/GamesAI" target="_blank" rel="noopener">GitHub</a>
     <a href="/" class="nav-cta">Try Live →</a>
   </nav>
@@ -1358,6 +1482,145 @@ body.cursor-hover .cursor-ring { width: 60px; height: 60px; margin: -30px 0 0 -3
     <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/NOTICE.md" target="_blank" class="btn btn-secondary">
       Read NOTICE.md license posture →
     </a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- DOWNLOADS — install in your IDE / agent / CLI                -->
+<!-- ============================================================ -->
+<section id="downloads" class="downloads-section">
+  <div class="downloads-bg" data-parallax="0.18"></div>
+  <span class="section-eyebrow reveal">Install GamesAI</span>
+  <h2 class="reveal delay-1">Wherever you write code, GamesAI <span style="color:var(--red-400)">slots in.</span></h2>
+  <p class="section-sub reveal delay-2">
+    The same engine-aware codegen + 54 KB-grounded AI that runs in the web playground also runs as a CLI you can pipe in CI, an MCP server your AI agent can call directly, and (soon) a VS Code / Cursor / JetBrains extension. One core, every surface — pick what fits your workflow.
+  </p>
+
+  <div class="downloads-grid">
+    <!-- CLI -->
+    <div class="dl-card reveal-zoom delay-2" data-tilt>
+      <div class="dl-head">
+        <div class="dl-icon">⌘</div>
+        <span class="dl-status ready">✓ Available</span>
+      </div>
+      <h3>Command Line</h3>
+      <p class="dl-desc">Boilergen + Schema Validator + Localization Assistant as a single CLI. Pipe into any CI / pre-commit hook / Makefile.</p>
+      <ul class="dl-features">
+        <li>Generate from YAML schemas</li>
+        <li>Validate cross-refs + FiveM manifests</li>
+        <li>AI-translate i18n with static lint first</li>
+      </ul>
+      <div class="dl-cmd">
+        <span><span class="cmd-prompt">$ </span>git clone github.com/Sariev-Alizhan/GamesAI &amp;&amp; cd boilergen &amp;&amp; npm i</span>
+        <button class="dl-cmd-copy" data-copy="git clone https://github.com/Sariev-Alizhan/GamesAI.git && cd GamesAI/boilergen && npm install && npm link">Copy</button>
+      </div>
+      <a href="https://github.com/Sariev-Alizhan/GamesAI#getting-started" target="_blank" class="dl-link">Read the install docs →</a>
+    </div>
+
+    <!-- MCP Server -->
+    <div class="dl-card reveal-zoom delay-3" data-tilt>
+      <div class="dl-head">
+        <div class="dl-icon">⚡</div>
+        <span class="dl-status ready">✓ Available</span>
+      </div>
+      <h3>MCP Server</h3>
+      <p class="dl-desc">Expose Boilergen to Claude Code / Cursor / Windsurf / Continue / any MCP-compatible AI agent. Vibe-code: describe an entity, AI calls our tools, files appear in your project.</p>
+      <ul class="dl-features">
+        <li>Generate / Validate / Translate as MCP tools</li>
+        <li>RAG-grounded over 54 KB entries</li>
+        <li>Works with any MCP client</li>
+      </ul>
+      <div class="dl-cmd">
+        <span><span class="cmd-prompt">$ </span>npm run mcp <span style="color:var(--text-dim);"># in cloned repo</span></span>
+        <button class="dl-cmd-copy" data-copy="npm run mcp">Copy</button>
+      </div>
+      <a href="https://github.com/Sariev-Alizhan/GamesAI/blob/main/boilergen/src/mcp/server.ts" target="_blank" class="dl-link">View MCP source →</a>
+    </div>
+
+    <!-- VS Code Extension -->
+    <div class="dl-card reveal-zoom delay-4" data-tilt>
+      <div class="dl-head">
+        <div class="dl-icon">VS</div>
+        <span class="dl-status soon">⏳ Q3 2026</span>
+      </div>
+      <h3>VS Code Extension</h3>
+      <p class="dl-desc">Schema-aware YAML autocomplete, inline AI Describe (highlight a comment → generate YAML), generate-from-palette, diagnostics on broken cross-refs. Marketplace + OpenVSX.</p>
+      <ul class="dl-features">
+        <li>YAML autocomplete from JSON Schema</li>
+        <li>AI Describe inline with current file context</li>
+        <li>One-click Generate (Ctrl+Shift+P)</li>
+        <li>Broken-ref squiggles in your YAML</li>
+      </ul>
+      <div class="dl-cmd">
+        <span style="color:var(--text-dim);">Track progress on GitHub →</span>
+      </div>
+      <a href="https://github.com/Sariev-Alizhan/GamesAI/issues" target="_blank" class="dl-link">+1 the tracker issue →</a>
+    </div>
+
+    <!-- Cursor (via OpenVSX) -->
+    <div class="dl-card reveal-zoom delay-2" data-tilt>
+      <div class="dl-head">
+        <div class="dl-icon">↗</div>
+        <span class="dl-status soon">⏳ Q3 2026</span>
+      </div>
+      <h3>Cursor / VSCodium</h3>
+      <p class="dl-desc">Same extension, different store. Ships to OpenVSX so any VS Code-compatible editor (Cursor, VSCodium, Windsurf, code-server) picks it up automatically.</p>
+      <ul class="dl-features">
+        <li>Cursor's AI sees Boilergen tools natively</li>
+        <li>Same install as VS Code</li>
+        <li>OpenVSX-published</li>
+      </ul>
+      <div class="dl-cmd">
+        <span style="color:var(--text-dim);">Ships with the VS Code extension</span>
+      </div>
+      <a href="https://github.com/Sariev-Alizhan/GamesAI/issues" target="_blank" class="dl-link">Watch the milestone →</a>
+    </div>
+
+    <!-- JetBrains (Rider) -->
+    <div class="dl-card reveal-zoom delay-3" data-tilt>
+      <div class="dl-head">
+        <div class="dl-icon">JB</div>
+        <span class="dl-status soon">⏳ Q4 2026</span>
+      </div>
+      <h3>JetBrains Plugin</h3>
+      <p class="dl-desc">Rider, IntelliJ, WebStorm, PyCharm. Sweet spot for Unity (Rider) and Unreal (Rider) devs who already pay for first-class C# / C++ tooling.</p>
+      <ul class="dl-features">
+        <li>JetBrains Marketplace</li>
+        <li>Native Schema-Validator inspections</li>
+        <li>Tool window for AI Describe + history</li>
+      </ul>
+      <div class="dl-cmd">
+        <span style="color:var(--text-dim);">After VS Code milestone ships</span>
+      </div>
+      <a href="https://github.com/Sariev-Alizhan/GamesAI/issues" target="_blank" class="dl-link">Vote for engine priority →</a>
+    </div>
+
+    <!-- Visual Studio (Microsoft) -->
+    <div class="dl-card reveal-zoom delay-4" data-tilt>
+      <div class="dl-head">
+        <div class="dl-icon">VS</div>
+        <span class="dl-status later">… Later</span>
+      </div>
+      <h3>Visual Studio</h3>
+      <p class="dl-desc">Microsoft Visual Studio (2022+) — for AAA studios on Unreal C++ / Unity C# who haven't moved to Rider. Lower priority because the audience is smaller and JetBrains covers most of it.</p>
+      <ul class="dl-features">
+        <li>VSIX extension</li>
+        <li>Same MCP integration as VS Code</li>
+        <li>Demand-driven — needs studio user</li>
+      </ul>
+      <div class="dl-cmd">
+        <span style="color:var(--text-dim);">Build when a studio asks</span>
+      </div>
+      <a href="https://github.com/Sariev-Alizhan/GamesAI/issues" target="_blank" class="dl-link">Open an issue if you need it →</a>
+    </div>
+  </div>
+
+  <div class="mt-8 reveal delay-3" style="text-align: center; max-width: 720px; margin-left: auto; margin-right: auto;">
+    <p class="text-muted" style="font-size: 14px; line-height: 1.55;">
+      <strong style="color: var(--text);">Honest framing:</strong> we don't sell "type a prompt → get a finished game" — that's snake oil. We ship an AI helper that <em>knows your engine, your version, and your codebase shape</em>, so the boring 80% of gamedev gets eliminated and your team focuses on the 20% that's actually engineering.
+    </p>
   </div>
 </section>
 
@@ -1887,6 +2150,27 @@ window.addEventListener('load', () => {
   }
   requestAnimationFrame(tick);
 })();
+
+// ============================================================
+//  DOWNLOADS — copy-cmd buttons
+// ============================================================
+document.querySelectorAll('.dl-cmd-copy').forEach(btn => {
+  btn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const cmd = btn.getAttribute('data-copy') || '';
+    if (!cmd) return;
+    try {
+      await navigator.clipboard.writeText(cmd);
+      const orig = btn.textContent;
+      btn.textContent = '✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1400);
+    } catch {
+      btn.textContent = '✗';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1400);
+    }
+  });
+});
 
 // ============================================================
 //  RIGHT-RAIL  active-section indicator
