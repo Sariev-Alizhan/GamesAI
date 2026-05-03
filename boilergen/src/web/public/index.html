@@ -1026,6 +1026,112 @@ body.cursor-hover .cursor-ring { width: 56px; height: 56px; margin: -28px 0 0 -2
   .file-item, .code-anim pre code .code-line, .empty-state svg, .btn .spin-dot { animation: none !important; opacity: 1 !important; }
   .code-anim pre::before { animation: none !important; opacity: 0 !important; }
 }
+
+/* ============================================================
+   MOBILE-BLOCK — full-screen "use desktop" overlay
+   shown below 900px width (UI is IDE-style, doesn't fit phones)
+   ============================================================ */
+#mobile-block { display: none; }
+@media (max-width: 900px) {
+  body { overflow: hidden !important; height: 100vh; }
+  header, main, .modal-backdrop, .cursor-dot, .cursor-ring { display: none !important; }
+  #ambient-canvas, .ambient-glow { z-index: 0; }
+  #mobile-block {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: fixed; inset: 0; z-index: 1000;
+    padding: 32px 24px;
+    text-align: center;
+    color: var(--text);
+    background:
+      linear-gradient(180deg, rgba(6, 7, 10, 0.85), rgba(6, 7, 10, 0.95)),
+      url('/landing-assets/terminal-iso.jpg');
+    background-size: cover, cover; background-position: center;
+  }
+  #mobile-block::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 700px 460px at 50% 30%, rgba(220, 38, 38, 0.18), transparent 60%);
+  }
+  #mobile-block > * { position: relative; z-index: 2; }
+  #mobile-block .mb-mark {
+    width: 72px; height: 72px;
+    filter: drop-shadow(0 0 22px rgba(220, 38, 38, 0.6));
+    animation: mb-float 4s ease-in-out infinite;
+  }
+  #mobile-block .mb-eyebrow {
+    margin-top: 28px;
+    font-family: var(--mono);
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: #fca5a5;
+    padding: 6px 14px;
+    background: rgba(220, 38, 38, 0.10);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    border-radius: 100px;
+    backdrop-filter: blur(8px);
+  }
+  #mobile-block h1 {
+    font-size: clamp(28px, 7vw, 38px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    margin-top: 22px;
+    max-width: 480px;
+  }
+  #mobile-block h1 .accent {
+    background: linear-gradient(180deg, #f87171, #dc2626);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 18px rgba(220, 38, 38, 0.4));
+  }
+  #mobile-block p {
+    font-size: 14px; color: var(--text-muted);
+    margin-top: 18px; max-width: 360px; line-height: 1.55;
+  }
+  #mobile-block .mb-row {
+    margin-top: 28px;
+    display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px;
+  }
+  #mobile-block .mb-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 22px;
+    border-radius: 10px;
+    font: inherit; font-weight: 500; font-size: 15px;
+    color: white !important;
+    text-decoration: none;
+    background: linear-gradient(180deg, #ef4444, #dc2626);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 28px rgba(220, 38, 38, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    cursor: pointer;
+  }
+  #mobile-block .mb-btn.ghost {
+    background: rgba(22, 26, 34, 0.7);
+    color: var(--text) !important;
+    border: 1px solid var(--border-strong);
+    box-shadow: none;
+    backdrop-filter: blur(8px);
+  }
+  #mobile-block .mb-meta {
+    margin-top: 36px;
+    font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+  #mobile-block .mb-meta .url {
+    color: var(--text);
+    background: rgba(22, 26, 34, 0.7);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    margin-top: 8px;
+    display: inline-block;
+    user-select: all; -webkit-user-select: all;
+  }
+}
+@keyframes mb-float {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50%      { transform: translateY(-8px) rotate(2deg); }
+}
+@media (max-width: 900px) and (prefers-reduced-motion: reduce) {
+  #mobile-block .mb-mark { animation: none; }
+}
 </style>
 </head>
 <body>
@@ -1034,6 +1140,34 @@ body.cursor-hover .cursor-ring { width: 56px; height: 56px; margin: -28px 0 0 -2
 <div class="ambient-glow"></div>
 <div class="cursor-ring" id="cursor-ring"></div>
 <div class="cursor-dot" id="cursor-dot"></div>
+
+<!-- ============================================================
+     MOBILE BLOCK — shown when viewport is too small for the IDE.
+     Editor + preview side-by-side don't compress to ~360px in any
+     useful way. Instead: an elegant brand-consistent screen that
+     points to the marketing site and the desktop experience.
+     ============================================================ -->
+<div id="mobile-block" role="dialog" aria-labelledby="mb-title">
+  <img class="mb-mark" src="/landing-assets/brand-mark.png" alt="GamesAI">
+  <span class="mb-eyebrow">Boilergen Playground</span>
+  <h1 id="mb-title">
+    Best experienced<br>
+    on <span class="accent">a desktop</span>
+  </h1>
+  <p>
+    The playground is an IDE-style tool — a YAML editor on one side, generated
+    code on the other. It needs room to breathe. Open this URL on a laptop or
+    desktop to use it.
+  </p>
+  <div class="mb-row">
+    <a class="mb-btn" href="/landing.html">Browse the marketing site →</a>
+    <a class="mb-btn ghost" id="mb-share" href="#">Email this link to me</a>
+  </div>
+  <div class="mb-meta">
+    Or copy the URL:<br>
+    <span class="url">boilergen-eight.vercel.app</span>
+  </div>
+</div>
 
 <header>
   <a href="/landing.html" class="brand" title="Back to GamesAI site">
@@ -1659,11 +1793,32 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
 const isMobile = window.matchMedia('(max-width: 900px)').matches;
 
 // ============================================================
+//  MOBILE BLOCK wiring — wire the "Email this link to me" CTA
+// ============================================================
+(function initMobileBlock() {
+  const share = document.getElementById('mb-share');
+  if (!share) return;
+  const url = window.location.origin;
+  const subject = encodeURIComponent('GamesAI Playground (open on desktop)');
+  const body = encodeURIComponent(`Open this on a laptop or desktop to use the playground:\n\n${url}\n`);
+  share.setAttribute('href', `mailto:?subject=${subject}&body=${body}`);
+  share.addEventListener('click', async (e) => {
+    if (!navigator.share) return; // fall back to mailto
+    e.preventDefault();
+    try {
+      await navigator.share({ title: 'GamesAI Playground', text: 'Open on desktop:', url });
+    } catch { /* user cancelled */ }
+  });
+})();
+
+// ============================================================
 //  AMBIENT 3D — quiet drifting particle field, low opacity so
 //  it never fights the editor for attention. Three drifting
-//  light blobs and a starfield.
+//  light blobs and a starfield. Skipped on small viewports
+//  (the mobile-block overlay covers the page anyway).
 // ============================================================
 (function initAmbient() {
+  if (isMobile) return; // mobile-block covers the canvas; skip the GPU work
   const canvas = document.getElementById('ambient-canvas');
   if (!canvas) return;
 
