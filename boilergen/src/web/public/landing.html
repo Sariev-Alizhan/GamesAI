@@ -247,8 +247,15 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
   color: var(--red-300);
   margin-bottom: 36px;
   backdrop-filter: blur(8px);
+  white-space: nowrap;
 }
 .hero-eyebrow .sep { color: rgba(255, 255, 255, 0.15); }
+@media (max-width: 480px) {
+  .hero-eyebrow { font-size: 10px; padding: 6px 12px; gap: 6px; letter-spacing: 0.12em; margin-bottom: 28px; }
+  /* hide only the extra items, keep one separator visible */
+  .hero-eyebrow .mobile-hide { display: none; }
+  .hero-eyebrow .mobile-hide + .sep { display: none; }
+}
 .hero-eyebrow .pulse {
   width: 8px; height: 8px; border-radius: 50%; background: var(--red-500);
   box-shadow: 0 0 0 0 var(--accent-glow);
@@ -272,6 +279,16 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
   max-width: 540px;
   margin: 0 auto 40px;
   line-height: 1.6;
+}
+@media (max-width: 600px) {
+  /* Drop manual line breaks; let H1 wrap naturally so no orphan words */
+  .hero-content h1 br { display: none; }
+  .hero-content h1 {
+    font-size: clamp(24px, 6.8vw, 32px); line-height: 1.18; margin-bottom: 22px;
+    text-wrap: balance;
+    max-width: 360px; margin-left: auto; margin-right: auto;
+  }
+  .hero-content p.lead { font-size: 14px; max-width: 320px; margin-bottom: 28px; }
 }
 .cta-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
 .btn {
@@ -319,7 +336,11 @@ h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
 .hero-badges .badge { display: flex; align-items: center; gap: 8px; }
 .hero-badges .badge .check { color: var(--red-400); font-size: 10px; }
 @media (max-width: 480px) {
-  .hero-badges { margin-top: 40px; gap: 14px; font-size: 11px; }
+  .hero-badges {
+    margin-top: 32px; gap: 10px 18px; font-size: 11px;
+    display: grid; grid-template-columns: 1fr 1fr; max-width: 280px; margin-left: auto; margin-right: auto;
+  }
+  .hero-badges .badge { justify-self: center; }
 }
 
 .scroll-cue {
@@ -895,9 +916,9 @@ body.cursor-hover .cursor-ring { width: 60px; height: 60px; margin: -30px 0 0 -3
       <span class="hero-eyebrow">
         <span class="pulse"></span>
         v0.2.0
-        <span class="sep">/</span> 3 modules
+        <span class="sep">/</span><span class="mobile-hide"> 3 modules</span>
         <span class="sep">/</span> 5 engines
-        <span class="sep">/</span> 365 tests
+        <span class="sep">/</span><span class="mobile-hide"> 365 tests</span>
       </span>
       <h1 id="hero-title">
         Open-source AI toolkit that<br>
@@ -1555,13 +1576,21 @@ const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
   // ---- responsive sizing ----
   let baseCamZ = 12;
+  let viewportScale = 1;
   function resize() {
     const w = window.innerWidth, h = window.innerHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    // pull camera back on portrait / narrow screens so 3D objects fit
-    baseCamZ = w < 600 ? 17 : (w < 900 ? 14 : 12);
+    // pull camera back AND scale objects down on portrait / narrow screens
+    baseCamZ = w < 600 ? 16 : (w < 900 ? 14 : 12);
+    viewportScale = w < 480 ? 0.55 : (w < 768 ? 0.7 : 1);
+    // apply to top-level groups
+    cubesGroup.scale.setScalar(viewportScale);
+    knot.scale.setScalar(viewportScale);
+    sphereGroup.scale.setScalar(viewportScale);
+    nebula.scale.setScalar(viewportScale);
+    portal.scale.setScalar(viewportScale);
   }
   resize();
   window.addEventListener('resize', resize);
@@ -1649,8 +1678,8 @@ const isMobile = window.matchMedia('(max-width: 768px)').matches;
     knot.rotation.y = t * 0.35;
     knotMat.opacity = 0.85 * knotOpacity;
     knotMat.emissiveIntensity = 0.6 + Math.sin(t * 1.4) * 0.2;
-    // pulse-scale the knot subtly with scroll-within-stage
-    const knotS = 1 + Math.sin(t * 0.9) * 0.05;
+    // pulse-scale the knot subtly with scroll-within-stage (* viewportScale for mobile)
+    const knotS = (1 + Math.sin(t * 0.9) * 0.05) * viewportScale;
     knot.scale.set(knotS, knotS, knotS);
 
     // -------- Sphere + ring --------
@@ -1661,7 +1690,7 @@ const isMobile = window.matchMedia('(max-width: 768px)').matches;
     ringMat.opacity   = 0.55 * sphereOpacity;
     ring.rotation.z = t * 0.5;
     const coreS = 1 + Math.sin(t * 2.2) * 0.18;
-    core.scale.set(coreS, coreS, coreS);
+    core.scale.set(coreS, coreS, coreS); // local to sphereGroup which is already scaled
 
     // -------- Nebula (with morph to portal) --------
     nebMat.opacity = 0.85 * nebulaOpacity;
@@ -1687,7 +1716,7 @@ const isMobile = window.matchMedia('(max-width: 768px)').matches;
     // -------- Portal --------
     portalMat.opacity = 0.55 * portalOpacity;
     portal.rotation.z = t * 0.7;
-    const portS = 1 + Math.sin(t * 1.8) * 0.12 + portalOpacity * 0.4;
+    const portS = (1 + Math.sin(t * 1.8) * 0.12 + portalOpacity * 0.4) * viewportScale;
     portal.scale.set(portS, portS, portS);
 
     // -------- Camera (global travel) --------
