@@ -2189,13 +2189,24 @@ const small  = window.matchMedia('(max-width: 900px)').matches;
 if (small) { /* mobile-block overlay covers the editor — skip CM */ }
 else {
   try {
-    const [{ EditorView, basicSetup }, { yaml }, { oneDark }, { keymap }, { indentWithTab }, { placeholder }] = await Promise.all([
+    const [
+      { EditorView, basicSetup },
+      { yaml },
+      { oneDark },
+      { keymap },
+      { indentWithTab },
+      { placeholder },
+      { linter, lintGutter },
+      jsYaml,
+    ] = await Promise.all([
       import('https://esm.sh/codemirror@6.0.1'),
       import('https://esm.sh/@codemirror/lang-yaml@6.1.2'),
       import('https://esm.sh/@codemirror/theme-one-dark@6.1.2'),
       import('https://esm.sh/@codemirror/view@6.34.1'),
       import('https://esm.sh/@codemirror/commands@6.7.1'),
       import('https://esm.sh/@codemirror/view@6.34.1'),
+      import('https://esm.sh/@codemirror/lint@6.8.4'),
+      import('https://esm.sh/js-yaml@4.1.0'),
     ]);
 
     const ta = document.getElementById('yaml-input');
@@ -2209,6 +2220,29 @@ else {
 
     let isSyncing = false;
 
+    // YAML syntax linter — js-yaml.load throws YAMLException with .mark
+    // (line/column). Map that to a single CodeMirror Diagnostic on the
+    // offending line. No errors → empty array → editor is clean.
+    const yamlLinter = linter((view) => {
+      const text = view.state.doc.toString();
+      if (!text.trim()) return [];
+      try {
+        jsYaml.load(text);
+        return [];
+      } catch (e) {
+        const mark = e.mark || {};
+        const line = (mark.line ?? 0) + 1;            // js-yaml is 0-based
+        const lineObj = view.state.doc.line(Math.min(view.state.doc.lines, Math.max(1, line)));
+        return [{
+          from: lineObj.from,
+          to: lineObj.to,
+          severity: 'error',
+          message: (e.reason || e.message || 'YAML parse error').replace(/^[a-z]/, c => c.toUpperCase()),
+          source: 'js-yaml',
+        }];
+      }
+    }, { delay: 350 });
+
     const view = new EditorView({
       doc: ta.value || '',
       extensions: [
@@ -2217,9 +2251,28 @@ else {
         oneDark,
         keymap.of([indentWithTab]),
         placeholder('Paste or write entity YAML here…\nDrop a .yaml file anywhere on this panel.'),
+        lintGutter(),
+        yamlLinter,
         EditorView.theme({
           '&': { height: '100%' },
           '.cm-scroller': { overflow: 'auto' },
+          '.cm-lintRange-error': {
+            backgroundImage: 'linear-gradient(to right, transparent, rgba(220, 38, 38, 0.4), transparent), linear-gradient(to right, transparent 25%, rgba(220, 38, 38, 0.6) 25%, rgba(220, 38, 38, 0.6) 50%, transparent 50%)',
+            backgroundRepeat: 'repeat-x',
+            backgroundSize: '100% 1px, 6px 2px',
+            backgroundPosition: 'bottom',
+            paddingBottom: '2px',
+          },
+          '.cm-tooltip-lint': {
+            backgroundColor: 'rgba(13, 15, 20, 0.95)',
+            border: '1px solid rgba(220, 38, 38, 0.55)',
+            borderRadius: '6px',
+            color: '#eef2f7',
+            backdropFilter: 'blur(8px)',
+          },
+          '.cm-diagnostic-error': { borderLeft: '3px solid #ef4444', paddingLeft: '8px' },
+          '.cm-gutter-lint .cm-gutterElement': { width: '14px' },
+          '.cm-lint-marker-error': { color: '#ef4444' },
         }),
         EditorView.updateListener.of((update) => {
           if (!update.docChanged || isSyncing) return;
